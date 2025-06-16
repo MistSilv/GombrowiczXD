@@ -4,7 +4,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-2">
         @foreach ($automaty as $automat)
             <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}"
-               class="border p-4 rounded-2xl shadow hover:bg-blue-100 hover:text-black transition flex flex-col items-center">
+               class="border p-4 rounded-2xl shadow hover:bg-slate-900 transition flex flex-col items-center">
                 <div class="text-5xl mb-2">🧅</div>
                 <h2 class="text-xl font-bold text-center text-white">{{ $automat->nazwa }}</h2>
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
@@ -12,5 +12,5 @@
         @endforeach
     </div>
 
-    <a href="/login">logiwanie</a>
+    <a class="text-white" href="/login">logiwanie - test</a>
 </x-layout>
