@@ -5,7 +5,7 @@
         @foreach ($automaty as $automat)
             <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}"
                class="border p-4 rounded-2xl shadow hover:bg-blue-100 hover:text-black transition flex flex-col items-center">
-                <div class="text-5xl mb-2">🛕</div>
+                <div class="text-5xl mb-2">🧅</div>
                 <h2 class="text-xl font-bold text-center text-white">{{ $automat->nazwa }}</h2>
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
             </a>
