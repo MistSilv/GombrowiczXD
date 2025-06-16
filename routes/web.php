@@ -29,4 +29,8 @@ Route::resource('straty', StrataController::class)->only(['create', 'store', 'sh
 
 Route::get('/export/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('zamowienia.export');
 
+Route::get('/login', function () {
+    return view('login/login');
+});
+
 
