@@ -1,6 +1,6 @@
 <x-layout>
     <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Podsumowanie zamówień ({{ $typ }})</h1>
+        <h1 class="text-2xl font-bold mb-4 text-white">Podsumowanie zamówień ({{ $typ }})</h1>
         <p class="mb-6">Okres: <strong>{{ $okres }}</strong></p>
 
         @if($produkty->isEmpty())
@@ -19,11 +19,11 @@
 
             <div class="mb-4 flex gap-3">
                 <a href="{{ route('zamowienia.export', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl]) }}"
-                   class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded">
+                   class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
                     Eksportuj do Excel (.xlsx)
                 </a>
                 <a href="{{ route('zamowienia.export', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl]) }}"
-                   class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+                   class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
                     Eksportuj do CSV
                 </a>
             </div>

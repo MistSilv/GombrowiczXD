@@ -19,23 +19,10 @@ class ExportController extends Controller
         if ($zakres === 'tydzien') {
             return $this->exportTygodniowy($date, $format);
         }
-        elseif ($zakres === 'miesiac') {
-            
-            return abort(404); // Tymczasowo, do implementacji
-        }
-        elseif ($zakres === 'rok') {
-            
-            
-            return abort(404); // Tymczasowo, do implementacji
-        }
-        elseif ($zakres === 'dzien') {
-            
-            return abort(404); // Tymczasowo, do implementacji
-        }
-        else{
-            
-            return abort(404); // Nieznany zakres
-        }
+
+        // inne zakresy (dzien, miesiac, rok) - można rozszerzyć
+
+        return abort(404);
     }
 
     private function exportTygodniowy(Carbon $date, $format)

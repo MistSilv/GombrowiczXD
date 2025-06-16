@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="container">
+    <div class="container text-white">
         <h1 class="text-2xl font-bold mb-4">Szczegóły zamówienia #{{ $zamowienie->id }}</h1>
 
         <p><strong>Data zamówienia:</strong> {{ $zamowienie->data_zamowienia }}</p>
