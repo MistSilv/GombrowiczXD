@@ -50,7 +50,7 @@ class StrataController extends Controller
             $strata->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
         }
 
-        return redirect()->route('zamowienia.create', ['vending_machine_id' => $request->automat_id])
+        return redirect()->route('zamowienia.create', ['automat_id' => $request->automat_id])
                      ->with('success', 'Straty zostały zapisane.');
     }
 
@@ -85,4 +85,3 @@ class StrataController extends Controller
         //
     }
 }
-
