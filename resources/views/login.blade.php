@@ -13,13 +13,6 @@
             <h2 class="mt-6 text-center text-3xl leading-9 font-extrabold text-white">
                 Sign in to your account
             </h2>
-            <p class="mt-2 text-center text-sm leading-5 text-blue-400 max-w">
-                Or
-                <a href="{{ route('register') }}"
-                    class="font-medium text-blue-400 hover:text-blue-300 focus:outline-none focus:underline transition ease-in-out duration-150">
-                    create a new account
-                </a>
-            </p>
         </div>
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

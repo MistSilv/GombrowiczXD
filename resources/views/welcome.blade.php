@@ -10,6 +10,17 @@
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
             </a>
         @endforeach
+        
+            @auth
+            @if(auth()->user()->isAdmin())
+                <a href="{{ route('register') }}"
+                    class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded mt-10">
+                    create a new account
+                </a>
+            @endif
+            @endauth
     </div>
+
+
 
 </x-layout>
