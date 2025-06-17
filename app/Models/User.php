@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // Dodano atrybut roli
     ];
 
     /**
@@ -44,5 +45,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Metody sprawdzania roli
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isSerwis()
+    {
+        return $this->role === 'serwis';
+    }
+
+    public function isProdukcja()
+    {
+        return $this->role === 'produkcja';
     }
 }

@@ -15,7 +15,7 @@
             </h2>
             <p class="mt-2 text-center text-sm leading-5 text-blue-400 max-w">
                 Or
-                <a href="#"
+                <a href="{{ route('register') }}"
                     class="font-medium text-blue-400 hover:text-blue-300 focus:outline-none focus:underline transition ease-in-out duration-150">
                     create a new account
                 </a>
@@ -24,12 +24,16 @@
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form>
+                <form method="POST" action="{{ url('/login') }}">
+                    @csrf
                     <div>
                         <label for="email" class="block text-sm font-medium leading-5 text-gray-200">Email address</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="email" name="email" placeholder="user@example.com" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-500 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+                            <input id="email" name="email" placeholder="user@example.com" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-500 transition duration-150 ease-in-out sm:text-sm sm:leading-5" value="{{ old('email') }}">
                         </div>
+                        @error('email')
+                            <span class="text-red-400 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="mt-6">
@@ -37,6 +41,9 @@
                         <div class="mt-1 rounded-md shadow-sm">
                             <input id="password" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-500 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
                         </div>
+                        @error('password')
+                            <span class="text-red-400 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="text-sm leading-5 mt-4">
@@ -56,3 +63,6 @@
                 </form>
             </div>
         </div>
+    </div>
+</body>
+</html>

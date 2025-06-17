@@ -12,5 +12,4 @@
         @endforeach
     </div>
 
-    <a class="text-white" href="/login">logiwanie - test</a>
 </x-layout>
