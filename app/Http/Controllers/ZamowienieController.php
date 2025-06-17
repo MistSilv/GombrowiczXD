@@ -20,7 +20,15 @@ class ZamowienieController extends Controller
      */
     public function index()
     {
-        $zamowienia = Zamowienie::orderByDesc('data_zamowienia')->take(10)->get();
+        $dzisiaj = Carbon::today()->toDateString();
+
+        $zamowienia = Zamowienie::where(function($q) use ($dzisiaj) {
+                $q->whereNull('data_realizacji')
+                ->orWhere('data_realizacji', '>=', $dzisiaj);
+            })
+            ->orderByDesc('data_zamowienia')
+            ->get();
+
         return view('zamowienia.index', compact('zamowienia'));
     }
 
