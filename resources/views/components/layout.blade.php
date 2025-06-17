@@ -15,6 +15,7 @@
             Wyloguj
         </a>
     </nav>
+    
     <main class="container mx-auto py-6 px-4">
         {{ $slot }}
     </main>

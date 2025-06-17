@@ -33,7 +33,7 @@
                     Złóż zamówienie
                 </button>
             </div>
-            <div class="mt-4">
+            <div class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">
                 <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="btn btn-warning">
                     Wprowadź straty
                 </a>
