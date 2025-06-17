@@ -1,10 +1,7 @@
 <x-layout>
+    <x-subnav />
     <div class="container">
         <h1 class="text-2xl font-bold mb-4 text-white">Zgłoszone straty</h1>
-
-        <div class="mb-6 flex flex-wrap gap-2">
-            <a href="{{ route('zamowienia.index') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Wróć do zamówień</a>
-        </div>
 
         @if ($straty->isEmpty())
         <p>Brak zgłoszonych strat.</p>

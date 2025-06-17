@@ -1,4 +1,5 @@
 <x-layout>
+    <x-subnav />
     <h1 class="text-2xl font-bold mb-6 text-center text-white">Wybierz automat</h1>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-2">

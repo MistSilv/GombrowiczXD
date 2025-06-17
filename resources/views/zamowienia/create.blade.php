@@ -1,4 +1,5 @@
 <x-layout>
+    <x-subnav />
     <div class="max-w-3xl mx-auto p-4">
         <h1 class="text-xl font-semibold mb-4 text-white">Nowe zamówienie</h1>
 
@@ -33,7 +34,7 @@
                     Złóż zamówienie
                 </button>
             </div>
-            <div class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">
+            <div class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded mt-7">
                 <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="btn btn-warning">
                     Wprowadź straty
                 </a>

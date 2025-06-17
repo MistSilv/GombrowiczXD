@@ -1,4 +1,5 @@
 <x-layout>
+    <x-subnav />
     <div class="container">
         <h1 class="text-2xl font-bold mb-4 text-white">Aktualne zamówienia</h1>
 
