@@ -6,7 +6,13 @@ use App\Http\Controllers\AutomatController;
 use App\Http\Controllers\StrataController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+
+Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 Route::get('/', function () {
     return view('login');
