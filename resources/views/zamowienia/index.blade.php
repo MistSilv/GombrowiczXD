@@ -32,7 +32,7 @@
                                 <td class="border px-4 py-2">{{ $zamowienie->data_zamowienia }}</td>
                                 <td class="border px-4 py-2">{{ $zamowienie->data_realizacji ?? '—' }}</td>
                                 <td class="border px-4 py-2">
-                                    <a href="{{ route('zamowienia.show', $zamowienie) }}" class="text-blue-500 hover:underline">Szczegóły</a>
+                                    <a href="{{ route('zamowienia.show', $zamowienie) }}" class="text-blue-500 hover:underline">ℹ️</a>
                                 </td>
                             </tr>
                         @endforeach

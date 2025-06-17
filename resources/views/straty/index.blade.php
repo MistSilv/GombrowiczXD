@@ -23,7 +23,7 @@
                                 <td class="border px-4 py-2">{{ $strata->data_straty }}</td>
                                 <td class="border px-4 py-2">{{ $strata->opis ?? '—' }}</td>
                                 <td class="border px-4 py-2">
-                                    <a href="{{ route('straty.show', $strata) }}" class="text-blue-500 hover:underline">Szczegóły</a>
+                                    <a href="{{ route('straty.show', $strata) }}" class="text-blue-500 hover:underline">ℹ️</a>
                                 </td>
                             </tr>
                         @endforeach

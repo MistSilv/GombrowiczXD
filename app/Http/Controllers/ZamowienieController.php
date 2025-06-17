@@ -20,7 +20,7 @@ class ZamowienieController extends Controller
      */
     public function index()
     {
-        $zamowienia = Zamowienie::orderByDesc('data_zamowienia')->get();
+        $zamowienia = Zamowienie::orderByDesc('data_zamowienia')->take(10)->get();
         return view('zamowienia.index', compact('zamowienia'));
     }
 
@@ -67,7 +67,7 @@ class ZamowienieController extends Controller
 
     public function archiwum()
     {
-        $zamowienia = Zamowienie::orderByDesc('data_zamowienia')->get();
+        $zamowienia = Zamowienie::orderByDesc('data_zamowienia')->paginate(20);
         return view('zamowienia.archiwum', compact('zamowienia'));
     }
 
