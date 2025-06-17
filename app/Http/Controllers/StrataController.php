@@ -14,7 +14,9 @@ class StrataController extends Controller
      */
     public function index()
     {
-        //
+        $straty = Strata::with('automat')->orderByDesc('data_straty')->get();
+
+        return view('straty.index', compact('straty'));
     }
 
     /**

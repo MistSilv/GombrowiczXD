@@ -56,6 +56,7 @@ class User extends Authenticatable
     public function isSerwis()
     {
         return $this->role === 'serwis';
+        
     }
 
     public function isProdukcja()

@@ -27,7 +27,8 @@ Route::get('/zamowienia/podsumowanie/tydzien/{date?}', [ZamowienieController::cl
 Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
 Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
 
-Route::resource('straty', StrataController::class)->only(['create', 'store', 'show']);
+Route::resource('straty', StrataController::class)->only(['index', 'create', 'store', 'show']);
+
 
 Route::get('/export/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('zamowienia.export');
 
