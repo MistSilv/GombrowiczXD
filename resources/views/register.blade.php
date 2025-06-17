@@ -13,7 +13,7 @@
     <title>Rejestracja</title>
 </head>
 <body class="mx-auto py-6 px-4 bg-black">
-    <div class="max-w-md mx-auto mt-10 bg-gray-900 p-8 rounded shadow">
+    <div class="max-w-md mx-auto mt-4 bg-gray-900 p-8 rounded shadow">
     <h2 class="text-2xl font-bold mb-6 text-white text-center">Rejestracja użytkownika</h2>
     <form method="POST" action="{{ route('register') }}">
         @csrf

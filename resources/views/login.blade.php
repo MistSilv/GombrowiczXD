@@ -46,12 +46,10 @@
                         @enderror
                     </div>
 
-                    <div class="text-sm leading-5 mt-4">
-                        <a href="#"
-                            class="font-medium text-blue-400 hover:text-blue-300 focus:outline-none focus:underline transition ease-in-out duration-150">
-                            Forgot your password?
-                        </a>
-                    </div>
+                    <a href="{{ route('password.request') }}"
+                        class="font-medium text-blue-400 hover:text-blue-300 focus:outline-none focus:underline transition ease-in-out duration-150">
+                        Forgot your password?
+                    </a>
 
                     <div class="mt-6">
                         <span class="block w-full rounded-md shadow-sm">
