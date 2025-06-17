@@ -1,14 +1,18 @@
 <x-layout>
     <x-subnav />
     <div class="container">
+        @auth
+            @if(!auth()->user()->isSerwis())
+               <div class="mb-6 flex flex-wrap gap-2">
+                <a href="{{ route('zamowienia.archiwum') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
+                <a href="{{ route('zamowienia.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
+                <a href="{{ route('zamowienia.podsumowanie.tydzien') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
+                <a href="{{ route('zamowienia.podsumowanie.miesiac') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
+                <a href="{{ route('zamowienia.podsumowanie.rok') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
+                </div>
+            @endif
+            @endauth
         
-        <div class="mb-6 flex flex-wrap gap-2">
-            <a href="{{ route('zamowienia.archiwum') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
-            <a href="{{ route('zamowienia.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
-            <a href="{{ route('zamowienia.podsumowanie.tydzien') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
-            <a href="{{ route('zamowienia.podsumowanie.miesiac') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
-            <a href="{{ route('zamowienia.podsumowanie.rok') }}" class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
-        </div>
 
         <h1 class="text-2xl font-bold mb-4 text-white">Aktualne zamówienia</h1>
 

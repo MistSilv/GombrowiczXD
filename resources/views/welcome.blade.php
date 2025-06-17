@@ -10,7 +10,7 @@
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
             </a>
         @endforeach
-        
+
             @auth
             @if(auth()->user()->isAdmin())
                 <a href="{{ route('register') }}"
