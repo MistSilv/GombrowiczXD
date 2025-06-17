@@ -5,10 +5,14 @@ use App\Http\Controllers\ZamowienieController;
 use App\Http\Controllers\AutomatController;
 use App\Http\Controllers\StrataController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('login');
 });
+
+Route::get('/welcome', [App\Http\Controllers\AutomatController::class, 'index'])->name('welcome');
 
 Route::get('/zamowienia/nowe', [ZamowienieController::class, 'create'])->name('zamowienia.create');
 Route::post('/zamowienia', [ZamowienieController::class, 'store'])->name('zamowienia.store');
@@ -23,14 +27,18 @@ Route::get('/zamowienia/podsumowanie/tydzien/{date?}', [ZamowienieController::cl
 Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
 Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
 
-Route::get('/', [AutomatController::class, 'index']);
-
 Route::resource('straty', StrataController::class)->only(['create', 'store', 'show']);
 
 Route::get('/export/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('zamowienia.export');
 
+
 Route::get('/login', function () {
-    return view('login/login');
-});
+    return view('login');
+})->name('login');
+
+Route::post('/login', [App\Http\Controllers\LoginController::class, 'login']);
+
+Route::get('/register', [App\Http\Controllers\RegisterController::class, 'show'])->name('register');
+Route::post('/register', [App\Http\Controllers\RegisterController::class, 'store']);
 
 
