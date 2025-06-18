@@ -6,6 +6,11 @@ use App\Models\Strata;
 use App\Models\Produkt;
 use App\Models\Automat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+
+use Carbon\Carbon;
+
 
 class StrataController extends Controller
 {
@@ -14,7 +19,7 @@ class StrataController extends Controller
      */
     public function index()
     {
-        $straty = Strata::with('automat')->orderByDesc('data_straty')->get();
+        $straty = Strata::with('automat')->orderByDesc('data_straty')->paginate(20);
 
         return view('straty.index', compact('straty'));
     }
@@ -85,5 +90,87 @@ class StrataController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function podsumowanieDnia($date = null)
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::today();
+
+        $produkty = DB::table('produkt_strata')
+            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
+            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
+            ->whereDate('straty.data_straty', $date)
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_strata.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('straty.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $date->format('Y-m-d'),
+            'typ' => 'Dzień',
+        ]);
+    }
+
+    public function podsumowanieTygodnia($date = null)
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::today();
+        $start = $date->copy()->startOfWeek();
+        $end = $date->copy()->endOfWeek();
+
+        $produkty = DB::table('produkt_strata')
+            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
+            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
+            ->whereBetween('straty.data_straty', [$start, $end])
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_strata.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('straty.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $start->format('Y-m-d') . ' do ' . $end->format('Y-m-d'),
+            'typ' => 'Tydzień',
+        ]);
+    }
+
+    public function podsumowanieMiesiaca($month = null)
+    {
+        $date = $month ? Carbon::parse($month) : Carbon::today();
+        $start = $date->copy()->startOfMonth();
+        $end = $date->copy()->endOfMonth();
+
+        $produkty = DB::table('produkt_strata')
+            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
+            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
+            ->whereBetween('straty.data_straty', [$start, $end])
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_strata.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('straty.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $start->format('Y-m'),
+            'typ' => 'Miesiąc',
+        ]);
+    }
+
+    public function podsumowanieRoku($year = null)
+    {
+        $date = $year ? Carbon::parse($year . '-01-01') : Carbon::today();
+        $start = $date->copy()->startOfYear();
+        $end = $date->copy()->endOfYear();
+
+        $produkty = DB::table('produkt_strata')
+            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
+            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
+            ->whereBetween('straty.data_straty', [$start, $end])
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_strata.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('straty.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $start->format('Y'),
+            'typ' => 'Rok',
+        ]);
     }
 }

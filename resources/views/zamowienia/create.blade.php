@@ -34,8 +34,8 @@
                     Złóż zamówienie
                 </button>
             </div>
-            <div class="bg-slate-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded mt-7">
-                <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="btn btn-warning">
+            <div class="mt-6">
+                <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                     Wprowadź straty
                 </a>
             </div>

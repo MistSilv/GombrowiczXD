@@ -1,6 +1,23 @@
 <x-layout>
     <x-subnav />
     <div class="container">
+
+   <div class="mb-6 flex flex-wrap gap-2">
+    <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+        Podsumowanie dnia
+    </a>
+    <a href="{{ route('straty.podsumowanie.tydzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+        Podsumowanie tygodnia
+    </a>
+    <a href="{{ route('straty.podsumowanie.miesiac') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+        Podsumowanie miesiąca
+    </a>
+    <a href="{{ route('straty.podsumowanie.rok') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+        Podsumowanie roku
+    </a>
+</div>
+
+
         <h1 class="text-2xl font-bold mb-4 text-white">Zgłoszone straty</h1>
 
         @if ($straty->isEmpty())
@@ -29,6 +46,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                {{ $straty->links() }}
             </div>
         @endif
     </div>

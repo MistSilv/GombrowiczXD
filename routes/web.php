@@ -36,6 +36,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
     Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
 
+
+    Route::get('/straty/podsumowanie/dzien/{date?}', [StrataController::class, 'podsumowanieDnia'])->name('straty.podsumowanie.dzien');
+    Route::get('/straty/podsumowanie/tydzien/{date?}', [StrataController::class, 'podsumowanieTygodnia'])->name('straty.podsumowanie.tydzien');
+    Route::get('/straty/podsumowanie/miesiac/{month?}', [StrataController::class, 'podsumowanieMiesiaca'])->name('straty.podsumowanie.miesiac');
+    Route::get('/straty/podsumowanie/rok/{year?}', [StrataController::class, 'podsumowanieRoku'])->name('straty.podsumowanie.rok');
+
+
+
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
     Route::post('/register', [RegisterController::class, 'store']);
 
@@ -43,5 +51,12 @@ Route::middleware(['auth'])->group(function () {
         'parameters' => ['straty' => 'strata']
     ])->only(['index', 'create', 'store', 'show']);
 
-    Route::get('/export/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('zamowienia.export');
+ 
+    Route::get('/export/zamowienia/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])
+        ->name('export.zamowienia');
+
+
+    Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty'])
+        ->name('export.straty');
+
 });

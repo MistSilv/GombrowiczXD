@@ -18,13 +18,15 @@
                 $dateForUrl = \Illuminate\Support\Str::before($okres, ' do'); // np. "2025-06-01"
             @endphp
 
+            
+
             <div class="mb-4 flex gap-3">
-                <a href="{{ route('straty.export', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl]) }}"
-                   class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
+                <a href="{{ route('export.straty', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl]) }}"
+                class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
                     Eksportuj do Excel (.xlsx)
                 </a>
-                <a href="{{ route('straty.export', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl]) }}"
-                   class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
+                <a href="{{ route('export.straty', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl]) }}"
+                class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
                     Eksportuj do CSV
                 </a>
             </div>
