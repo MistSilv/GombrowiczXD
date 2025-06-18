@@ -44,4 +44,5 @@ Route::middleware(['auth'])->group(function () {
     ])->only(['index', 'create', 'store', 'show']);
 
     Route::get('/export/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('zamowienia.export');
+    Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty']);
 });
