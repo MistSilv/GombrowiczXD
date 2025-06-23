@@ -8,6 +8,8 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\LoginController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('login');
@@ -21,6 +23,8 @@ Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequest
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/welcome', [AutomatController::class, 'index'])->name('welcome');
@@ -43,7 +47,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/straty/podsumowanie/rok/{year?}', [StrataController::class, 'podsumowanieRoku'])->name('straty.podsumowanie.rok');
 
 
-
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
     Route::post('/register', [RegisterController::class, 'store']);
 
@@ -58,5 +61,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty'])
         ->name('export.straty');
+
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 });
