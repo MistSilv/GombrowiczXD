@@ -13,5 +13,8 @@
     </div>
 
 
+    <button id="installPwaBtn" style="display:none;" class="bg-blue-800 text-white px-4 py-2 rounded">
+    Zainstaluj aplikację
+    </button>
 
 </x-layout>
