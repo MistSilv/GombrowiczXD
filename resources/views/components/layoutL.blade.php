@@ -5,6 +5,7 @@
     <title>{{ $title ?? 'Aplikacja Zamówień' }}</title>
     <meta name="viewport" content="width=device-width, initial-sale=1">
     <script src="https://cdn.tailwindcss.com"></script>
+    @laravelPWA
 </head>
 <body class="bg-black">
     <nav class="bg-black px-4 py-3 flex items-center shadow mb-6 relative">
