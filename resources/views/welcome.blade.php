@@ -5,11 +5,10 @@
         @foreach ($automaty as $automat)
             <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}"
                class="border p-4 rounded-2xl shadow hover:bg-slate-900 transition flex flex-col items-center">
-                <div class="text-5xl mb-2">🧅</div>
+                <img src="{{ asset('images/icons/icon-192x192.png') }}" alt="Ikona automatu" class="mb-2" style="width:64px; height:64px;">
                 <h2 class="text-xl font-bold text-center text-white">{{ $automat->nazwa }}</h2>
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
             </a>
         @endforeach     
     </div>
-
 </x-layout>
