@@ -12,10 +12,4 @@
         @endforeach     
     </div>
 
-
-    <button id="installPwaBtn" style="display:none;" class="bg-blue-800 text-white px-4 py-2 rounded">
-    Zainstaluj aplikację
-    </button>
-    <script src="/js/pwa-install.js"></script>
-
 </x-layout>
