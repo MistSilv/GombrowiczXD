@@ -11,4 +11,10 @@
             </a>
         @endforeach     
     </div>
+
+    <button id="installPWA"
+    class="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 mt-3 rounded shadow-lg z-50 hidden">
+    Zainstaluj aplikację
+    </button>
+@vite('resources/js/app.js')
 </x-layout>

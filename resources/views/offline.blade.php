@@ -1,0 +1,7 @@
+<x-layoutL>
+    <div class="flex flex-col items-center justify-center min-h-screen text-white">
+        <img src="{{ asset('images/icons/splash-640x1136.png') }}" alt="">
+        <h1 class="text-2xl font-bold mb-4">Brak połączenia z internetem</h1>
+        <p>Niektóre funkcje mogą być niedostępne w trybie offline.</p>
+    </div>
+</x-layoutL>
