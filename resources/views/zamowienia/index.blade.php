@@ -1,23 +1,26 @@
 <x-layout>
-    <x-subnav />
     <div class="container">
         @auth
             @if(!auth()->user()->isSerwis())
                <div class="mb-6 flex flex-wrap gap-2">
-                <a href="{{ route('zamowienia.archiwum') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
-                <a href="{{ route('zamowienia.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
-                <a href="{{ route('zamowienia.podsumowanie.tydzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
-                <a href="{{ route('zamowienia.podsumowanie.miesiac') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
-                <a href="{{ route('zamowienia.podsumowanie.rok') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
+                <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
+                <a href="{{ route('zamowienia.podsumowanie.dzien', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
+                <a href="{{ route('zamowienia.podsumowanie.tydzien', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
+                <a href="{{ route('zamowienia.podsumowanie.miesiac', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
+                <a href="{{ route('zamowienia.podsumowanie.rok', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
                 </div>
             @endif
-            @endauth
-        
+        @endauth
 
-        <h1 class="text-2xl font-bold mb-4 text-white">Aktualne zamówienia</h1>
+        <h1 class="text-2xl font-bold mb-4 text-white">
+            Aktualne zamówienia
+            @if(request('automat_id'))
+                dla automatu #{{ request('automat_id') }}
+            @endif
+        </h1>
 
         @if ($zamowienia->isEmpty())
-        <p>Brak aktualnych zamówień.</p>
+            <p>Brak aktualnych zamówień.</p>
         @else
             <div class="overflow-x-auto w-full overflow-visible">
                 <table class="table-auto w-full border-collapse border border-gray-300">

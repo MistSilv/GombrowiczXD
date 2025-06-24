@@ -1,5 +1,4 @@
 <x-layout>
-    <x-subnav />
     <div class="container text-white">
         <h1 class="text-2xl font-bold mb-4">Szczegóły zamówienia #{{ $zamowienie->id }}</h1>
 
@@ -19,6 +18,6 @@
             </ul>
         @endif
 
-        <a href="{{ route('zamowienia.index') }}" class="text-blue-500 hover:underline mt-6 inline-block">← Wróć do listy</a>
+        <a href="{{ route('zamowienia.index', ['automat_id' => $zamowienie->automat_id]) }}" class="text-blue-500 hover:underline mt-6 inline-block">← Wróć do listy</a>
     </div>
 </x-layout>

@@ -1,5 +1,4 @@
 <x-layout>
-    <x-subnav />
     <div class="container">
 
            @auth

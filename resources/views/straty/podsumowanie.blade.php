@@ -1,5 +1,4 @@
 <x-layout>
-    <x-subnav />
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4 text-white">Podsumowanie strat ({{ $typ }})</h1>
         <p class="mb-6">Okres: <strong>{{ $okres }}</strong></p>

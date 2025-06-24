@@ -1,5 +1,4 @@
 <x-layout>
-    <x-subnav />
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4 text-white">Podsumowanie zamówień ({{ $typ }})</h1>
         <p class="mb-6">Okres: <strong>{{ $okres }}</strong></p>
@@ -19,12 +18,12 @@
             @endphp
 
             <div class="mb-4 flex gap-3">
-                <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl]) }}"
-                   class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
+               <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
+                class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
                     Eksportuj do Excel (.xlsx)
                 </a>
-                <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl]) }}"
-                   class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
+                <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
+                class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
                     Eksportuj do CSV
                 </a>
             </div>
@@ -47,6 +46,6 @@
             </table>
         @endif
 
-        <a href="{{ route('zamowienia.index') }}" class="text-blue-500 hover:underline mt-6 inline-block">← Wróć do listy zamówień</a>
+        <a href="{{ route('zamowienia.index', ['automat_id' => request('automat_id')]) }}" class="text-blue-500 hover:underline mt-6 inline-block">← Wróć do listy zamówień</a>
     </div>
 </x-layout>

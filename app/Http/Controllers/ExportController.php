@@ -42,20 +42,26 @@ class ExportController extends Controller
             $dniTygodnia->push($d->copy());
         }
 
-        $dane = DB::table('produkt_zamowienie')
+        $query = DB::table('produkt_zamowienie')
             ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
             ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
-                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'))
-            ->get();
+            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
+
+        if (request()->filled('automat_id')) {
+            $query->where('zamowienia.automat_id', request('automat_id'));
+        }
+
+         $dane = $query->select(
+        'produkty.id as produkt_id',
+        'produkty.tw_nazwa',
+        DB::raw('MIN(ean_codes.kod_ean) as ean'),
+        DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
+        DB::raw('zamowienia.automat_id'),
+        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
+        )
+        ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'), 'zamowienia.automat_id')
+        ->get();
 
         $produkty = $dane->groupBy('produkt_id');
         $filename = 'tydzien_macierzy_' . $start->format('Y_m_d') . '.' . $format;
@@ -93,10 +99,16 @@ class ExportController extends Controller
                 }
 
                 // Suma dnia
-                $row = ['', 'Suma dnia'];
+               $row = ['', 'Suma dnia'];
                 foreach ($dniTygodnia as $dzien) {
                     $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                        ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
+                        ->filter(function($rek) use ($dzien) {
+                            $match = $rek->dzien === $dzien->format('Y-m-d');
+                            if (request()->filled('automat_id')) {
+                                $match = $match && $rek->automat_id == request('automat_id');
+                            }
+                            return $match;
+                        })
                         ->sum('ilosc');
                     $row[] = $sumaDnia;
                 }
@@ -145,7 +157,13 @@ class ExportController extends Controller
         $sumRow = $row; 
         foreach ($dniTygodnia as $dzien) {
             $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
+                ->filter(function($rek) use ($dzien) {
+                    $match = $rek->dzien === $dzien->format('Y-m-d');
+                    if (request()->filled('automat_id')) {
+                        $match = $match && $rek->automat_id == request('automat_id');
+                    }
+                    return $match;
+                })
                 ->sum('ilosc');
             $sheet->setCellValueByColumnAndRow($col++, $row, $sumaDnia);
         }
@@ -181,23 +199,29 @@ class ExportController extends Controller
         $start = $date->copy()->startOfDay();
         $end = $date->copy()->endOfDay();
 
-        $dane = DB::table('produkt_zamowienie')
+        $query = DB::table('produkt_zamowienie')
             ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
             ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa')
-            ->get();
+            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
+
+        if (request()->filled('automat_id')) {
+            $query->where('zamowienia.automat_id', request('automat_id'));
+        }
+
+        $dane = $query->select(
+        'produkty.id as produkt_id',
+        'produkty.tw_nazwa',
+        DB::raw('MIN(ean_codes.kod_ean) as ean'),
+        DB::raw('zamowienia.automat_id'),
+        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
+        )
+        ->groupBy('produkty.id', 'produkty.tw_nazwa', 'zamowienia.automat_id')
+        ->get();
 
         $filename = 'dzien_macierzy_' . $start->format('Y_m_d') . '.' . $format;
 
-        if ($format === 'csv') {
+       if ($format === 'csv') {
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -207,6 +231,7 @@ class ExportController extends Controller
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, ['Produkt', 'EAN', 'Ilość']);
                 foreach ($dane as $produkt) {
+                    if (request()->filled('automat_id') && $produkt->automat_id != request('automat_id')) continue;
                     fputcsv($handle, [$produkt->tw_nazwa, $produkt->ean, $produkt->ilosc]);
                 }
                 fclose($handle);
@@ -260,20 +285,26 @@ class ExportController extends Controller
             $dniMiesiaca->push($d->copy());
         }
 
-        $dane = DB::table('produkt_zamowienie')
+        $query = DB::table('produkt_zamowienie')
             ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
             ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
-                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'))
-            ->get();
+            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
+
+        if (request()->filled('automat_id')) {
+            $query->where('zamowienia.automat_id', request('automat_id'));
+        }
+
+        $dane = $query->select(
+        'produkty.id as produkt_id',
+        'produkty.tw_nazwa',
+        DB::raw('MIN(ean_codes.kod_ean) as ean'),
+        DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
+        DB::raw('zamowienia.automat_id'),
+        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
+        )
+        ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'), 'zamowienia.automat_id')
+        ->get();
 
         $produkty = $dane->groupBy('produkt_id');
         $filename = 'miesiac_macierzy_' . $start->format('Y_m') . '.' . $format;
@@ -309,10 +340,16 @@ class ExportController extends Controller
                 }
 
                 // Suma dnia
-                $row = ['', 'Suma dnia'];
+               $row = ['', 'Suma dnia'];
                 foreach ($dniMiesiaca as $dzien) {
                     $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                        ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
+                        ->filter(function($rek) use ($dzien) {
+                            $match = $rek->dzien === $dzien->format('Y-m-d');
+                            if (request()->filled('automat_id')) {
+                                $match = $match && $rek->automat_id == request('automat_id');
+                            }
+                            return $match;
+                        })
                         ->sum('ilosc');
                     $row[] = $sumaDnia;
                 }
@@ -357,7 +394,13 @@ class ExportController extends Controller
         $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma dnia');
         foreach ($dniMiesiaca as $dzien) {
             $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
+                ->filter(function($rek) use ($dzien) {
+                    $match = $rek->dzien === $dzien->format('Y-m-d');
+                    if (request()->filled('automat_id')) {
+                        $match = $match && $rek->automat_id == request('automat_id');
+                    }
+                    return $match;
+                })
                 ->sum('ilosc');
             $sheet->setCellValueByColumnAndRow($col++, $row, $sumaDnia);
         }
@@ -393,20 +436,26 @@ class ExportController extends Controller
             $miesiace->push($m->copy());
         }
 
-        $dane = DB::table('produkt_zamowienie')
+        $query = DB::table('produkt_zamowienie')
             ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
             ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('MONTH(zamowienia.data_zamowienia) as miesiac'),
-                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(zamowienia.data_zamowienia)'))
-            ->get();
+            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
+
+        if (request()->filled('automat_id')) {
+            $query->where('zamowienia.automat_id', request('automat_id'));
+        }
+
+        $dane = $query->select(
+        'produkty.id as produkt_id',
+        'produkty.tw_nazwa',
+        DB::raw('MIN(ean_codes.kod_ean) as ean'),
+        DB::raw('MONTH(zamowienia.data_zamowienia) as miesiac'),
+        DB::raw('zamowienia.automat_id'),
+        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
+        )
+        ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(zamowienia.data_zamowienia)'), 'zamowienia.automat_id')
+        ->get();
 
         $produkty = $dane->groupBy('produkt_id');
         $filename = 'rok_macierzy_' . $start->format('Y') . '.' . $format;
@@ -445,7 +494,13 @@ class ExportController extends Controller
                 $row = ['', 'Suma miesiąca'];
                 foreach ($miesiace as $miesiac) {
                     $sumaMiesiaca = $produkty->flatMap(fn($p) => $p)
-                        ->filter(fn($rek) => $rek->miesiac == $miesiac->format('n'))
+                        ->filter(function($rek) use ($miesiac) {
+                            $match = $rek->miesiac == $miesiac->format('n');
+                            if (request()->filled('automat_id')) {
+                                $match = $match && $rek->automat_id == request('automat_id');
+                            }
+                            return $match;
+                        })
                         ->sum('ilosc');
                     $row[] = $sumaMiesiaca;
                 }
@@ -490,7 +545,13 @@ class ExportController extends Controller
         $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma miesiąca');
         foreach ($miesiace as $miesiac) {
             $sumaMiesiaca = $produkty->flatMap(fn($p) => $p)
-                ->filter(fn($rek) => $rek->miesiac == $miesiac->format('n'))
+                ->filter(function($rek) use ($miesiac) {
+                    $match = $rek->miesiac == $miesiac->format('n');
+                    if (request()->filled('automat_id')) {
+                        $match = $match && $rek->automat_id == request('automat_id');
+                    }
+                    return $match;
+                })
                 ->sum('ilosc');
             $sheet->setCellValueByColumnAndRow($col++, $row, $sumaMiesiaca);
         }

@@ -1,5 +1,4 @@
 <x-layout>
-    <x-subnav />
     <h1 class="text-2xl font-bold mb-4 text-center text-white">Wprowadź stratę dla automatu: {{ $automat ? $automat->nazwa : 'Nie wybrano' }}</h1>
 
     <form method="POST" action="{{ route('straty.store') }}" class="bg-gray-900 p-6 rounded shadow-md max-w-xl mx-auto w-full">

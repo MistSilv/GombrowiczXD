@@ -1,5 +1,4 @@
 <x-layout>
-    <x-subnav />
     <div class="container text-white">
         <h1 class="text-2xl font-bold mb-4">Szczegóły straty #{{ $strata->id }}</h1>
 
