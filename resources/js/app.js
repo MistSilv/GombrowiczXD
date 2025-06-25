@@ -22,3 +22,17 @@ if (installBtn) {
         deferredPrompt = null;
     });
 }
+
+
+window.addEventListener('online', async () => {
+    try {
+        const response = await fetch('/welcome', { credentials: 'same-origin' });
+        if (response.redirected && response.url.includes('/login')) {
+            window.location.href = '/login';
+        }
+        if (response.status === 401 || response.status === 419) {
+            window.location.href = '/login';
+        }
+    } catch (e) {
+    }
+});

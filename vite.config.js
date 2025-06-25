@@ -36,8 +36,34 @@ export default defineConfig({
                 enabled: true
             },
             workbox: {
-                navigateFallback: '/offline',
-            }
+        navigateFallback: '/offline.html', 
+        runtimeCaching: [
+            {
+                // Cache strony HTML (np. podstrony Laravel)
+                urlPattern: /^\/.*$/,
+                handler: 'NetworkFirst',
+                options: {
+                    cacheName: 'html-pages',
+                    expiration: {
+                        maxEntries: 50,
+                        maxAgeSeconds: 24 * 60 * 60, 
+                    },
+                },
+            },
+            {
+                // Cache CSS, JS, obrazków
+                urlPattern: /\.(?:js|css|png|jpg|jpeg|svg|gif)$/,
+                handler: 'CacheFirst',
+                options: {
+                    cacheName: 'assets',
+                    expiration: {
+                        maxEntries: 100,
+                        maxAgeSeconds: 7 * 24 * 60 * 60,
+                    },
+                },
+            },
+            ],
+        },
         }),
     ],
 });

@@ -15,6 +15,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "html5-qrcode": "^2.3.8",
         "vite-plugin-pwa": "^1.0.0"
     }
 }
