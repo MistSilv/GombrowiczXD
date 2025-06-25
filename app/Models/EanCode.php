@@ -12,6 +12,6 @@ class EanCode extends Model
 
     public function produkt()
     {
-        return $this->belongsTo(Produkt::class);
+        return $this->belongsTo(Produkt::class, 'produkt_id');
     }
 }

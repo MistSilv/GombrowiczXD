@@ -36,3 +36,5 @@ window.addEventListener('online', async () => {
     } catch (e) {
     }
 });
+
+import { Html5Qrcode } from "html5-qrcode";

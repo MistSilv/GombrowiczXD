@@ -18,7 +18,7 @@ class Produkt extends Model
                     ->withPivot('ilosc');
     }
 
-    public function eanKody()
+    public function eanCodes()
     {
         return $this->hasMany(EanCode::class);
     }
