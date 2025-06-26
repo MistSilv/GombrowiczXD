@@ -7,10 +7,16 @@
         </h1>
 
         <div class="mb-6">
-            <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
-            <div id="reader" style="width: 300px;"></div>
-            <div id="scan-result" class="mt-2 text-white"></div>
+        <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
+        
+        <button id="start-scan" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+            Rozpocznij skanowanie
+        </button>
+
+        <div id="reader" style="width: 300px; display: none;"></div>
+        <div id="scan-result" class="mt-2 text-white"></div>
         </div>
+
 
         <form action="{{ route('zamowienia.store') }}" method="POST">
             @csrf
@@ -34,6 +40,14 @@
                 </div>
             </div>
 
+
+            <div class="mb-4">
+            <input type="text" id="szukaj-produkt" placeholder="Wpisz nazwę produktu" class="form-input w-full text-black mb-2" />
+            <button type="button" id="dodaj-produkt-nazwa" class="bg-blue-500 text-white px-3 py-1 rounded">
+                Dodaj produkt po nazwie
+            </button>
+            </div>
+
             <button type="button" id="dodaj-produkt" class="mt-2 mb-4 bg-blue-500 text-white px-3 py-1 rounded">
                 + Dodaj produkt
             </button>
@@ -44,26 +58,26 @@
                 </button>
             </div>
 
-            <div class="mt-6">
+            <div class="mt-6 flex flex-col md:flex-row md:items-center">
                 @if($automat)
-                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                         Wprowadź straty
                     </a>
                     @auth
                     @if(!auth()->user()->isProdukcja())
-                        <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" class="ml-2 bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                        <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                             Lista zamówień tego automatu
                         </a>
                     @endif
                     @endauth
                     @auth
-                    @if(auth()->user()->isProdukcja())
-                        <a href="{{ route('zamowienia.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2">
+                    @if(!auth()->user()->isSerwis())
+                        <a href="{{ route('zamowienia.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                             Zamówienia
                         </a>
                     @endif
                     @endauth
-                    <a href="{{ route('straty.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2">
+                    <a href="{{ route('straty.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                         Straty
                     </a>
                 @endif
@@ -96,7 +110,7 @@
                     ${options}
                 </select>
                 <input type="number" name="produkty[${index}][ilosc]" min="1" class="form-input w-24 text-black" placeholder="Ilość" required>
-                <button type="button" class=" bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+                <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
             `;
             container.appendChild(newItem);
             index++;
@@ -109,51 +123,67 @@
         });
 
         const scanner = new Html5Qrcode("reader");
+        let isScanning = false;
 
         function onScanSuccess(decodedText) {
             scanner.stop().then(() => {
+                isScanning = false;
+                $('#reader').hide();
                 $('#scan-result').text(`Zeskanowano: ${decodedText}`);
 
-           const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch('/api/check-ean', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ kod_ean: decodedText })
-            })
-        .then(res => {
-            if (!res.ok) {
-                return res.json().then(err => { throw err });
-            }
-            return res.json();
-        })
-        .then(data => {
-            dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa);
-            scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
-        })
-        .catch(err => {
-            console.error(err);
-            alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
-            scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
-        });
+                fetch('/api/check-ean', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: JSON.stringify({ kod_ean: decodedText })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        return res.json().then(err => { throw err });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
+                });
             }).catch(err => {
-                console.error("Błąd podczas zatrzymywania skanera:", err);
+                console.error("Błąd zatrzymywania skanera:", err);
             });
         }
 
+        document.getElementById('start-scan').addEventListener('click', () => {
+            if (isScanning) return;
 
-        Html5Qrcode.getCameras().then(devices => {
-            if (devices && devices.length) {
-                scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
-            }
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    $('#reader').show();
+                    scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess)
+                        .then(() => { isScanning = true; })
+                        .catch(err => { console.error("Błąd uruchamiania skanera:", err); });
+                } else {
+                    alert("Brak dostępnych kamer.");
+                }
+            }).catch(err => {
+                console.error("Błąd pobierania kamer:", err);
+            });
         });
 
-        function dodajProduktDoListy(produktId, nazwaProduktu) {
-            const container = document.getElementById('produkty-lista');
+         function dodajProduktDoListy(produktId, nazwaProduktu) {
+        const container = document.getElementById('produkty-lista');
+        const istniejący = [...container.querySelectorAll('select')].find(select => select.value == produktId);
 
+        if (istniejący) {
+            const inputIlosc = istniejący.closest('.produkt-item').querySelector('input[type="number"]');
+            inputIlosc.value = parseInt(inputIlosc.value) + 1;
+        } else {
             const newItem = document.createElement('div');
             newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
 
@@ -167,10 +197,30 @@
                     ${options}
                 </select>
                 <input type="number" name="produkty[${index}][ilosc]" min="1" value="1" class="form-input w-24 text-black" placeholder="Ilość" required>
-                <button type="button" class=" bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+                <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
             `;
             container.appendChild(newItem);
             index++;
         }
+    }
+
+    document.getElementById('dodaj-produkt-nazwa').addEventListener('click', () => {
+    const szukanaNazwa = document.getElementById('szukaj-produkt').value.trim().toLowerCase();
+
+    if (!szukanaNazwa) {
+        alert("Wpisz nazwę produktu.");
+        return;
+    }
+
+    const znalezionyProdukt = produkty.find(p => p.tw_nazwa.toLowerCase().includes(szukanaNazwa));
+
+    if (znalezionyProdukt) {
+        dodajProduktDoListy(znalezionyProdukt.id, znalezionyProdukt.tw_nazwa);
+        document.getElementById('szukaj-produkt').value = "";
+    } else {
+        alert("Nie znaleziono produktu o takiej nazwie.");
+    }
+    });
+
     </script>
 </x-layout>
