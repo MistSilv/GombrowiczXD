@@ -14,14 +14,6 @@
             <a href="{{ url('/welcome') }}" class="text-white font-bold text-lg hover:text-blue-900 transition flex items-center">
                 Strona główna
             </a>
-            @auth
-                @if(auth()->user()->isAdmin())
-                    <a href="{{ route('register') }}"
-                        class="text-white font-bold text-lg hover:text-blue-900 transition flex items-center">
-                        create a new account
-                    </a>
-                @endif
-            @endauth
         </div>
         <form method="POST" action="{{ route('logout') }}" class="absolute top-0 right-0 mr-3 mt-3">
             @csrf
