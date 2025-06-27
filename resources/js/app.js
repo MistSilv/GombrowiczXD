@@ -1,6 +1,8 @@
 import './bootstrap';
 import { registerSW } from 'virtual:pwa-register';
-registerSW();
+
+navigator.serviceWorker.register('build/sw.js');
+//registerSW();
 
 let deferredPrompt;
 const installBtn = document.getElementById('installPWA');
