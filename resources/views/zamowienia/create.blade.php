@@ -129,38 +129,45 @@
         let isScanning = false;
 
         function onScanSuccess(decodedText) {
-            scanner.stop().then(() => {
-                isScanning = false;
-                $('#reader').hide();
-                $('#scan-result').text(`Zeskanowano: ${decodedText}`);
+        scanner.stop().then(() => {
+            isScanning = false;
+            $('#reader').hide();
+            $('#scan-result').text(`Zeskanowano: ${decodedText}`);
 
-                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                fetch('/api/check-ean', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token
-                    },
-                    body: JSON.stringify({ kod_ean: decodedText })
-                })
-                .then(res => {
-                    if (!res.ok) {
-                        return res.json().then(err => { throw err });
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa);
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
-                });
+            fetch('/api/check-ean', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({ kod_ean: decodedText })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw err });
+                }
+                return res.json();
+            })
+            .then(data => {
+                const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
+
+                if (ilosc !== null && !isNaN(ilosc) && parseInt(ilosc) > 0) {
+                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
+                } else {
+                    alert("Produkt nie został dodany — podano nieprawidłową ilość.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
+            });
             }).catch(err => {
                 console.error("Błąd zatrzymywania skanera:", err);
             });
         }
+
 
         document.getElementById('start-scan').addEventListener('click', () => {
             if (isScanning) return;
@@ -179,33 +186,34 @@
             });
         });
 
-         function dodajProduktDoListy(produktId, nazwaProduktu) {
-        const container = document.getElementById('produkty-lista');
-        const istniejący = [...container.querySelectorAll('select')].find(select => select.value == produktId);
+         function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
+            const container = document.getElementById('produkty-lista');
+            const istniejący = [...container.querySelectorAll('select')].find(select => select.value == produktId);
 
-        if (istniejący) {
-            const inputIlosc = istniejący.closest('.produkt-item').querySelector('input[type="number"]');
-            inputIlosc.value = parseInt(inputIlosc.value) + 1;
-        } else {
-            const newItem = document.createElement('div');
-            newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
+            if (istniejący) {
+                const inputIlosc = istniejący.closest('.produkt-item').querySelector('input[type="number"]');
+                inputIlosc.value = parseInt(inputIlosc.value) + ilosc;
+            } else {
+                const newItem = document.createElement('div');
+                newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
 
-            let options = `<option value="">-- wybierz produkt --</option>`;
-            produkty.forEach(function (p) {
-                options += `<option value="${p.id}" ${p.id == produktId ? 'selected' : ''}>${p.tw_nazwa}</option>`;
-            });
+                let options = `<option value="">-- wybierz produkt --</option>`;
+                produkty.forEach(function (p) {
+                    options += `<option value="${p.id}" ${p.id == produktId ? 'selected' : ''}>${p.tw_nazwa}</option>`;
+                });
 
-            newItem.innerHTML = `
-                <select name="produkty[${index}][produkt_id]" class="form-select w-full" required>
-                    ${options}
-                </select>
-                <input type="number" name="produkty[${index}][ilosc]" min="1" value="1" class="form-input w-24 text-black" placeholder="Ilość" required>
-                <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
-            `;
-            container.appendChild(newItem);
-            index++;
+                newItem.innerHTML = `
+                    <select name="produkty[${index}][produkt_id]" class="form-select w-full" required>
+                        ${options}
+                    </select>
+                    <input type="number" name="produkty[${index}][ilosc]" min="1" value="${ilosc}" class="form-input w-24 text-black" placeholder="Ilość" required>
+                    <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+                `;
+                container.appendChild(newItem);
+                index++;
+            }
         }
-    }
+
 
     const szukajInput = document.getElementById('szukaj-produkt');
     const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
