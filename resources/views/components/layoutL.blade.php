@@ -5,7 +5,7 @@
     <title>{{ $title ?? 'Aplikacja Zamówień' }}</title>
     <meta name="viewport" content="width=device-width, initial-sale=1">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="manifest" href="/build/manifest.webmanifest">
     <meta name="theme-color" content="#1e293b">
 </head>
 <body class="bg-black">
