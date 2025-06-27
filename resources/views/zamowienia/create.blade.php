@@ -41,12 +41,15 @@
             </div>
 
 
-            <div class="mb-4">
+            <div class="mb-4 relative">
             <input type="text" id="szukaj-produkt" placeholder="Wpisz nazwę produktu" class="form-input w-full text-black mb-2" />
-            <button type="button" id="dodaj-produkt-nazwa" class="bg-blue-500 text-white px-3 py-1 rounded">
+            <ul id="lista-podpowiedzi" class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full hidden"></ul>
+            </div>
+
+            <button type="button" id="dodaj-produkt-nazwa" class="bg-blue-500 text-white px-3 py-1 rounded hidden">
                 Dodaj produkt po nazwie
             </button>
-            </div>
+
 
             <button type="button" id="dodaj-produkt" class="mt-2 mb-4 bg-blue-500 text-white px-3 py-1 rounded">
                 + Dodaj produkt
@@ -204,23 +207,45 @@
         }
     }
 
-    document.getElementById('dodaj-produkt-nazwa').addEventListener('click', () => {
-    const szukanaNazwa = document.getElementById('szukaj-produkt').value.trim().toLowerCase();
+    const szukajInput = document.getElementById('szukaj-produkt');
+    const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
 
-    if (!szukanaNazwa) {
-        alert("Wpisz nazwę produktu.");
-        return;
-    }
+    szukajInput.addEventListener('input', () => {
+        const fraza = szukajInput.value.trim().toLowerCase();
+        listaPodpowiedzi.innerHTML = '';
 
-    const znalezionyProdukt = produkty.find(p => p.tw_nazwa.toLowerCase().includes(szukanaNazwa));
+        if (!fraza) {
+            listaPodpowiedzi.classList.add('hidden');
+            return;
+        }
 
-    if (znalezionyProdukt) {
-        dodajProduktDoListy(znalezionyProdukt.id, znalezionyProdukt.tw_nazwa);
-        document.getElementById('szukaj-produkt').value = "";
-    } else {
-        alert("Nie znaleziono produktu o takiej nazwie.");
-    }
+        const pasujaceProdukty = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(fraza));
+
+        if (pasujaceProdukty.length) {
+            pasujaceProdukty.forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = p.tw_nazwa;
+                li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer');
+                li.addEventListener('click', () => {
+                    dodajProduktDoListy(p.id, p.tw_nazwa);
+                    szukajInput.value = '';
+                    listaPodpowiedzi.innerHTML = '';
+                    listaPodpowiedzi.classList.add('hidden');
+                });
+                listaPodpowiedzi.appendChild(li);
+            });
+            listaPodpowiedzi.classList.remove('hidden');
+        } else {
+            listaPodpowiedzi.classList.add('hidden');
+        }
     });
+
+    document.addEventListener('click', (e) => {
+        if (!listaPodpowiedzi.contains(e.target) && e.target !== szukajInput) {
+            listaPodpowiedzi.classList.add('hidden');
+        }
+    });
+
 
     </script>
 </x-layout>
