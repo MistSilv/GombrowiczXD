@@ -1,3 +1,4 @@
+<!-- strona do wyświetlania szczegółów zamówienia -->
 <x-layout>
     <div class="container text-white">
         <h1 class="text-2xl font-bold mb-4">Szczegóły zamówienia #{{ $zamowienie->id }}</h1>

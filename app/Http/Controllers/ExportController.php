@@ -4,1120 +4,331 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Carbon\Carbon;
 
 class ExportController extends Controller
 {
+    //główny kontroler eksportu danych
     public function exportZamowienia($zakres, $date = null, $format = 'xlsx')
     {
         $date = $date ? Carbon::parse($date) : Carbon::today();
 
-        if ($zakres === 'tydzien') {
-            return $this->exportTygodniowy($date, $format);
-        }
-        if ($zakres === 'dzien') {
-            return $this->exportDzienny($date, $format);
-        }
-        if ($zakres === 'miesiac') {
-            return $this->exportMiesieczny($date, $format);
-        }
-        if ($zakres === 'rok') {
-            return $this->exportRoczny($date, $format);
-        }
-
-        return abort(404);
+        return $this->eksportMacierz(
+            'zamowienia',
+            $zakres,
+            $date,
+            $format,
+            [$this, 'pobierzDaneZamowien']
+        ); // Eksportuje zamówienia w zależności od zakresu i formatu
     }
 
-    private function exportTygodniowy(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfWeek();
-        $end = $date->copy()->endOfWeek();
-
-        $dniTygodnia = collect();
-        for ($d = $start->copy(); $d <= $end; $d->addDay()) {
-            $dniTygodnia->push($d->copy());
-        }
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id'));
-        }
-
-         $dane = $query->select(
-        'produkty.id as produkt_id',
-        'produkty.tw_nazwa',
-        DB::raw('MIN(ean_codes.kod_ean) as ean'),
-        DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
-        DB::raw('zamowienia.automat_id'),
-        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-        )
-        ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'), 'zamowienia.automat_id')
-        ->get();
-
-        $produkty = $dane->groupBy('produkt_id');
-        $filename = 'tydzien_macierzy_' . $start->format('Y_m_d') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                    'Content-Type' => 'text/csv',
-                    'Content-Disposition' => "attachment; filename=\"$filename\"",
-                ];
-
-            return response()->stream(function () use ($produkty, $dniTygodnia) {
-                $handle = fopen('php://output', 'w');
-                // Nagłówki
-                $header = ['Produkt', 'EAN'];
-                foreach ($dniTygodnia as $dzien) {
-                    $header[] = $dzien->format('d.m');
-                }
-                $header[] = 'Suma';
-                fputcsv($handle, $header);
-
-                // Dane
-                foreach ($produkty as $produktGroup) {
-                    $row = [];
-                    $produkt = $produktGroup->first();
-                    $row[] = $produkt->tw_nazwa;
-                    $row[] = $produkt->ean;
-                    $sumaProduktu = 0;
-                    foreach ($dniTygodnia as $dzien) {
-                        $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                        $row[] = $ilosc;
-                        $sumaProduktu += $ilosc;
-                    }
-                    $row[] = $sumaProduktu;
-                    fputcsv($handle, $row);
-                }
-
-                // Suma dnia
-               $row = ['', 'Suma dnia'];
-                foreach ($dniTygodnia as $dzien) {
-                    $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                        ->filter(function($rek) use ($dzien) {
-                            $match = $rek->dzien === $dzien->format('Y-m-d');
-                            if (request()->filled('automat_id')) {
-                                $match = $match && $rek->automat_id == request('automat_id');
-                            }
-                            return $match;
-                        })
-                        ->sum('ilosc');
-                    $row[] = $sumaDnia;
-                }
-                fputcsv($handle, $row);
-
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        // XLSX
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $row = 1;
-        $col = 1;
-
-        // Nagłówki
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Produkt');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'EAN');
-        foreach ($dniTygodnia as $dzien) {
-            $sheet->setCellValueByColumnAndRow($col++, $row, $dzien->format('d.m'));
-        }
-        $sheet->setCellValueByColumnAndRow($col, $row, 'Suma');
-        $headerRow = $row;
-        $row++;
-
-        $firstDataRow = $row;
-        foreach ($produkty as $produktGroup) {
-            $col = 1;
-            $produkt = $produktGroup->first();
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->tw_nazwa);
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->ean);
-            $sumaProduktu = 0;
-            foreach ($dniTygodnia as $dzien) {
-                $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                $sheet->setCellValueByColumnAndRow($col++, $row, $ilosc);
-                $sumaProduktu += $ilosc;
-            }
-            $sheet->setCellValueByColumnAndRow($col, $row, $sumaProduktu);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, '');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma dnia');
-        $sumRow = $row; 
-        foreach ($dniTygodnia as $dzien) {
-            $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                ->filter(function($rek) use ($dzien) {
-                    $match = $rek->dzien === $dzien->format('Y-m-d');
-                    if (request()->filled('automat_id')) {
-                        $match = $match && $rek->automat_id == request('automat_id');
-                    }
-                    return $match;
-                })
-                ->sum('ilosc');
-            $sheet->setCellValueByColumnAndRow($col++, $row, $sumaDnia);
-        }
-
-      $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumn = $sheet->getHighestColumn();
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
-
-        $eanCol = 'B';
-        $firstRow = $headerRow + 1;
-        $lastRow = $sumRow; 
-        $sheet->getStyle("{$eanCol}{$firstRow}:{$eanCol}{$lastRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-    }
-
-
-    
-    private function exportDzienny(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfDay();
-        $end = $date->copy()->endOfDay();
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id'));
-        }
-
-        $dane = $query->select(
-        'produkty.id as produkt_id',
-        'produkty.tw_nazwa',
-        DB::raw('MIN(ean_codes.kod_ean) as ean'),
-        DB::raw('zamowienia.automat_id'),
-        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-        )
-        ->groupBy('produkty.id', 'produkty.tw_nazwa', 'zamowienia.automat_id')
-        ->get();
-
-        $filename = 'dzien_macierzy_' . $start->format('Y_m_d') . '.' . $format;
-
-       if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($dane) {
-                $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['Produkt', 'EAN', 'Ilość']);
-                foreach ($dane as $produkt) {
-                    if (request()->filled('automat_id') && $produkt->automat_id != request('automat_id')) continue;
-                    fputcsv($handle, [$produkt->tw_nazwa, $produkt->ean, $produkt->ilosc]);
-                }
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Produkt');
-        $sheet->setCellValue('B1', 'EAN');
-        $sheet->setCellValue('C1', 'Ilość');
-        $headerRow = 1;
-        $firstDataRow = 2;
-        $row = 2;
-        foreach ($dane as $produkt) {
-            $sheet->setCellValue('A' . $row, $produkt->tw_nazwa);
-            $sheet->setCellValue('B' . $row, $produkt->ean);
-            $sheet->setCellValue('C' . $row, $produkt->ilosc);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-        $sumRow = $row; 
-
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
-
-        $sheet->getStyle("B{$firstDataRow}:B{$lastDataRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-    }
-
-    private function exportMiesieczny(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfMonth();
-        $end = $date->copy()->endOfMonth();
-
-        $dniMiesiaca = collect();
-        for ($d = $start->copy(); $d <= $end; $d->addDay()) {
-            $dniMiesiaca->push($d->copy());
-        }
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id'));
-        }
-
-        $dane = $query->select(
-        'produkty.id as produkt_id',
-        'produkty.tw_nazwa',
-        DB::raw('MIN(ean_codes.kod_ean) as ean'),
-        DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
-        DB::raw('zamowienia.automat_id'),
-        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-        )
-        ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'), 'zamowienia.automat_id')
-        ->get();
-
-        $produkty = $dane->groupBy('produkt_id');
-        $filename = 'miesiac_macierzy_' . $start->format('Y_m') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($produkty, $dniMiesiaca) {
-                $handle = fopen('php://output', 'w');
-                $header = ['Produkt', 'EAN'];
-                foreach ($dniMiesiaca as $dzien) {
-                    $header[] = $dzien->format('d.m');
-                }
-                $header[] = 'Suma';
-                fputcsv($handle, $header);
-
-                foreach ($produkty as $produktGroup) {
-                    $row = [];
-                    $produkt = $produktGroup->first();
-                    $row[] = $produkt->tw_nazwa;
-                    $row[] = $produkt->ean;
-                    $sumaProduktu = 0;
-                    foreach ($dniMiesiaca as $dzien) {
-                        $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                        $row[] = $ilosc;
-                        $sumaProduktu += $ilosc;
-                    }
-                    $row[] = $sumaProduktu;
-                    fputcsv($handle, $row);
-                }
-
-                // Suma dnia
-               $row = ['', 'Suma dnia'];
-                foreach ($dniMiesiaca as $dzien) {
-                    $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                        ->filter(function($rek) use ($dzien) {
-                            $match = $rek->dzien === $dzien->format('Y-m-d');
-                            if (request()->filled('automat_id')) {
-                                $match = $match && $rek->automat_id == request('automat_id');
-                            }
-                            return $match;
-                        })
-                        ->sum('ilosc');
-                    $row[] = $sumaDnia;
-                }
-                fputcsv($handle, $row);
-
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $row = 1;
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Produkt');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'EAN');
-        foreach ($dniMiesiaca as $dzien) {
-            $sheet->setCellValueByColumnAndRow($col++, $row, $dzien->format('d.m'));
-        }
-        $sheet->setCellValueByColumnAndRow($col, $row, 'Suma');
-        $headerRow = $row;
-        $row++;
-
-        $firstDataRow = $row;
-        foreach ($produkty as $produktGroup) {
-            $col = 1;
-            $produkt = $produktGroup->first();
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->tw_nazwa);
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->ean);
-            $sumaProduktu = 0;
-            foreach ($dniMiesiaca as $dzien) {
-                $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                $sheet->setCellValueByColumnAndRow($col++, $row, $ilosc);
-                $sumaProduktu += $ilosc;
-            }
-            $sheet->setCellValueByColumnAndRow($col, $row, $sumaProduktu);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, '');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma dnia');
-        foreach ($dniMiesiaca as $dzien) {
-            $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                ->filter(function($rek) use ($dzien) {
-                    $match = $rek->dzien === $dzien->format('Y-m-d');
-                    if (request()->filled('automat_id')) {
-                        $match = $match && $rek->automat_id == request('automat_id');
-                    }
-                    return $match;
-                })
-                ->sum('ilosc');
-            $sheet->setCellValueByColumnAndRow($col++, $row, $sumaDnia);
-        }
-        $sumRow = $row;
-
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
-
-        $sheet->getStyle("B{$firstDataRow}:B{$sumRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-    }
-
-    private function exportRoczny(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfYear();
-        $end = $date->copy()->endOfYear();
-
-        $miesiace = collect();
-        for ($m = $start->copy(); $m <= $end; $m->addMonth()) {
-            $miesiace->push($m->copy());
-        }
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]);
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id'));
-        }
-
-        $dane = $query->select(
-        'produkty.id as produkt_id',
-        'produkty.tw_nazwa',
-        DB::raw('MIN(ean_codes.kod_ean) as ean'),
-        DB::raw('MONTH(zamowienia.data_zamowienia) as miesiac'),
-        DB::raw('zamowienia.automat_id'),
-        DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-        )
-        ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(zamowienia.data_zamowienia)'), 'zamowienia.automat_id')
-        ->get();
-
-        $produkty = $dane->groupBy('produkt_id');
-        $filename = 'rok_macierzy_' . $start->format('Y') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($produkty, $miesiace) {
-                $handle = fopen('php://output', 'w');
-                $header = ['Produkt', 'EAN'];
-                foreach ($miesiace as $miesiac) {
-                    $header[] = $miesiac->format('m.Y');
-                }
-                $header[] = 'Suma';
-                fputcsv($handle, $header);
-
-                foreach ($produkty as $produktGroup) {
-                    $row = [];
-                    $produkt = $produktGroup->first();
-                    $row[] = $produkt->tw_nazwa;
-                    $row[] = $produkt->ean;
-                    $sumaProduktu = 0;
-                    foreach ($miesiace as $miesiac) {
-                        $ilosc = $produktGroup->firstWhere('miesiac', $miesiac->format('n'))->ilosc ?? 0;
-                        $row[] = $ilosc;
-                        $sumaProduktu += $ilosc;
-                    }
-                    $row[] = $sumaProduktu;
-                    fputcsv($handle, $row);
-                }
-
-                // Suma miesiąca
-                $row = ['', 'Suma miesiąca'];
-                foreach ($miesiace as $miesiac) {
-                    $sumaMiesiaca = $produkty->flatMap(fn($p) => $p)
-                        ->filter(function($rek) use ($miesiac) {
-                            $match = $rek->miesiac == $miesiac->format('n');
-                            if (request()->filled('automat_id')) {
-                                $match = $match && $rek->automat_id == request('automat_id');
-                            }
-                            return $match;
-                        })
-                        ->sum('ilosc');
-                    $row[] = $sumaMiesiaca;
-                }
-                fputcsv($handle, $row);
-
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $row = 1;
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Produkt');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'EAN');
-        foreach ($miesiace as $miesiac) {
-            $sheet->setCellValueByColumnAndRow($col++, $row, $miesiac->format('m.Y'));
-        }
-        $sheet->setCellValueByColumnAndRow($col, $row, 'Suma');
-        $headerRow = $row;
-        $row++;
-
-        $firstDataRow = $row;
-        foreach ($produkty as $produktGroup) {
-            $col = 1;
-            $produkt = $produktGroup->first();
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->tw_nazwa);
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->ean);
-            $sumaProduktu = 0;
-            foreach ($miesiace as $miesiac) {
-                $ilosc = $produktGroup->firstWhere('miesiac', $miesiac->format('n'))->ilosc ?? 0;
-                $sheet->setCellValueByColumnAndRow($col++, $row, $ilosc);
-                $sumaProduktu += $ilosc;
-            }
-            $sheet->setCellValueByColumnAndRow($col, $row, $sumaProduktu);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, '');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma miesiąca');
-        foreach ($miesiace as $miesiac) {
-            $sumaMiesiaca = $produkty->flatMap(fn($p) => $p)
-                ->filter(function($rek) use ($miesiac) {
-                    $match = $rek->miesiac == $miesiac->format('n');
-                    if (request()->filled('automat_id')) {
-                        $match = $match && $rek->automat_id == request('automat_id');
-                    }
-                    return $match;
-                })
-                ->sum('ilosc');
-            $sheet->setCellValueByColumnAndRow($col++, $row, $sumaMiesiaca);
-        }
-        $sumRow = $row;
-
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
-
-        $sheet->getStyle("B{$firstDataRow}:B{$sumRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-    }
-
-
-  private function applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol)
-    {
-        $headerStyle = [
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'B91C1C'],
-            ],
-        ];
-
-        $rowStyle = [
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '065F46'],
-            ],
-            'font' => ['color' => ['rgb' => 'FFFFFF']],
-        ];
-
-        $borderStyle = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['rgb' => '222222'],
-                ],
-            ],
-        ];
-
-        $sheet->getStyle("A{$headerRow}:{$lastCol}{$headerRow}")->applyFromArray($headerStyle);
-
-        if ($lastDataRow >= $firstDataRow) {
-            $sheet->getStyle("A{$firstDataRow}:{$lastCol}{$lastDataRow}")->applyFromArray($rowStyle);
-        }
-
-        $sumRow = $lastDataRow + 1;
-        $sheet->getStyle("A{$sumRow}:{$lastCol}{$sumRow}")->applyFromArray($rowStyle);
-
-        $sheet->getStyle("A{$headerRow}:{$lastCol}{$sumRow}")->applyFromArray($borderStyle);
-    }
-
-
-     public function exportStraty($zakres, $date = null, $format = 'xlsx')
+    //główny kontroler eksportu strat
+    public function exportStraty($zakres, $date = null, $format = 'xlsx')
     {
         $date = $date ? Carbon::parse($date) : Carbon::today();
 
-        if ($zakres === 'tydzien') {
-            return $this->exportStratyTygodniowe($date, $format);
-        }
-        if ($zakres === 'dzien') {
-            return $this->exportStratyDzienne($date, $format);
-        }
-        if ($zakres === 'miesiac') {
-            return $this->exportStratyMiesieczne($date, $format);
-        }
+        return $this->eksportMacierz(
+            'straty',
+            $zakres,
+            $date,
+            $format,
+            [$this, 'pobierzDaneStrat']
+        ); // Eksportuje straty w zależności od zakresu i formatu
+    }
+
+    //wszystkie eksporty danych zamówień i strat są realizowane przez tę funkcję
+    private function eksportMacierz($typ, $zakres, Carbon $date, $format, callable $daneCallback)
+    {
+        // Ustal zakres i etykiety kolumn
         if ($zakres === 'rok') {
-            return $this->exportStratyRoczne($date, $format);
-        }
-
-        return abort(404);
-    }
-
-    private function exportStratyTygodniowe(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfWeek();
-        $end = $date->copy()->endOfWeek();
-
-        $dniTygodnia = collect();
-        for ($d = $start->copy(); $d <= $end; $d->addDay()) {
-            $dniTygodnia->push($d->copy());
-        }
-
-        $dane = DB::table('produkt_strata')
-            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
-            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('straty.data_straty', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(straty.data_straty AS DATE) as dzien'),
-                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(straty.data_straty AS DATE)'))
-            ->get();
-
-        $produkty = $dane->groupBy('produkt_id');
-        $filename = 'straty_tydzien_' . $start->format('Y_m_d') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($produkty, $dniTygodnia) {
-                $handle = fopen('php://output', 'w');
-                // Nagłówki
-                $header = ['Produkt', 'EAN'];
-                foreach ($dniTygodnia as $dzien) {
-                    $header[] = $dzien->format('d.m');
-                }
-                $header[] = 'Suma';
-                fputcsv($handle, $header);
-
-                // Dane
-                foreach ($produkty as $produktGroup) {
-                    $row = [];
-                    $produkt = $produktGroup->first();
-                    $row[] = $produkt->tw_nazwa;
-                    $row[] = $produkt->ean;
-                    $sumaProduktu = 0;
-                    foreach ($dniTygodnia as $dzien) {
-                        $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                        $row[] = $ilosc;
-                        $sumaProduktu += $ilosc;
-                    }
-                    $row[] = $sumaProduktu;
-                    fputcsv($handle, $row);
-                }
-
-                // Suma dnia
-                $row = ['', 'Suma dnia'];
-                foreach ($dniTygodnia as $dzien) {
-                    $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                        ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
-                        ->sum('ilosc');
-                    $row[] = $sumaDnia;
-                }
-                fputcsv($handle, $row);
-
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        // XLSX
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $row = 1;
-        $col = 1;
-
-        // Nagłówki
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Produkt');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'EAN');
-        foreach ($dniTygodnia as $dzien) {
-            $sheet->setCellValueByColumnAndRow($col++, $row, $dzien->format('d.m'));
-        }
-        $sheet->setCellValueByColumnAndRow($col, $row, 'Suma');
-        $headerRow = $row;
-        $row++;
-
-        $firstDataRow = $row;
-        foreach ($produkty as $produktGroup) {
-            $col = 1;
-            $produkt = $produktGroup->first();
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->tw_nazwa);
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->ean);
-            $sumaProduktu = 0;
-            foreach ($dniTygodnia as $dzien) {
-                $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                $sheet->setCellValueByColumnAndRow($col++, $row, $ilosc);
-                $sumaProduktu += $ilosc;
+            $start = $date->copy()->startOfYear();
+            $end = $date->copy()->endOfYear();
+            $okresy = collect();
+            $iter = $start->copy();
+            while ($iter <= $end) {
+                $okresy->push($iter->copy());
+                $iter->addMonth();
             }
-            $sheet->setCellValueByColumnAndRow($col, $row, $sumaProduktu);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, '');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma dnia');
-        $sumRow = $row; 
-        foreach ($dniTygodnia as $dzien) {
-            $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
-                ->sum('ilosc');
-            $sheet->setCellValueByColumnAndRow($col++, $row, $sumaDnia);
-        }
-
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
-
-        $eanCol = 'B';
-        $firstRow = $headerRow + 1;
-        $lastRow = $sumRow; 
-        $sheet->getStyle("{$eanCol}{$firstRow}:{$eanCol}{$lastRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-    }
-
-    private function exportStratyDzienne(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfDay();
-        $end = $date->copy()->endOfDay();
-
-        $dane = DB::table('produkt_strata')
-            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
-            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('straty.data_straty', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa')
-            ->get();
-
-        $filename = 'straty_dzien_' . $start->format('Y_m_d') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($dane) {
-                $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['Produkt', 'EAN', 'Ilość']);
-                foreach ($dane as $produkt) {
-                    fputcsv($handle, [$produkt->tw_nazwa, $produkt->ean, $produkt->ilosc]);
-                }
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Produkt');
-        $sheet->setCellValue('B1', 'EAN');
-        $sheet->setCellValue('C1', 'Ilość');
-        $headerRow = 1;
-        $firstDataRow = 2;
-        $row = 2;
-        foreach ($dane as $produkt) {
-            $sheet->setCellValue('A' . $row, $produkt->tw_nazwa);
-            $sheet->setCellValue('B' . $row, $produkt->ean);
-            $sheet->setCellValue('C' . $row, $produkt->ilosc);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-        $sumRow = $row; 
-
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
-
-        $sheet->getStyle("B{$firstDataRow}:B{$lastDataRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
-    }
-
-    private function exportStratyMiesieczne(Carbon $date, $format)
-    {
-        $start = $date->copy()->startOfMonth();
-        $end = $date->copy()->endOfMonth();
-
-        $dniMiesiaca = collect();
-        for ($d = $start->copy(); $d <= $end; $d->addDay()) {
-            $dniMiesiaca->push($d->copy());
-        }
-
-        $dane = DB::table('produkt_strata')
-            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
-            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('straty.data_straty', [$start, $end])
-            ->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(straty.data_straty AS DATE) as dzien'),
-                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(straty.data_straty AS DATE)'))
-            ->get();
-
-        $produkty = $dane->groupBy('produkt_id');
-        $filename = 'straty_miesiac_' . $start->format('Y_m') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($produkty, $dniMiesiaca) {
-                $handle = fopen('php://output', 'w');
-                $header = ['Produkt', 'EAN'];
-                foreach ($dniMiesiaca as $dzien) {
-                    $header[] = $dzien->format('d.m');
-                }
-                $header[] = 'Suma';
-                fputcsv($handle, $header);
-
-                foreach ($produkty as $produktGroup) {
-                    $row = [];
-                    $produkt = $produktGroup->first();
-                    $row[] = $produkt->tw_nazwa;
-                    $row[] = $produkt->ean;
-                    $sumaProduktu = 0;
-                    foreach ($dniMiesiaca as $dzien) {
-                        $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                        $row[] = $ilosc;
-                        $sumaProduktu += $ilosc;
-                    }
-                    $row[] = $sumaProduktu;
-                    fputcsv($handle, $row);
-                }
-
-                // Suma dnia
-                $row = ['', 'Suma dnia'];
-                foreach ($dniMiesiaca as $dzien) {
-                    $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                        ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
-                        ->sum('ilosc');
-                    $row[] = $sumaDnia;
-                }
-                fputcsv($handle, $row);
-
-                fclose($handle);
-            }, 200, $headers);
-        }
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $row = 1;
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Produkt');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'EAN');
-        foreach ($dniMiesiaca as $dzien) {
-            $sheet->setCellValueByColumnAndRow($col++, $row, $dzien->format('d.m'));
-        }
-        $sheet->setCellValueByColumnAndRow($col, $row, 'Suma');
-        $headerRow = $row;
-        $row++;
-
-        $firstDataRow = $row;
-        foreach ($produkty as $produktGroup) {
-            $col = 1;
-            $produkt = $produktGroup->first();
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->tw_nazwa);
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->ean);
-            $sumaProduktu = 0;
-            foreach ($dniMiesiaca as $dzien) {
-                $ilosc = $produktGroup->firstWhere('dzien', $dzien->format('Y-m-d'))->ilosc ?? 0;
-                $sheet->setCellValueByColumnAndRow($col++, $row, $ilosc);
-                $sumaProduktu += $ilosc;
+            $etykiety = $okresy->map(fn($m) => $m->format('m-Y'));
+        } else {
+            $start = match ($zakres) {
+                'dzien'   => $date->copy()->startOfDay(),
+                'tydzien' => $date->copy()->startOfWeek(),
+                'miesiac' => $date->copy()->startOfMonth(),
+                default   => abort(404),
+            };
+            $end = match ($zakres) {
+                'dzien'   => $date->copy()->endOfDay(),
+                'tydzien' => $date->copy()->endOfWeek(),
+                'miesiac' => $date->copy()->endOfMonth(),
+            };
+            $okresy = collect();
+            $iter = $start->copy();
+            while ($iter <= $end) {
+                $okresy->push($iter->copy());
+                $iter->addDay();
             }
-            $sheet->setCellValueByColumnAndRow($col, $row, $sumaProduktu);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
-
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, '');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma dnia');
-        foreach ($dniMiesiaca as $dzien) {
-            $sumaDnia = $produkty->flatMap(fn($p) => $p)
-                ->filter(fn($rek) => $rek->dzien === $dzien->format('Y-m-d'))
-                ->sum('ilosc');
-            $sheet->setCellValueByColumnAndRow($col++, $row, $sumaDnia);
-        }
-        $sumRow = $row;
-
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
-
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
+            $etykiety = $okresy->map(fn($d) => $d->format('d-m'));
         }
 
-        $sheet->getStyle("B{$firstDataRow}:B{$sumRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
+        $dane = call_user_func($daneCallback, $start, $end, $zakres);
+        $produkty = $dane->groupBy('produkt_id');
 
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+        $filename = "{$typ}_{$zakres}_{$start->format('Y_m_d')}.{$format}";
+
+        return $format === 'csv'
+            ? $this->generujCsv($produkty, $okresy, $etykiety, $zakres)
+            : $this->generujXlsx($produkty, $okresy, $etykiety, $filename, $zakres);
     }
 
-    private function exportStratyRoczne(Carbon $date, $format)
+    //pobiera dane zamówień 
+    private function pobierzDaneZamowien($start, $end, $zakres)
     {
-        $start = $date->copy()->startOfYear();
-        $end = $date->copy()->endOfYear();
+        $query = DB::table('produkt_zamowienie')
+            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
+            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
+            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+            ->whereBetween('zamowienia.data_zamowienia', [$start, $end])
+            ->when(request('automat_id'), fn($q) => $q->where('zamowienia.automat_id', request('automat_id')));
 
-        $miesiace = collect();
-        for ($m = $start->copy(); $m <= $end; $m->addMonth()) {
-            $miesiace->push($m->copy());
+        if ($zakres === 'rok') {
+            $query->select(
+                'produkty.id as produkt_id',
+                'produkty.tw_nazwa',
+                DB::raw('MIN(ean_codes.kod_ean) as ean'),
+                DB::raw('MONTH(zamowienia.data_zamowienia) as miesiac'),
+                DB::raw('zamowienia.automat_id'),
+                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
+            )
+            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(zamowienia.data_zamowienia)'), 'zamowienia.automat_id');
+        } else {
+            $query->select(
+                'produkty.id as produkt_id',
+                'produkty.tw_nazwa',
+                DB::raw('MIN(ean_codes.kod_ean) as ean'),
+                DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
+                DB::raw('zamowienia.automat_id'),
+                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
+            )
+            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'), 'zamowienia.automat_id');
         }
 
-        $dane = DB::table('produkt_strata')
-            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
-            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
+        return $query->get();
+    }
+
+    //pobiera dane strat
+    private function pobierzDaneStrat($start, $end, $zakres)
+    {
+        $query = DB::table('produkty_straty')
+            ->join('straty', 'produkty_straty.strata_id', '=', 'straty.id')
+            ->join('produkty', 'produkty_straty.produkt_id', '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('straty.data_straty', [$start, $end])
-            ->select(
+            ->whereBetween('straty.data_straty', [$start, $end]);
+
+        if ($zakres === 'rok') {
+            $query->select(
                 'produkty.id as produkt_id',
                 'produkty.tw_nazwa',
                 DB::raw('MIN(ean_codes.kod_ean) as ean'),
                 DB::raw('MONTH(straty.data_straty) as miesiac'),
-                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
+                DB::raw('SUM(produkty_straty.ilosc) as ilosc')
             )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(straty.data_straty)'))
-            ->get();
-
-        $produkty = $dane->groupBy('produkt_id');
-        $filename = 'straty_rok_' . $start->format('Y') . '.' . $format;
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            return response()->stream(function () use ($produkty, $miesiace) {
-                $handle = fopen('php://output', 'w');
-                $header = ['Produkt', 'EAN'];
-                foreach ($miesiace as $miesiac) {
-                    $header[] = $miesiac->format('m.Y');
-                }
-                $header[] = 'Suma';
-                fputcsv($handle, $header);
-
-                foreach ($produkty as $produktGroup) {
-                    $row = [];
-                    $produkt = $produktGroup->first();
-                    $row[] = $produkt->tw_nazwa;
-                    $row[] = $produkt->ean;
-                    $sumaProduktu = 0;
-                    foreach ($miesiace as $miesiac) {
-                        $ilosc = $produktGroup->firstWhere('miesiac', $miesiac->format('n'))->ilosc ?? 0;
-                        $row[] = $ilosc;
-                        $sumaProduktu += $ilosc;
-                    }
-                    $row[] = $sumaProduktu;
-                    fputcsv($handle, $row);
-                }
-
-                // Suma miesiąca
-                $row = ['', 'Suma miesiąca'];
-                foreach ($miesiace as $miesiac) {
-                    $sumaMiesiaca = $produkty->flatMap(fn($p) => $p)
-                        ->filter(fn($rek) => $rek->miesiac == $miesiac->format('n'))
-                        ->sum('ilosc');
-                    $row[] = $sumaMiesiaca;
-                }
-                fputcsv($handle, $row);
-
-                fclose($handle);
-            }, 200, $headers);
+            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(straty.data_straty)'));
+        } else {
+            $query->select(
+                'produkty.id as produkt_id',
+                'produkty.tw_nazwa',
+                DB::raw('MIN(ean_codes.kod_ean) as ean'),
+                DB::raw('CAST(straty.data_straty AS DATE) as dzien'),
+                DB::raw('SUM(produkty_straty.ilosc) as ilosc')
+            )
+            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(straty.data_straty AS DATE)'));
         }
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $row = 1;
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Produkt');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'EAN');
-        foreach ($miesiace as $miesiac) {
-            $sheet->setCellValueByColumnAndRow($col++, $row, $miesiac->format('m.Y'));
-        }
-        $sheet->setCellValueByColumnAndRow($col, $row, 'Suma');
-        $headerRow = $row;
-        $row++;
+        return $query->get();
+    }
 
-        $firstDataRow = $row;
-        foreach ($produkty as $produktGroup) {
-            $col = 1;
-            $produkt = $produktGroup->first();
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->tw_nazwa);
-            $sheet->setCellValueByColumnAndRow($col++, $row, $produkt->ean);
-            $sumaProduktu = 0;
-            foreach ($miesiace as $miesiac) {
-                $ilosc = $produktGroup->firstWhere('miesiac', $miesiac->format('n'))->ilosc ?? 0;
-                $sheet->setCellValueByColumnAndRow($col++, $row, $ilosc);
-                $sumaProduktu += $ilosc;
+    //generuje eksport do CSV
+    private function generujCsv($produkty, $okresy, $etykiety, $zakres)
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"export.csv\"",
+        ];
+
+        return response()->stream(function () use ($produkty, $okresy, $etykiety, $zakres) {
+            $handle = fopen('php://output', 'w');
+
+            $naglowek = ['Produkt', 'EAN'];
+            foreach ($etykiety as $label) {
+                $naglowek[] = $label;
             }
-            $sheet->setCellValueByColumnAndRow($col, $row, $sumaProduktu);
-            $row++;
-        }
-        $lastDataRow = $row - 1;
+            $naglowek[] = 'Suma';
+            fputcsv($handle, $naglowek);
 
-        $col = 1;
-        $sheet->setCellValueByColumnAndRow($col++, $row, '');
-        $sheet->setCellValueByColumnAndRow($col++, $row, 'Suma miesiąca');
-        foreach ($miesiace as $miesiac) {
-            $sumaMiesiaca = $produkty->flatMap(fn($p) => $p)
-                ->filter(fn($rek) => $rek->miesiac == $miesiac->format('n'))
-                ->sum('ilosc');
-            $sheet->setCellValueByColumnAndRow($col++, $row, $sumaMiesiaca);
-        }
-        $sumRow = $row;
+            foreach ($produkty as $grupa) {
+                $p = $grupa->first();
+                $row = [$p->tw_nazwa, $p->ean];
+                $suma = 0;
 
-        $lastCol = $sheet->getHighestColumn();
-        $this->applyXlsxStyles($sheet, $headerRow, $firstDataRow, $lastDataRow, $lastCol);
+                foreach ($okresy as $okres) {
+                    if ($zakres === 'rok') {
+                        $ilosc = $grupa->firstWhere('miesiac', $okres->format('n'))->ilosc ?? 0;
+                    } else {
+                        $ilosc = $grupa->firstWhere('dzien', $okres->format('Y-m-d'))->ilosc ?? 0;
+                    }
+                    $row[] = $ilosc;
+                    $suma += $ilosc;
+                }
 
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($lastCol);
-        for ($col = 1; $col <= $highestColumnIndex; $col++) {
-            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
-        }
+                $row[] = $suma;
+                fputcsv($handle, $row);
+            }
 
-        $sheet->getStyle("B{$firstDataRow}:B{$sumRow}")
-            ->getNumberFormat()
-            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
-
-        $writer = new Xlsx($spreadsheet);
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+            fclose($handle);
+        }, 200, $headers);
     }
 
 
+//generuje eksport do XLSX
+private function generujXlsx($produkty, $okresy, $etykiety, $filename, $zakres)
+{
+    if (empty($produkty)) {
+        throw new \RuntimeException('Brak danych produktów do eksportu');
+    }
+
+    if (empty($okresy)) {
+        throw new \RuntimeException('Brak zakresu dat do eksportu');
+    }
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Nagłówki kolumn
+    $header = ['Produkt', 'EAN'];
+    foreach ($etykiety as $label) {
+        $header[] = $label;
+    }
+    $header[] = 'Suma';
+
+    $sheet->fromArray($header, null, 'A1');
+
+    // Styl nagłówków
+    $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FFD9D9D9']
+        ],
+        'borders' => [
+            'bottom' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM
+            ]
+        ]
+    ]);
+
+    // Wypełnianie danych
+    $rowIndex = 2;
+    foreach ($produkty as $produktId => $grupa) {
+        $p = $grupa->first();
+
+        $row = [$p->tw_nazwa, ''];
+
+        // Formatowanie EAN jako tekst
+        if (!empty($p->ean)) {
+            $sheet->setCellValueExplicit("B{$rowIndex}", $p->ean, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        }
+
+        $suma = 0;
+        foreach ($okresy as $okres) {
+            if ($zakres === 'rok') {
+                $ilosc = $grupa->firstWhere('miesiac', $okres->format('n'))?->ilosc ?? 0;
+            } else {
+                $ilosc = $grupa->firstWhere('dzien', $okres->format('Y-m-d'))?->ilosc ?? 0;
+            }
+            $row[] = $ilosc;
+            $suma += $ilosc;
+        }
+
+        $row[] = $suma;
+
+        $sheet->fromArray($row, null, "A{$rowIndex}");
+
+        $rowIndex++;
+    }
+
+    $lastCol = $sheet->getHighestColumn();
+    $lastColIndex = Coordinate::columnIndexFromString($lastCol);
+
+    // Sumy dzienne/miesięczne pod tabelą
+    $sumRowIndex = $rowIndex;
+    $sheet->setCellValue("A{$sumRowIndex}", $zakres === 'rok' ? 'Suma miesiąca' : 'Suma dnia');
+
+    // Sumowanie ilości w kolumnach z okresami
+    for ($col = 3; $col < $lastColIndex; $col++) {
+        $columnLetter = Coordinate::stringFromColumnIndex($col);
+        $sumRange = "{$columnLetter}2:{$columnLetter}" . ($rowIndex - 1);
+        $sheet->setCellValue($columnLetter . $sumRowIndex, "=SUM({$sumRange})");
+    }
+
+    // Sumowanie sumy końcowej (kolumna suma)
+    $sumColLetter = Coordinate::stringFromColumnIndex($lastColIndex);
+    $sumRange = "{$sumColLetter}2:{$sumColLetter}" . ($rowIndex - 1);
+    $sheet->setCellValue($sumColLetter . $sumRowIndex, "=SUM({$sumRange})");
+
+    // Stylowanie wiersza sum
+    $sheet->getStyle("A{$sumRowIndex}:{$lastCol}{$sumRowIndex}")->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FFE2EFDA']
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => 'FF000000']
+            ],
+        ],
+    ]);
+
+    // Autodopasowanie szerokości kolumn
+    for ($col = 1; $col <= $lastColIndex; $col++) {
+        $columnLetter = Coordinate::stringFromColumnIndex($col);
+        $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
+    }
+
+    // Obramowanie wszystkich danych
+    $sheet->getStyle("A1:{$lastCol}{$sumRowIndex}")->applyFromArray([
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => 'FF000000']
+            ],
+        ],
+    ]);
+
+    // Zablokowanie nagłówków
+    $sheet->freezePane('A2');
+
+    $writer = new Xlsx($spreadsheet);
+
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    return response()->streamDownload(
+        function () use ($writer) {
+            $writer->save('php://output');
+        },
+        $filename,
+        [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . rawurlencode($filename) . '"',
+        ]
+    );
+}
 }

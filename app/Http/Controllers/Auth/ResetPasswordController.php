@@ -14,7 +14,7 @@ class ResetPasswordController extends Controller
         return view('auth.passwords.reset')->with([
             'token' => $token,
             'email' => $request->email,
-        ]);
+        ]); // Wyświetla formularz resetowania hasła
     }
 
     public function reset(Request $request)
@@ -23,7 +23,7 @@ class ResetPasswordController extends Controller
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|confirmed|min:6',
-        ]);
+        ]); // Walidacja danych wejściowych, aby upewnić się, że token, email i hasło są poprawne
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -32,10 +32,10 @@ class ResetPasswordController extends Controller
                 $user->setRememberToken(Str::random(60));
                 $user->save();
             }
-        );
+        ); // Próba resetowania hasła użytkownika
 
-        return $status === Password::PASSWORD_RESET
+        return $status === Password::PASSWORD_RESET // Sprawdza, czy resetowanie hasła powiodło się
                     ? redirect()->route('login')->with('status', __($status))
-                    : back()->withErrors(['email' => [__($status)]]);
+                    : back()->withErrors(['email' => [__($status)]]);   
     }
 }

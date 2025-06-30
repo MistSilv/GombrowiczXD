@@ -1,3 +1,4 @@
+<!-- strona główna aplikacji z nagłówkiem i nawigacją dla opcji resetowania -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -18,7 +19,7 @@
     </nav>
     
     <main class="container mx-auto py-6 px-4">
-        {{ $slot }}
+        {{ $slot }} <!-- miejsce na zawartość strony -->
     </main>
 </body>
 </html>

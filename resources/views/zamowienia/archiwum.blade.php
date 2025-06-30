@@ -1,3 +1,4 @@
+<!-- strona do archiwum zamówień -->
 <x-layout>
     <div class="container">
         <h1 class="text-2xl font-bold mb-4 text-white">Archiwum zamówień</h1>
@@ -8,7 +9,7 @@
         <p>Brak aktualnych zamówień.</p>
         @else
             <div class="overflow-x-auto w-full overflow-visible mt-10">
-                <table class="table-auto w-full border-collapse border border-gray-300">
+                <table class="table-auto w-full border-collapse border border-gray-300"> <!-- tabela z zamówieniami -->
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="border px-4 py-2">ID</th>

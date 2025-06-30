@@ -1,9 +1,10 @@
+<!-- strona do zmiany hasła - link -->
 <x-layoutL>
     <div class="max-w-md mx-auto mt-10 bg-gray-900 p-8 rounded shadow">
         <h2 class="text-2xl font-bold mb-6 text-white text-center">Resetowanie hasła</h2>
         @if (session('status'))
             <div class="mb-4 text-green-400 text-center font-semibold">
-                {{ session('status') }}
+                {{ session('status') }} <!-- komunikat o wysłaniu linku resetującego hasło -->
             </div>
         @endif
         <form method="POST" action="{{ route('password.email') }}">
@@ -13,7 +14,7 @@
                 <input id="email" type="email" name="email" required autofocus
                     class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
                 @error('email')
-                    <span class="text-red-400 text-sm">{{ $message }}</span>
+                    <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie emaila -->
                 @enderror
             </div>
             <button type="submit"

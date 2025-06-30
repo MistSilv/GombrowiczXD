@@ -1,3 +1,4 @@
+<!-- strona do wyświetlania aktualnych zamówień -->
 <x-layout>
     <div class="container">
         @auth
@@ -23,7 +24,8 @@
             <p>Brak aktualnych zamówień.</p>
         @else
             <div class="overflow-x-auto w-full overflow-visible">
-                <table class="table-auto w-full border-collapse border border-gray-300">
+                <!-- tabela z zamówieniami -->
+                <table class="table-auto w-full border-collapse border border-gray-300"> 
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="border px-4 py-2">ID</th>

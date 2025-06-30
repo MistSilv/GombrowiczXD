@@ -1,3 +1,4 @@
+<!-- strona do tworzenia zamówienia -->
 <x-layout>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -6,6 +7,7 @@
             Nowe zamówienie dla: {{ $automat ? $automat->nazwa : '---' }}
         </h1>
 
+        <!-- start skanowania kodu EAN -->
         <div class="mb-6">
         <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
         
@@ -21,6 +23,7 @@
         <form action="{{ route('zamowienia.store') }}" method="POST">
             @csrf
 
+            <!-- ukryte pole z ID automatu, jeśli jest dostępne -->
             @if($automat)
                 <input type="hidden" name="automat_id" value="{{ $automat->id }}">
             @endif
@@ -41,6 +44,7 @@
             </div>
 
 
+            <!-- pole do wyszukiwania produktów po nazwie -->
             <div class="mb-4 relative">
             <input type="text" id="szukaj-produkt" placeholder="Wpisz nazwę produktu" class="form-input w-full text-black mb-2" />
             <ul id="lista-podpowiedzi" class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full hidden"></ul>
@@ -67,14 +71,14 @@
                         Wprowadź straty
                     </a>
                     @auth
-                    @if(!auth()->user()->isProdukcja())
+                    @if(!auth()->user()->isProdukcja()) <!--widok dla każdego oprócz produkcji -->
                         <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                             Lista zamówień tego automatu
                         </a>
-                    @endif
+                    @endif 
                     @endauth
                     @auth
-                    @if(!auth()->user()->isSerwis())
+                    @if(!auth()->user()->isSerwis()) <!--widok dla każdego oprócz serwisanta-->
                         <a href="{{ route('zamowienia.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                             Zamówienia
                         </a>
@@ -92,20 +96,25 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        let index = 1;
-        const produkty = @json($produkty);
+      let index = 1; // Lgeneruje unikalną nazwę dla każdego produktu
+
+        const produkty = @json($produkty); // Lista produktów 
 
         const produktyMap = new Map();
+        // mapa dla wysukiwania produktów
         produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
 
+        // dodawanie produktu
         document.getElementById('dodaj-produkt').addEventListener('click', function () {
             const container = document.getElementById('produkty-lista');
 
+            // wybór produktu z listy
             let options = '<option value="">-- wybierz produkt --</option>';
             produkty.forEach(function(produkt) {
                 options += `<option value="${produkt.id}">${produkt.tw_nazwa}</option>`;
             });
 
+            // tworzenie nowego wierszu
             const newItem = document.createElement('div');
             newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
             newItem.innerHTML = `
@@ -119,62 +128,68 @@
             index++;
         });
 
+        // usuwanie produktu
         document.addEventListener('click', function (e) {
             if (e.target.classList.contains('remove-item')) {
                 e.target.closest('.produkt-item').remove();
             }
         });
 
+        // deklaracja skanera kodów
         const scanner = new Html5Qrcode("reader");
-        let isScanning = false;
+        let isScanning = false; // sprawdza czy skaner jest aktywny
 
+        // jak kod działa to sie to uruchamia
         function onScanSuccess(decodedText) {
-        scanner.stop().then(() => {
-            isScanning = false;
-            $('#reader').hide();
-            $('#scan-result').text(`Zeskanowano: ${decodedText}`);
+            scanner.stop().then(() => {
+                isScanning = false;
+                $('#reader').hide();
+                $('#scan-result').text(`Zeskanowano: ${decodedText}`);
 
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch('/api/check-ean', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ kod_ean: decodedText })
-            })
-            .then(res => {
-                if (!res.ok) {
-                    return res.json().then(err => { throw err });
-                }
-                return res.json();
-            })
-            .then(data => {
-                const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
+                // zapytania do API aby sprawdzić kod EAN
+                fetch('/api/check-ean', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: JSON.stringify({ kod_ean: decodedText })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        return res.json().then(err => { throw err });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    //szukanie produktu i dodawanie go do listy (pyta też o ilość)
+                    const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
 
-                if (ilosc !== null && !isNaN(ilosc) && parseInt(ilosc) > 0) {
-                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
-                } else {
-                    alert("Produkt nie został dodany — podano nieprawidłową ilość.");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
-            });
+                    if (ilosc !== null && !isNaN(ilosc) && parseInt(ilosc) > 0) {
+                        dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
+                    } else {
+                        alert("Produkt nie został dodany — podano nieprawidłową ilość.");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
+                });
             }).catch(err => {
                 console.error("Błąd zatrzymywania skanera:", err);
             });
         }
 
-
+        // przycisk do skanera
         document.getElementById('start-scan').addEventListener('click', () => {
-            if (isScanning) return;
+            if (isScanning) return; // sprawdzanie czy już skanuje żeby nie powtarzać
 
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length) {
                     $('#reader').show();
+                    // skaner tylnia kamera
                     scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess)
                         .then(() => { isScanning = true; })
                         .catch(err => { console.error("Błąd uruchamiania skanera:", err); });
@@ -186,14 +201,18 @@
             });
         });
 
-         function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
+        function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
             const container = document.getElementById('produkty-lista');
+            
+            // sprawdza czy produkt jest na liście
             const istniejący = [...container.querySelectorAll('select')].find(select => select.value == produktId);
 
             if (istniejący) {
+                // tak, zwiększa ilość
                 const inputIlosc = istniejący.closest('.produkt-item').querySelector('input[type="number"]');
                 inputIlosc.value = parseInt(inputIlosc.value) + ilosc;
             } else {
+                // nie, tworzy nowy wiersz
                 const newItem = document.createElement('div');
                 newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
 
@@ -214,46 +233,47 @@
             }
         }
 
+        // uzupełnia pole wyszukiwania po nazwie
+        const szukajInput = document.getElementById('szukaj-produkt');
+        const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
 
-    const szukajInput = document.getElementById('szukaj-produkt');
-    const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
+        szukajInput.addEventListener('input', () => {
+            const fraza = szukajInput.value.trim().toLowerCase();
+            listaPodpowiedzi.innerHTML = '';
 
-    szukajInput.addEventListener('input', () => {
-        const fraza = szukajInput.value.trim().toLowerCase();
-        listaPodpowiedzi.innerHTML = '';
+            if (!fraza) {
+                listaPodpowiedzi.classList.add('hidden'); // ukrywa listę podpowiedzi
+                return;
+            }
 
-        if (!fraza) {
-            listaPodpowiedzi.classList.add('hidden');
-            return;
-        }
+            // wyszukiwarka po frazie
+            const pasujaceProdukty = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(fraza));
 
-        const pasujaceProdukty = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(fraza));
-
-        if (pasujaceProdukty.length) {
-            pasujaceProdukty.forEach(p => {
-                const li = document.createElement('li');
-                li.textContent = p.tw_nazwa;
-                li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer');
-                li.addEventListener('click', () => {
-                    dodajProduktDoListy(p.id, p.tw_nazwa);
-                    szukajInput.value = '';
-                    listaPodpowiedzi.innerHTML = '';
-                    listaPodpowiedzi.classList.add('hidden');
+            if (pasujaceProdukty.length) {
+                pasujaceProdukty.forEach(p => {
+                    const li = document.createElement('li');
+                    li.textContent = p.tw_nazwa;
+                    li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer');
+                    
+                    // jak klikniesz to doda produkt do listy
+                    li.addEventListener('click', () => {
+                        dodajProduktDoListy(p.id, p.tw_nazwa);
+                        szukajInput.value = '';
+                        listaPodpowiedzi.innerHTML = '';
+                        listaPodpowiedzi.classList.add('hidden');
+                    });
+                    listaPodpowiedzi.appendChild(li);
                 });
-                listaPodpowiedzi.appendChild(li);
-            });
-            listaPodpowiedzi.classList.remove('hidden');
-        } else {
-            listaPodpowiedzi.classList.add('hidden');
-        }
-    });
+                listaPodpowiedzi.classList.remove('hidden');
+            } else {
+                listaPodpowiedzi.classList.add('hidden');
+            }
+        });
 
-    document.addEventListener('click', (e) => {
-        if (!listaPodpowiedzi.contains(e.target) && e.target !== szukajInput) {
-            listaPodpowiedzi.classList.add('hidden');
-        }
-    });
-
-
+        document.addEventListener('click', (e) => {
+            if (!listaPodpowiedzi.contains(e.target) && e.target !== szukajInput) {
+                listaPodpowiedzi.classList.add('hidden'); // ukrywa listę podpowiedzi
+            }
+        });
     </script>
 </x-layout>

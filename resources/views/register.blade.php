@@ -1,6 +1,7 @@
+<!-- strona rejestracji użytkownika -->
 @if(session('success'))
     <div class="mb-4 text-green-700 text-center font-sbold">
-        {{ session('success') }}
+        {{ session('success') }} <!-- komunikat o sukcesie rejestracji -->
     </div>
 @endif
 
@@ -15,7 +16,8 @@
 <body class="mx-auto py-6 px-4 bg-black">
     <div class="max-w-md mx-auto mt-4 bg-gray-900 p-8 rounded shadow">
     <h2 class="text-2xl font-bold mb-6 text-white text-center">Rejestracja użytkownika</h2>
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}"> <!-- formularz rejestracji -->
+        <!-- zabezpieczenie CSRF -->
         @csrf
 
         <div class="mb-4">
@@ -23,7 +25,7 @@
             <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
                 class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
             @error('name')
-                <span class="text-red-400 text-sm">{{ $message }}</span>
+                <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie imienia i nazwiska -->
             @enderror
         </div>
 
@@ -32,7 +34,7 @@
             <input id="email" type="email" name="email" value="{{ old('email') }}" required
                 class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
             @error('email')
-                <span class="text-red-400 text-sm">{{ $message }}</span>
+                <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie emaila -->
             @enderror
         </div>
 
@@ -41,7 +43,7 @@
             <input id="password" type="password" name="password" required
                 class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
             @error('password')
-                <span class="text-red-400 text-sm">{{ $message }}</span>
+                <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie hasła -->
             @enderror
         </div>
 
@@ -51,7 +53,7 @@
                 class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
         </div>
 
-        <div class="mb-6">
+        <div class="mb-6"> <!-- pole wyboru roli użytkownika -->
             <label for="role" class="block text-gray-200 mb-1">Rola</label>
             <select id="role" name="role" required
                 class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
@@ -60,7 +62,7 @@
                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
             @error('role')
-                <span class="text-red-400 text-sm">{{ $message }}</span>
+                <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie roli -->
             @enderror
         </div>
 

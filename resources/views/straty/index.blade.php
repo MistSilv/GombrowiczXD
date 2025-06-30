@@ -1,8 +1,9 @@
+<!-- strona do wyświetlania zgłoszonych strat -->
 <x-layout>
     <div class="container">
 
-           @auth
-            @if(!auth()->user()->isSerwis())
+           @auth <!-- sprawdzenie czy użytkownik jest zalogowany -->
+            @if(!auth()->user()->isSerwis()) <!-- jeśli użytkownik nie jest serwisem -->
             <div class="mb-6 flex flex-wrap gap-2">
             <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie dnia
@@ -27,7 +28,7 @@
         @if ($straty->isEmpty())
         <p>Brak zgłoszonych strat.</p>
         @else
-            <div class="overflow-x-auto w-full overflow-visible">
+            <div class="overflow-x-auto w-full overflow-visible"> <!-- kontener dla tabeli -->
                 <table class="table-auto w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100 text-black">
@@ -50,7 +51,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{ $straty->links() }}
+                {{ $straty->links() }} <!-- paginacja -->
             </div>
         @endif
     </div>

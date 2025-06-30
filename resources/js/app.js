@@ -1,34 +1,46 @@
+// Importy niezbędnych zależności
 import './bootstrap';
 import { registerSW } from 'virtual:pwa-register';
+import { Html5Qrcode } from 'html5-qrcode';
 
+// Rejestracja Service Workera 
 navigator.serviceWorker.register('build/sw.js');
-//registerSW();
 
+// Zmienna pomocnicza do przechwycenia zdarzenia instalacji PWA
 let deferredPrompt;
+
+// Przycisk instalacji PWA z interfejsu 
 const installBtn = document.getElementById('installPWA');
 
+// Nasłuchiwanie zdarzenia: przeglądarka gotowa zaproponować instalację PWA
 window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.style.display = 'block';
+    e.preventDefault(); // Blokowanie domyślnego zachowania przeglądarki
+    deferredPrompt = e; // Zapamiętanie zdarzenia instalacji
+    if (installBtn) installBtn.style.display = 'block'; // Pokazanie przycisku instalacji
 });
 
+// Obsługa kliknięcia przycisku instalacji PWA
 if (installBtn) {
     installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+        if (!deferredPrompt) return; // Jeśli nie ma zdarzenia instalacji, nic nie rób
+
+        deferredPrompt.prompt(); // Wyświetlenie natywnego okna instalacji
+        const { outcome } = await deferredPrompt.userChoice; // Oczekiwanie na wybór użytkownika
+
         if (outcome === 'accepted') {
-            installBtn.style.display = 'none';
+            installBtn.style.display = 'none'; // Ukrycie przycisku po zaakceptowaniu
         }
-        deferredPrompt = null;
+
+        deferredPrompt = null; // Reset zmiennej
     });
 }
 
-
+// Automatyczne sprawdzenie sesji po odzyskaniu połączenia internetowego
 window.addEventListener('online', async () => {
     try {
         const response = await fetch('/welcome', { credentials: 'same-origin' });
+
+        // Jeśli serwer przekierował na login lub błąd autoryzacji, przeładuj stronę logowania
         if (response.redirected && response.url.includes('/login')) {
             window.location.href = '/login';
         }
@@ -38,5 +50,3 @@ window.addEventListener('online', async () => {
     } catch (e) {
     }
 });
-
-import { Html5Qrcode } from "html5-qrcode";

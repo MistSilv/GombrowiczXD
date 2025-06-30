@@ -16,16 +16,16 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-        ]);
+        ]); // Walidacja danych wejściowych
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->intended('/welcome');
-        }
+        } // Jeśli uwierzytelnianie nie powiodło się, przekieruj z błędem
 
         return back()->withErrors([
             'email' => 'Podane dane są nieprawidłowe.',
-        ])->onlyInput('email');
+        ])->onlyInput('email'); // Zwróć błąd, jeśli dane logowania są nieprawidłowe
     }
 
     public function logout(Request $request)
@@ -33,6 +33,6 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('login'); // Wylogowanie użytkownika i przekierowanie na stronę logowania
     }
 }

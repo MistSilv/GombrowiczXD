@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable; // Użycie traitów HasFactory i Notifiable
 
     /**
      * The attributes that are mass assignable.
@@ -31,36 +31,36 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
-    ];
+        'remember_token', 
+    ]; // Ukrywanie hasła i tokenu pamięci
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected function casts(): array 
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-        ];
+        ]; // Rzutowanie atrybutów
     }
 
     // Metody sprawdzania roli
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin'; // Sprawdzenie, czy użytkownik jest administratorem
     }
 
     public function isSerwis()
     {
-        return $this->role === 'serwis';
+        return $this->role === 'serwis'; // Sprawdzenie, czy użytkownik jest serwisem
         
     }
 
     public function isProdukcja()
     {
-        return $this->role === 'produkcja';
+        return $this->role === 'produkcja'; // Sprawdzenie, czy użytkownik jest produkcją
     }
 }

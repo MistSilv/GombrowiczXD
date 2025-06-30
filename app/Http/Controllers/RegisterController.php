@@ -19,14 +19,14 @@ class RegisterController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|confirmed|min:6',
             'role' => 'required|in:admin,serwis,produkcja',
-        ]);
+        ]); // Walidacja danych wejściowych
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-        ]);
+        ]); // Tworzenie nowego użytkownika
 
         return redirect()->route('login')->with('success', 'Dodano Użytkownika');
     }
