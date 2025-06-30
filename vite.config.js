@@ -26,7 +26,8 @@ export default defineConfig({
             manifest: {
                 name: 'Gombrowicz',          
                 short_name: 'Gombrowicz',    
-                start_url: '/',              
+                start_url: '/',      
+                scope: '/',        
                 display: 'standalone',       
                 background_color: '#000000', 
                 theme_color: '#1e293b',      
@@ -53,7 +54,7 @@ export default defineConfig({
                     { src: '/images/icons/splash-1536x2048.png', sizes: '1536x2048', type: 'image/png' },
                     { src: '/images/icons/splash-1668x2224.png', sizes: '1668x2224', type: 'image/png' },
                     { src: '/images/icons/splash-1668x2388.png', sizes: '1668x2388', type: 'image/png' },
-                    { src: '/images/icons/splash-2048x2732.png', sizes: '2048x2732', type: 'image/png' },
+                    { src: '/images/icons/splash-2048x2732.png', sizes: '2048x2732', type: 'image/png', form_factor: 'wide' },
                 ],
             },
 
