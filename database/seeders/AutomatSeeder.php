@@ -31,6 +31,7 @@ class AutomatSeeder extends Seeder
 
         foreach ($automaty as $automatData) {
             Automat::create($automatData);
+            
         }
 
 
