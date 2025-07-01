@@ -55,7 +55,7 @@ class ZamowienieController extends Controller
         $request->validate([
             'produkty' => 'required|array|min:1',
             'produkty.*.produkt_id' => 'required|exists:produkty,id',
-            'produkty.*.ilosc' => 'required|integer|min:1',
+            'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647', // Poprawiony zakres ilości
             'automat_id' => 'required|exists:automats,id', // Poprawiony klucz, aby pasował do bazy danych
         ]);
 

@@ -52,6 +52,7 @@
                     type="number"
                     name="produkty[0][ilosc]"
                     min="1"
+                    max="2147483647"
                     value="{{ old('produkty.0.ilosc', 1) }}"
                     required
                     class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500">

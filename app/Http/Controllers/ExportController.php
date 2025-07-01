@@ -331,4 +331,129 @@ private function generujXlsx($produkty, $okresy, $etykiety, $filename, $zakres)
         ]
     );
 }
+
+//pojedyńcze zamówienie kody
+public function exportPojedynczeZamowienie($zamowienieId, $format = 'xlsx')
+{
+    $zamowienie = DB::table('zamowienia')
+        ->join('produkt_zamowienie', 'zamowienia.id', '=', 'produkt_zamowienie.zamowienie_id')
+        ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
+        ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+        ->select(
+            'produkty.tw_nazwa',
+            'ean_codes.kod_ean',
+            'produkt_zamowienie.ilosc'
+        )
+        ->where('zamowienia.id', $zamowienieId)
+        ->get(); // Pobiera produkty dla pojedynczego zamówienia
+
+    if ($format === 'csv') {
+        return $this->generujCsvDlaZamowienia($zamowienie, $zamowienieId); // Eksportuje zamówienie do CSV
+    }
+
+    return $this->generujXlsxDlaZamowienia($zamowienie, $zamowienieId); // Eksportuje zamówienie do XLSX
 }
+
+//eksport dla pojedynczego zamówienia csv
+private function generujCsvDlaZamowienia($produkty, $zamowienieId)
+{
+    $filename = "zamowienie_{$zamowienieId}.csv";
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+    ]; // Ustawia nagłówki dla pliku CSV
+
+    return response()->stream(function () use ($produkty) {
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, ['Produkt', 'EAN', 'Ilość']); 
+
+        foreach ($produkty as $p) {
+            fputcsv($handle, [$p->tw_nazwa, $p->kod_ean, $p->ilosc]);
+        }
+
+        fclose($handle);
+    }, 200, $headers); // Zwraca odpowiedź z plikiem CSV
+}
+
+//eksport dla pojedynczego zamówienia xlsx
+private function generujXlsxDlaZamowienia($produkty, $zamowienieId)
+{
+    $filename = "zamowienie_{$zamowienieId}.xlsx";
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Nagłówki
+    $sheet->fromArray(['Produkt', 'EAN', 'Ilość'], null, 'A1');
+
+    // Styl nagłówków
+    $sheet->getStyle('A1:C1')->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FFD9D9D9']
+        ],
+        'borders' => [
+            'bottom' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM
+            ]
+        ]
+    ]);
+
+    // Dane produktów
+    $rowIndex = 2;
+    $suma = 0;
+
+    foreach ($produkty as $p) {
+        $sheet->setCellValue("A{$rowIndex}", $p->tw_nazwa);
+
+        if (!empty($p->kod_ean)) {
+            $sheet->setCellValueExplicit("B{$rowIndex}", $p->kod_ean, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        }
+
+        $sheet->setCellValue("C{$rowIndex}", $p->ilosc);
+        $suma += $p->ilosc;
+
+        $rowIndex++;
+    }
+
+    // Podsumowanie ilości
+    $sumRow = $rowIndex;
+    $sheet->setCellValue("A{$sumRow}", 'Suma:');
+    $sheet->setCellValue("C{$sumRow}", "=SUM(C2:C" . ($rowIndex - 1) . ")");
+
+    // Styl wiersza sumy
+    $sheet->getStyle("A{$sumRow}:C{$sumRow}")->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FFE2EFDA']
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => 'FF000000']
+            ],
+        ],
+    ]);
+
+    // Autodopasowanie szerokości kolumn
+    foreach (range('A', 'C') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    $writer = new Xlsx($spreadsheet);
+
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $filename, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+}
+
+}
+
+

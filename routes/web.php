@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/podsumowanie/tydzien/{date?}', [ZamowienieController::class, 'podsumowanieTygodnia'])->name('zamowienia.podsumowanie.tydzien');
     Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
     Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
+    
 
 
     Route::get('/straty/podsumowanie/dzien/{date?}', [StrataController::class, 'podsumowanieDnia'])->name('straty.podsumowanie.dzien');
@@ -61,6 +62,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty'])
         ->name('export.straty');
+
+    Route::get('/export/zamowienie/{zamowienie_id}/{format}', [ExportController::class, 'exportPojedynczeZamowienie'])->name('export.zamowienie');
+
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
