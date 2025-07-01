@@ -15,27 +15,46 @@ class WsadController extends Controller
         $automatId = $request->get('automat_id');
         $automat = $automatId ? Automat::findOrFail($automatId) : null;
 
-        $query = Wsad::with('automat', 'produkty.produkt')->latest();
+        $query = Wsad::with('automat', 'produkty')->latest();
 
         if ($automat) {
             $query->where('automat_id', $automat->id);
         }
 
         $wsady = $query->get();
-
         $produkty = Produkt::orderBy('tw_nazwa')->get();
 
-        return view('wsady.index', compact('wsady', 'automat', 'produkty'));
+        $wsadProdukty = collect();
+        if ($automat) {
+            $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest()->first();
+            if ($ostatniWsad) {
+                $wsadProdukty = $ostatniWsad->produkty()->withPivot('ilosc')->get();
+            }
+        }
+
+        return view('wsady.index', compact('wsady', 'automat', 'produkty', 'wsadProdukty'));
     }
 
 
-
-
-    public function create()
+    public function create(Request $request)
     {
-        $automaty = Automat::all();
-        $produkty = Produkt::all();
-        return view('wsady.create', compact('automaty', 'produkty'));
+        $automat = null;
+        if ($request->has('automat_id')) {
+            $automat = Automat::find($request->get('automat_id'));
+        }
+
+        $produkty = Produkt::orderBy('tw_nazwa')->get();
+
+        // Zawsze ustawiamy kolekcję, nawet pustą
+        $wsadProdukty = collect();
+        if ($automat) {
+            $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest()->first();
+            if ($ostatniWsad) {
+                $wsadProdukty = $ostatniWsad->produkty()->withPivot('ilosc')->get();
+            }
+        }
+
+        return view('wsady.create', compact('automat', 'produkty', 'wsadProdukty'));
     }
 
     public function store(Request $request)
@@ -47,11 +66,10 @@ class WsadController extends Controller
             'produkty.*.ilosc' => 'required|integer|min:1',
         ]);
 
-       $wsad = Wsad::create([
-        'automat_id' => $request->automat_id,
-        'data_wsadu' => now(), 
+        $wsad = Wsad::create([
+            'automat_id' => $request->automat_id,
+            'data_wsadu' => now(),
         ]);
-
 
         foreach ($request->produkty as $produkt) {
             ProduktWsad::create([
@@ -61,13 +79,69 @@ class WsadController extends Controller
             ]);
         }
 
-        return redirect()->route('wsady.index', ['automat_id' => $request->automat_id])
-                     ->with('success', 'Wsad został dodany.');
+        return redirect()->route('wsady.create', ['automat_id' => $request->automat_id])
+                         ->with('success', 'Wsad został dodany.');
     }
 
     public function show(Wsad $wsad)
     {
-        $wsad->load('automat', 'produkty.produkt');
+        $wsad->load('automat', 'produkty');
         return view('wsady.show', compact('wsad'));
+    }
+
+    // Zmniejsz ilość produktu o 1 w ostatnim wsadzie dla automatu
+    public function decrease(Request $request)
+    {
+        $produktId = $request->route('produkt_id');
+        $automatId = $request->route('automat_id');
+
+        $ostatniWsad = Wsad::where('automat_id', $automatId)->latest()->first();
+
+        if (!$ostatniWsad) {
+            return redirect()->back()->withErrors('Nie znaleziono wsadu dla tego automatu.');
+        }
+
+        $produktWsad = ProduktWsad::where('wsad_id', $ostatniWsad->id)
+            ->where('produkt_id', $produktId)
+            ->first();
+
+        if (!$produktWsad) {
+            return redirect()->back()->withErrors('Produkt nie istnieje w tym wsadzie.');
+        }
+
+        if ($produktWsad->ilosc > 1) {
+            $produktWsad->ilosc -= 1;
+            $produktWsad->save();
+        } else {
+            // Jeśli ilość to 1, usuń wpis
+            $produktWsad->delete();
+        }
+
+        return redirect()->back()->with('success', 'Ilość produktu została zmniejszona.');
+    }
+
+    // Usuń produkt z ostatniego wsadu automatu
+    public function delete(Request $request)
+    {
+        $produktId = $request->route('produkt_id');
+        $automatId = $request->route('automat_id');
+
+        $ostatniWsad = Wsad::where('automat_id', $automatId)->latest()->first();
+
+        if (!$ostatniWsad) {
+            return redirect()->back()->withErrors('Nie znaleziono wsadu dla tego automatu.');
+        }
+
+        $produktWsad = ProduktWsad::where('wsad_id', $ostatniWsad->id)
+            ->where('produkt_id', $produktId)
+            ->first();
+
+        if (!$produktWsad) {
+            return redirect()->back()->withErrors('Produkt nie istnieje w tym wsadzie.');
+        }
+
+        $produktWsad->delete();
+
+        return redirect()->back()->with('success', 'Produkt został usunięty z wsadu.');
     }
 }

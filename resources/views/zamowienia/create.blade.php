@@ -60,10 +60,16 @@
             </button>
 
             <div class="mt-4">
-                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
-                    Złóż zamówienie
-                </button>
+                <form method="POST" action="{{ route('zloz.zamowienie') }}">
+                    @csrf
+                    <div class="mt-4">
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
+                            Złóż zamówienie
+                        </button>
+                    </div>
+                </form>
             </div>
+
 
             <div class="mt-6 flex flex-col md:flex-row md:items-center">
                 @if($automat)
@@ -86,6 +92,9 @@
                     @endauth
                     <a href="{{ route('straty.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                         Straty
+                    </a>
+                    <a href="{{ route('wsady.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                        Powrót
                     </a>
                 @endif
             </div>

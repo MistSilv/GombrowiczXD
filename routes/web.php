@@ -72,6 +72,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('wsady', WsadController::class);
     Route::get('/wsady/automat/{automat_id}', [WsadController::class, 'index'])->name('wsady.byAutomat');
     Route::get('/wsady', [WsadController::class, 'index'])->name('wsady.index');
+    Route::post('/wsady/{produkt_id}/{automat_id}/decrease', [WsadController::class, 'decrease'])->name('wsady.decrease');
+    Route::delete('/wsady/{produkt_id}/{automat_id}/delete', [WsadController::class, 'delete'])->name('wsady.delete');
+
+    Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
+
+
 
 });
 

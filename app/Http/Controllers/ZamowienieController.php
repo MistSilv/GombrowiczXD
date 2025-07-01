@@ -7,6 +7,8 @@ use App\Models\Produkt;
 use App\Models\Automat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ZamowienieMail;
 
 
 use Carbon\Carbon;
@@ -50,28 +52,58 @@ class ZamowienieController extends Controller
         return view('zamowienia.create', compact('produkty', 'automat'));
     }
 
+
+
     public function store(Request $request)
-    {
-        $request->validate([
-            'produkty' => 'required|array|min:1',
-            'produkty.*.produkt_id' => 'required|exists:produkty,id',
-            'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647', // Poprawiony zakres ilości
-            'automat_id' => 'required|exists:automats,id', // Poprawiony klucz, aby pasował do bazy danych
-        ]);
+{
+    $request->validate([
+        'produkty' => 'required|array|min:1',
+        'produkty.*.produkt_id' => 'required|exists:produkty,id',
+        'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647',
+        'automat_id' => 'required|exists:automats,id',
+    ]);
 
-        $zamowienie = Zamowienie::create([
-            'data_realizacji' => now()->addDay(),
-            'automat_id' => $request->get('automat_id'), // poprawiony klucz
-        ]);
+    $zamowienie = Zamowienie::create([
+        'data_realizacji' => now()->addDay(),
+        'automat_id' => $request->get('automat_id'),
+    ]);
 
-        foreach ($request->produkty as $pozycja) {
-            $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]); // Dodaj produkty do zamówienia z ilością
-        }
-
-         return redirect()->route('zamowienia.index', [
-        'automat_id' => $request->get('automat_id')
-        ])->with('success', 'Zamówienie zostało zapisane.'); // Przekierowanie do indeksu zamówień z parametrem automat_id
+    foreach ($request->produkty as $pozycja) {
+        $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
     }
+
+    // Generowanie plików XLSX i CSV
+    $exporter = new ExportController();
+
+    $xlsxResponse = $exporter->exportPojedynczeZamowienie($zamowienie->id, 'xlsx');
+    $csvResponse = $exporter->exportPojedynczeZamowienie($zamowienie->id, 'csv');
+
+    $xlsxContent = $xlsxResponse->getContent();
+    $csvContent = $csvResponse->getContent();
+
+    // Ścieżki do tymczasowych plików w storage/app/temp
+    $tempDir = storage_path('app/temp');
+    if (!file_exists($tempDir)) {
+        mkdir($tempDir, 0755, true);
+    }
+
+    $xlsxPath = "{$tempDir}/zamowienie_{$zamowienie->id}.xlsx";
+    $csvPath = "{$tempDir}/zamowienie_{$zamowienie->id}.csv";
+
+    // Zapis plików na dysku
+    file_put_contents($xlsxPath, $xlsxContent);
+    file_put_contents($csvPath, $csvContent);
+
+    // Wyślij maila z załącznikami i automatycznym usuwaniem plików w destruktorze
+    Mail::to('domgggzzz@gmail.com')->send(new ZamowienieMail($zamowienie));
+
+
+    return redirect()->route('zamowienia.index', [
+        'automat_id' => $request->get('automat_id')
+    ])->with('success', 'Zamówienie zostało zapisane i mail wysłany.');
+}
+
+
 
 
 

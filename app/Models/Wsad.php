@@ -20,8 +20,10 @@ class Wsad extends Model
 
     public function produkty()
     {
-        return $this->hasMany(ProduktWsad::class);
+        return $this->belongsToMany(Produkt::class, 'produkt_wsad', 'wsad_id', 'produkt_id')
+                    ->withPivot('ilosc');
     }
+
 
     protected $table = 'wsady';
 
