@@ -44,7 +44,7 @@ class StrataController extends Controller
             'opis' => 'nullable|string',
             'produkty' => 'required|array|min:1',
             'produkty.*.produkt_id' => 'required|exists:produkty,id',
-            'produkty.*.ilosc' => 'required|integer|min:1',
+            'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647', // Poprawiony zakres ilości
         ]); // Walidacja danych wejściowych
 
         $strata = Strata::create([

@@ -37,7 +37,7 @@
                         @endforeach
                     </select>
 
-                    <input type="number" name="produkty[0][ilosc]" min="1" class="form-input w-24 text-black" placeholder="Ilość" required>
+                    <input type="number" name="produkty[0][ilosc]" min="1" max="2147483647" class="form-input w-24 text-black" placeholder="Ilość" required>
 
                     <button type="button" class=" bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
                 </div>

@@ -6,16 +6,7 @@
         @foreach ($automaty as $automat) <!-- iteracja po dostępnych automatach -->
             <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}"
                class="border p-4 rounded-2xl shadow hover:bg-slate-900 transition flex flex-col items-center">
-               @auth
-                    @if(auth()->user()->isSerwis())
-                    <img src="{{ asset('images/icons/iconxd.png') }}" alt=""> <!-- ikona dla serwisu -->
-                    @endif
-                @endauth
-                @auth
-                    @if(!auth()->user()->isSerwis())
-                    <img src="{{ asset('images/icons/icon-192x192.png') }}" alt=""> <!-- ikona dla innych użytkowników -->
-                    @endif
-                @endauth
+                    <img src="{{ asset('images/icons/icon-192x192.png') }}" alt=""> 
                 <h2 class="text-xl font-bold text-center text-white">{{ $automat->nazwa }}</h2>
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
             </a>
