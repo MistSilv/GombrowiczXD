@@ -4,7 +4,20 @@ import { registerSW } from 'virtual:pwa-register';
 import { Html5Qrcode } from 'html5-qrcode';
 
 // Rejestracja Service Workera 
-navigator.serviceWorker.register('build/sw.js');
+const updateSW = registerSW({
+  scope: '/', // 🔧 To zapewnia pełne przechwycenie całego ruchu
+  onNeedRefresh() {
+    if (confirm('Nowa wersja aplikacji jest dostępna. Odświeżyć?')) {
+      updateSW(true);
+    }
+  },
+  onRegistered(reg) {
+    console.log('✅ Service Worker registered with scope:', reg?.scope);
+  },
+  onRegisterError(error) {
+    console.error('❌ SW registration failed:', error);
+  },
+});
 
 // Zmienna pomocnicza do przechwycenia zdarzenia instalacji PWA
 let deferredPrompt;

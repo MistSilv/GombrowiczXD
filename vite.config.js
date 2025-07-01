@@ -22,6 +22,13 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate', // Automatyczna aktualizacja Service Workera
 
+            includeAssets: [
+                'favicon.ico',
+                'robots.txt',
+                'offline.html', // <-- dodaj to!
+                // możesz dodać inne pliki statyczne, jeśli chcesz
+            ],
+
             // Plik manifestu aplikacji PWA
             manifest: {
                 name: 'Gombrowicz',          
@@ -30,7 +37,7 @@ export default defineConfig({
                 scope: '/',        
                 display: 'standalone',       
                 background_color: '#000000', 
-                theme_color: '#1e293b',      
+                theme_color: '#1e293b',
 
                 // Ikony aplikacji w różnych rozdzielczościach
                 icons: [
@@ -57,7 +64,12 @@ export default defineConfig({
                     { src: '/images/icons/splash-2048x2732.png', sizes: '2048x2732', type: 'image/png', form_factor: 'wide' },
                 ],
             },
-
+            workbox: {
+                navigateFallback: '/offline.html',
+                additionalManifestEntries: [
+                    { url: '/offline.html', revision: null },
+                ],
+            },
             // Włączenie PWA również w środowisku developerskim
             devOptions: {
                 enabled: true
