@@ -47,9 +47,9 @@ class WsadController extends Controller
             'produkty.*.ilosc' => 'required|integer|min:1',
         ]);
 
-        $wsad = Wsad::create([
-            'automat_id' => $request->automat_id,
-            'data_wsadu' => now(), // lub z requestu jeśli masz
+       $wsad = Wsad::create([
+        'automat_id' => $request->automat_id,
+        'data_wsadu' => now(), 
         ]);
 
 
