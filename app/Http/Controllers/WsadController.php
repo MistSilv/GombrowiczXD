@@ -34,7 +34,7 @@ class WsadController extends Controller
 
         $wsad = Wsad::create([
             'automat_id' => $request->automat_id,
-            'data_wsad-u' => now(), // lub z requestu jeśli masz
+            'data_wsadu' => now(), // lub z requestu jeśli masz
         ]);
 
         foreach ($request->produkty as $produkt) {

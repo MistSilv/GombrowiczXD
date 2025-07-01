@@ -70,7 +70,7 @@ class ProduktSeeder extends Seeder
             $produkt = Produkt::create($produktData);
 
             foreach ($eanKody as $kod) {
-                $produkt->eanKody()->create(['kod_ean' => $kod]);
+                $produkt->eanCodes()->create(['kod_ean' => $kod]);
             }
         }
     }
