@@ -20,6 +20,7 @@ export default defineConfig({
 
         // Konfiguracja PWA
         VitePWA({
+            filename: 'sw.js', // Nazwa pliku Service Workera
             registerType: 'autoUpdate', // Automatyczna aktualizacja Service Workera
 
             includeAssets: [
