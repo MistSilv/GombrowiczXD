@@ -93,6 +93,18 @@ return new class extends Migration
             $table->timestamps();
 
         });
+        Schema::create('wsady', function (Blueprint $table) {
+            $table->id();
+            $table->timestamp('data_wsad-u')->useCurrent();
+            $table->foreignId('automat_id')->constrained('automats')->onDelete('cascade'); // [Dodano]
+            $table->timestamps();
+        });
+        Schema::create('produkt_wsad', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('wsad_id')->constrained('wsady')->onDelete('cascade');
+            $table->foreignId('produkt_id')->constrained('produkty')->onDelete('cascade');
+            $table->integer('ilosc');
+        });
     }
 
     /**
@@ -104,6 +116,8 @@ return new class extends Migration
         Schema::dropIfExists('straty');         // [Dodano]
         Schema::dropIfExists('produkt_zamowienie');
         Schema::dropIfExists('zamowienia'); // [Dodano]
+        Schema::dropIfExists('produkt_wsad'); // [Dodano]
+        Schema::dropIfExists('wsady'); // [Dodano]
         Schema::dropIfExists('automats');
         Schema::dropIfExists('ean_codes');
         Schema::dropIfExists('produkty');
