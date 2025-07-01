@@ -104,6 +104,7 @@ return new class extends Migration
             $table->foreignId('wsad_id')->constrained('wsady')->onDelete('cascade');
             $table->foreignId('produkt_id')->constrained('produkty')->onDelete('cascade');
             $table->integer('ilosc');
+            $table->timestamps();
         });
     }
 

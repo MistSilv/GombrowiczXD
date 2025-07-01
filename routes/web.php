@@ -69,6 +69,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::resource('wsady', WsadController::class);
+    Route::resource('wsady', WsadController::class);
+    Route::get('/wsady/automat/{automat_id}', [WsadController::class, 'index'])->name('wsady.byAutomat');
+    Route::get('/wsady', [WsadController::class, 'index'])->name('wsady.index');
+
 });
 

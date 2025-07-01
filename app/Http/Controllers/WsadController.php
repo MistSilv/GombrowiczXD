@@ -10,11 +10,26 @@ use Illuminate\Http\Request;
 
 class WsadController extends Controller
 {
-    public function index()
+   public function index(Request $request)
     {
-        $wsady = Wsad::with('automat', 'produkty.produkt')->latest()->get();
-        return view('wsady.index', compact('wsady'));
+        $automatId = $request->get('automat_id');
+        $automat = $automatId ? Automat::findOrFail($automatId) : null;
+
+        $query = Wsad::with('automat', 'produkty.produkt')->latest();
+
+        if ($automat) {
+            $query->where('automat_id', $automat->id);
+        }
+
+        $wsady = $query->get();
+
+        $produkty = Produkt::orderBy('tw_nazwa')->get();
+
+        return view('wsady.index', compact('wsady', 'automat', 'produkty'));
     }
+
+
+
 
     public function create()
     {
@@ -32,10 +47,11 @@ class WsadController extends Controller
             'produkty.*.ilosc' => 'required|integer|min:1',
         ]);
 
-        $wsad = Wsad::create([
-            'automat_id' => $request->automat_id,
-            'data_wsad-u' => now(), // lub z requestu jeśli masz
+       $wsad = Wsad::create([
+        'automat_id' => $request->automat_id,
+        'data_wsadu' => now(), 
         ]);
+
 
         foreach ($request->produkty as $produkt) {
             ProduktWsad::create([
@@ -45,7 +61,8 @@ class WsadController extends Controller
             ]);
         }
 
-        return redirect()->route('wsady.index')->with('success', 'Wsad został dodany.');
+        return redirect()->route('wsady.index', ['automat_id' => $request->automat_id])
+                     ->with('success', 'Wsad został dodany.');
     }
 
     public function show(Wsad $wsad)
