@@ -95,7 +95,7 @@ return new class extends Migration
         });
         Schema::create('wsady', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('data_wsad-u')->useCurrent();
+            $table->timestamp('data_wsadu')->useCurrent();
             $table->foreignId('automat_id')->constrained('automats')->onDelete('cascade'); // [Dodano]
             $table->timestamps();
         });
