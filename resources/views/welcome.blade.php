@@ -22,14 +22,20 @@
 <!-- Skrypt do obsługi instalacji PWA -->
 @vite('resources/js/app.js')
 
-<div class="mt-9 text-center">
-       @auth
-                @if(auth()->user()->isAdmin()) <!-- jeśli użytkownik jest administratorem -->
-                    <a href="{{ route('register') }}"
-                        class = "bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                        create a new account <!-- link do rejestracji nowego użytkownika -->
-                    </a>
-                @endif
-            @endauth
+<div class="mt-9 text-center flex flex-col gap-4 sm:flex-row sm:justify-center sm:gap-6">
+    @auth
+        @if(auth()->user()->isAdmin()) <!-- jeśli użytkownik jest administratorem -->
+            <a href="{{ route('register') }}"
+               class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                create a new account <!-- link do rejestracji nowego użytkownika -->
+            </a>
+        @endif
+    @endauth
+
+    <a href="{{ url('/produkty/niewlasne') }}"
+       class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+        Złoż zamówienie nie kraftowe produkty
+    </a>
 </div>
+
 </x-layout>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\WsadController;
+use App\Http\Controllers\ProduktController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -79,6 +80,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
     Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierzZamowienieCsv'])->name('zamowienia.csv');
+
+    Route::get('/produkty/niewlasne', [ProduktController::class, 'niewlasne']);
+    Route::post('/produkty/niewlasne/upload', [ExportController::class, 'uploadProduktyNiewlasne'])->name('produkty.niewlasne.upload');
+
+    Route::get('/export/produkty-niewlasne', [ExportController::class, 'exportProduktyNiewlasne'])->name('export.produkty.niewlasne');
+
+  
+
 
 
 

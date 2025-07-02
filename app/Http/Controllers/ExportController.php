@@ -9,6 +9,9 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Carbon\Carbon;
+use App\Models\Produkt;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProduktyNiewlasneExport;
 
 class ExportController extends Controller
 {
@@ -453,6 +456,30 @@ private function generujXlsxDlaZamowienia($produkty, $zamowienieId)
         'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ]);
 }
+
+public function exportProduktyNiewlasne(Request $request)
+    {
+        $format = $request->input('format', 'xlsx');
+        $ids = $request->input('ids', '');
+
+        $idsArray = array_filter(explode(',', $ids));
+
+        $produkty = Produkt::whereIn('id', $idsArray)->get();
+
+        if ($format === 'csv') {
+            $csvData = "Nazwa produktu,Łączna ilość (wsad)\n";
+            foreach ($produkty as $produkt) {
+                $csvData .= "{$produkt->tw_nazwa},{$produkt->suma_ilosci}\n";
+            }
+
+            return response($csvData)
+                ->header('Content-Type', 'text/csv')
+                ->header('Content-Disposition', 'attachment; filename="produkty_niewlasne.csv"');
+        }
+
+        // Domyślnie XLSX
+        return Excel::download(new ProduktyNiewlasneExport($produkty), 'produkty_niewlasne.xlsx');
+    }
 
 }
 

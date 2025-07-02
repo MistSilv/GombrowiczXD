@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Produkt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProduktController extends Controller
 {
@@ -61,6 +62,20 @@ class ProduktController extends Controller
     public function destroy(Produkt $produkt)
     {
         //
+    }
+
+    public function niewlasne()
+    {
+        // Pobieramy produkty niewłasne z sumą ilości z wsadów
+        $produkty = DB::table('produkty')
+            ->leftJoin('produkt_wsad', 'produkty.id', '=', 'produkt_wsad.produkt_id')
+            ->leftJoin('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+            ->select('produkty.tw_nazwa', DB::raw('COALESCE(SUM(produkt_wsad.ilosc), 0) as suma_ilosci'))
+            ->where('produkty.is_wlasny', false)
+            ->groupBy('produkty.id', 'produkty.tw_nazwa')
+            ->get();
+
+        return view('produkty.niewlasne', compact('produkty'));
     }
 
    
