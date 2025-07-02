@@ -19,22 +19,23 @@
     </table>
 
     @php
-        // Pobierz listę ID produktów do eksportu jako ciąg rozdzielony przecinkami
         $produktIds = $produkty->pluck('id')->implode(',');
     @endphp
 
-    <a href="{{ route('export.produkty.niewlasne', ['ids' => $produktIds, 'format' => 'xlsx']) }}" 
-       class="inline-block mr-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-       Eksportuj XLSX
-    </a>
+    <div class="mt-9 text-center flex flex-col gap-4 sm:flex-row sm:justify-center sm:gap-6">
+        <a href="{{ route('export.produkty.niewlasne', ['ids' => $produktIds, 'format' => 'xlsx']) }}"
+           class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            Eksportuj XLSX
+        </a>
 
-    <a href="{{ route('export.produkty.niewlasne', ['ids' => $produktIds, 'format' => 'csv']) }}" 
-       class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-       Eksportuj CSV
-    </a>
+        <a href="{{ route('export.produkty.niewlasne', ['ids' => $produktIds, 'format' => 'csv']) }}"
+           class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            Eksportuj CSV
+        </a>
 
-    <a href="{{ url('/welcome') }}" 
-       class="mt-8 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded transition">
-       Powrót
-    </a>
+        <a href="{{ url('/welcome') }}"
+           class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            Powrót
+        </a>
+    </div>
 </x-layout>

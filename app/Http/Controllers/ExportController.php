@@ -12,6 +12,10 @@ use Carbon\Carbon;
 use App\Models\Produkt;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProduktyNiewlasneExport;
+use Illuminate\Support\Facades\Log;
+
+
+
 
 class ExportController extends Controller
 {
@@ -458,28 +462,33 @@ private function generujXlsxDlaZamowienia($produkty, $zamowienieId)
 }
 
 public function exportProduktyNiewlasne(Request $request)
-    {
-        $format = $request->input('format', 'xlsx');
-        $ids = $request->input('ids', '');
+{
+    $format = $request->input('format', 'xlsx');
 
-        $idsArray = array_filter(explode(',', $ids));
+    // Pobieramy produkty niewłasne dokładnie tak jak w metodzie niewlasne()
+    $produkty = DB::table('produkty')
+        ->leftJoin('produkt_wsad', 'produkty.id', '=', 'produkt_wsad.produkt_id')
+        ->leftJoin('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+        ->select('produkty.tw_nazwa', DB::raw('COALESCE(SUM(produkt_wsad.ilosc), 0) as suma_ilosci'))
+        ->where('produkty.is_wlasny', false)
+        ->groupBy('produkty.id', 'produkty.tw_nazwa')
+        ->get();
 
-        $produkty = Produkt::whereIn('id', $idsArray)->get();
-
-        if ($format === 'csv') {
-            $csvData = "Nazwa produktu,Łączna ilość (wsad)\n";
-            foreach ($produkty as $produkt) {
-                $csvData .= "{$produkt->tw_nazwa},{$produkt->suma_ilosci}\n";
-            }
-
-            return response($csvData)
-                ->header('Content-Type', 'text/csv')
-                ->header('Content-Disposition', 'attachment; filename="produkty_niewlasne.csv"');
+    if ($format === 'csv') {
+        $csvData = "Nazwa produktu,Łączna ilość (wsad)\n";
+        foreach ($produkty as $produkt) {
+            $csvData .= "\"{$produkt->tw_nazwa}\",{$produkt->suma_ilosci}\n";
         }
 
-        // Domyślnie XLSX
-        return Excel::download(new ProduktyNiewlasneExport($produkty), 'produkty_niewlasne.xlsx');
+        return response($csvData)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="produkty_niewlasne.csv"');
     }
+
+    // Dla XLSX możesz wykorzystać prostą klasę Export
+    return Excel::download(new ProduktyNiewlasneExport($produkty), 'produkty_niewlasne.xlsx');
+}
+
 
 }
 

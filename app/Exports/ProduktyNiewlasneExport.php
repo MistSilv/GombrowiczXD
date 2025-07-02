@@ -4,23 +4,23 @@ namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Illuminate\Support\Collection;
 
 class ProduktyNiewlasneExport implements FromCollection, WithHeadings
 {
     protected $produkty;
 
-    public function __construct(Collection $produkty)
+    public function __construct($produkty)
     {
         $this->produkty = $produkty;
     }
 
     public function collection()
     {
+        // Zwracamy kolekcję produktów do eksportu
         return $this->produkty->map(function ($produkt) {
             return [
-                'Nazwa produktu' => $produkt->tw_nazwa,
-                'Łączna ilość (wsad)' => $produkt->suma_ilosci,
+                'tw_nazwa' => $produkt->tw_nazwa,
+                'suma_ilosci' => $produkt->suma_ilosci,
             ];
         });
     }
