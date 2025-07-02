@@ -11,27 +11,24 @@ class ZamowienieMail extends Mailable
     use Queueable, SerializesModels;
 
     public $xlsxContent;
-    public $csvContent;
     public $zamowienie;
     public $zamowienieId;
 
-    public function __construct($xlsxContent, $csvContent, $zamowienie)
+    public function __construct($xlsxContent, $zamowienie)
     {
         $this->xlsxContent = $xlsxContent;
-        $this->csvContent = $csvContent;
         $this->zamowienie = $zamowienie;
         $this->zamowienieId = $zamowienie->id;
     }
 
     public function build()
     {
+        $dateTime = now()->format('Y-m-d H:i');
+
         return $this->subject("Zamówienie #{$this->zamowienieId}")
             ->view('emails.zamowienie', ['zamowienie' => $this->zamowienie])
-            ->attachData($this->xlsxContent, "zamowienie_{$this->zamowienieId}.xlsx", [
+            ->attachData($this->xlsxContent, "zamowienie_{$dateTime}.xlsx", [
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ])
-            ->attachData($this->csvContent, "zamowienie_{$this->zamowienieId}.csv", [
-                'mime' => 'text/csv',
             ]);
     }
 }

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ZamowienieMail;
 use App\Exports\ZamowienieExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\PDF;
+
 
 
 use Carbon\Carbon;
@@ -56,43 +58,33 @@ class ZamowienieController extends Controller
 
 
 
-public function store(Request $request)
-{
-    $request->validate([
-        'produkty' => 'required|array|min:1',
-        'produkty.*.produkt_id' => 'required|exists:produkty,id',
-        'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647',
-        'automat_id' => 'required|exists:automats,id',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'produkty' => 'required|array|min:1',
+            'produkty.*.produkt_id' => 'required|exists:produkty,id',
+            'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647',
+            'automat_id' => 'required|exists:automats,id',
+        ]);
 
-    $zamowienie = Zamowienie::create([
-        'data_realizacji' => now()->addDay(),
-        'automat_id' => $request->get('automat_id'),
-    ]);
+        $zamowienie = Zamowienie::create([
+            'data_realizacji' => now()->addDay(),
+            'automat_id' => $request->get('automat_id'),
+        ]);
 
-    foreach ($request->produkty as $pozycja) {
-        $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
+        foreach ($request->produkty as $pozycja) {
+            $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
+        }
+
+        // Tworzenie pliku XLSX
+        $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
+
+        // Wysyłka maila z załącznikiem XLSX
+        Mail::to('projekttest100969@gmail.com')->send(new ZamowienieMail($xlsxContent, $zamowienie));
+
+        return redirect()->route('zamowienia.index', ['automat_id' => $request->get('automat_id')])
+            ->with('success', 'Zamówienie zostało zapisane i mail wysłany.');
     }
-
-    // Generuj XLSX i CSV w pamięci
-    $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
-    $csvContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::CSV);
-
-    // Wyślij maila z zawartością plików jako załącznikami
-    Mail::to('domgggzzz@gmail.com')->send(new ZamowienieMail($xlsxContent, $csvContent, $zamowienie));
-
-
-    return redirect()->route('zamowienia.index', [
-        'automat_id' => $request->get('automat_id')
-    ])->with('success', 'Zamówienie zostało zapisane i mail wysłany.');
-}
-
-
-
-
-
-
-
 
     public function archiwum()
     {

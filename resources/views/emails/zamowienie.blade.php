@@ -1,18 +1,27 @@
 <h1>Zamówienie #{{ $zamowienie->id }}</h1>
+<h3>Automat: {{ $zamowienie->automat->nazwa ?? 'Brak danych' }}</h3>
 
-<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<table width="100%" style="border-collapse: collapse;">
     <thead>
         <tr>
-            <th style="border: 1px solid #333; padding: 8px; background-color: #f2f2f2; text-align: left;">Produkt</th>
-            <th style="border: 1px solid #333; padding: 8px; background-color: #f2f2f2; text-align: right;">Ilość</th>
+            <th style="border: 1px solid black; padding: 5px;">Produkt</th>
+            <th style="border: 1px solid black; padding: 5px;">Ilość</th>
         </tr>
     </thead>
     <tbody>
+        @php $suma = 0; @endphp
         @foreach($zamowienie->produkty as $produkt)
-        <tr>
-            <td style="border: 1px solid #333; padding: 8px;">{{ $produkt->tw_nazwa }}</td>
-            <td style="border: 1px solid #333; padding: 8px; text-align: right;">{{ $produkt->pivot->ilosc }}</td>
-        </tr>
+            <tr>
+                <td style="border: 1px solid black; padding: 5px;">{{ $produkt->tw_nazwa }}</td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ $produkt->pivot->ilosc }}</td>
+            </tr>
+            @php $suma += $produkt->pivot->ilosc; @endphp
         @endforeach
     </tbody>
+    <tfoot>
+        <tr>
+            <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Suma</td>
+            <td style="border: 1px solid black; padding: 5px; text-align: right; font-weight: bold;">{{ $suma }}</td>
+        </tr>
+    </tfoot>
 </table>
