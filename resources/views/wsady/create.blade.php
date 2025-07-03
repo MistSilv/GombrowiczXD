@@ -62,8 +62,6 @@
                 @endif
             </div>
         </form>
-
-        
     </div>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -75,6 +73,17 @@
 
     const produktyMap = new Map();
     produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
+
+    // Funkcja do focusowania i zaznaczania pola ilości obok selecta
+    function focusIloscDlaSelecta(selectElem) {
+        const produktItem = selectElem.closest('.produkt-item');
+        if (!produktItem) return;
+        const inputIlosc = produktItem.querySelector('input[type="number"]');
+        if (inputIlosc) {
+            inputIlosc.focus();
+            setTimeout(() => inputIlosc.select(), 100);
+        }
+    }
 
     // Dodawanie produktu ręcznie
     document.getElementById('dodaj-produkt').addEventListener('click', () => {
@@ -116,6 +125,7 @@
                 const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
                 if (ilosc && !isNaN(ilosc) && parseInt(ilosc) > 0) {
                     dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
+                    // focus jest ustawiany w dodajProduktDoListy
                 } else {
                     alert("Nieprawidłowa ilość.");
                 }
@@ -154,6 +164,8 @@
             if (istniejącySelect) {
                 const inputIlosc = istniejącySelect.closest('.produkt-item').querySelector('input[type="number"]');
                 inputIlosc.value = parseInt(inputIlosc.value) + ilosc;
+                inputIlosc.focus();
+                setTimeout(() => inputIlosc.select(), 100);
                 return;
             }
         }
@@ -175,41 +187,65 @@
         `;
 
         container.appendChild(newItem);
+
+        // Podpinamy event change do nowego selecta, żeby po wyborze focus był na ilości
+        const selectNowy = newItem.querySelector('select');
+        selectNowy.addEventListener('change', () => focusIloscDlaSelecta(selectNowy));
+
+        // Ustawiamy focus na input ilości
+        const inputIloscNowy = newItem.querySelector('input[type="number"]');
+        if (inputIloscNowy) {
+            inputIloscNowy.focus();
+            setTimeout(() => inputIloscNowy.select(), 100);
+        }
+
         index++;
     }
+
+    // Podpinamy event change do istniejących selectów na starcie strony
+    document.querySelectorAll('#produkty-lista select').forEach(select => {
+        select.addEventListener('change', () => focusIloscDlaSelecta(select));
+    });
 
     // Podpowiedzi przy wpisywaniu nazwy produktu
     const szukajInput = document.getElementById('szukaj-produkt');
     const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
 
     szukajInput.addEventListener('input', () => {
-        const fraza = szukajInput.value.trim().toLowerCase();
-        listaPodpowiedzi.innerHTML = '';
+        const val = szukajInput.value.toLowerCase();
+        if (val.length < 2) {
+            listaPodpowiedzi.style.display = 'none';
+            listaPodpowiedzi.innerHTML = '';
+            return;
+        }
 
-        if (!fraza) return listaPodpowiedzi.classList.add('hidden');
+        const dopasowane = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val));
+        if (!dopasowane.length) {
+            listaPodpowiedzi.style.display = 'none';
+            listaPodpowiedzi.innerHTML = '';
+            return;
+        }
 
-        const pasujace = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(fraza));
-        pasujace.forEach(p => {
-            const li = document.createElement('li');
-            li.textContent = p.tw_nazwa;
-            li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer');
-            li.addEventListener('click', () => {
-                dodajProduktDoListy(p.id, p.tw_nazwa);
-                szukajInput.value = '';
-                listaPodpowiedzi.innerHTML = '';
-                listaPodpowiedzi.classList.add('hidden');
-            });
-            listaPodpowiedzi.appendChild(li);
-        });
+        listaPodpowiedzi.innerHTML = dopasowane.map(p => `<li data-id="${p.id}" class="cursor-pointer px-2 py-1 hover:bg-gray-200">${p.tw_nazwa}</li>`).join('');
+        listaPodpowiedzi.style.display = 'block';
+    });
 
-        listaPodpowiedzi.classList.toggle('hidden', pasujace.length === 0);
+    listaPodpowiedzi.addEventListener('click', e => {
+        if (e.target.tagName.toLowerCase() === 'li') {
+            const id = e.target.getAttribute('data-id');
+            const nazwa = e.target.textContent;
+            dodajProduktDoListy(id, nazwa);
+            szukajInput.value = '';
+            listaPodpowiedzi.style.display = 'none';
+            listaPodpowiedzi.innerHTML = '';
+        }
     });
 
     document.addEventListener('click', e => {
         if (!listaPodpowiedzi.contains(e.target) && e.target !== szukajInput) {
-            listaPodpowiedzi.classList.add('hidden');
+            listaPodpowiedzi.style.display = 'none';
+            listaPodpowiedzi.innerHTML = '';
         }
     });
     </script>
-</div>
 </x-layout>

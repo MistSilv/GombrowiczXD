@@ -103,9 +103,18 @@
 
 <script>
     let index = 1;
-    const produkty = @json($produkty); // Te produkty są już przefiltrowane (tylko własne)
+    const produkty = @json($produkty);
     const produktyMap = new Map();
     produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
+
+    // Funkcja ustawiająca focus i zaznaczenie pola ilości po wybraniu produktu
+    function focusIlePole(produktItem) {
+        const iloscInput = produktItem.querySelector('input[type="number"]');
+        if (iloscInput) {
+            iloscInput.focus();
+            iloscInput.select();
+        }
+    }
 
     // Dodawanie nowego produktu
     document.getElementById('dodaj-produkt').addEventListener('click', function() {
@@ -127,6 +136,14 @@
         `;
         container.appendChild(newItem);
         index++;
+
+        // Po dodaniu nowego produktu focus ustaw na select i ustaw listener zmiany dla focusu na input ilości
+        const select = newItem.querySelector('select');
+        select.focus();
+
+        select.addEventListener('change', () => {
+            focusIlePole(newItem);
+        });
     });
 
     // Usuwanie produktu
@@ -135,6 +152,49 @@
             e.target.closest('.produkt-item').remove();
         }
     });
+
+    // Podpinanie eventów change do istniejących selectów (np. przy ładowaniu strony)
+    document.querySelectorAll('.produkty-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const produktItem = e.target.closest('.produkt-item');
+            focusIlePole(produktItem);
+        });
+    });
+
+    // Dodawanie produktu do listy (np. ze skanera lub wyszukiwarki)
+    function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
+        const container = document.getElementById('produkty-lista');
+
+        let options = '<option value="">-- wybierz produkt --</option>';
+        produkty.forEach(function(produkt) {
+            options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
+        });
+
+        const newItem = document.createElement('div');
+        newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
+        newItem.innerHTML = `
+            <select name="produkty[${index}][produkt_id]" class="form-select w-full produkty-select" required>
+                ${options}
+            </select>
+            <input type="number" name="produkty[${index}][ilosc]" min="1" class="form-input w-24 text-black" placeholder="Ilość" required value="${ilosc}">
+            <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+        `;
+        container.appendChild(newItem);
+
+        // Ustaw wartość selecta na wybrany produkt
+        const selectNowy = newItem.querySelector('select');
+        selectNowy.value = produktId;
+
+        // Po dodaniu produktu focus ustaw na pole ilości i zaznacz tekst
+        focusIlePole(newItem);
+
+        // Podpięcie eventu change do nowego selecta
+        selectNowy.addEventListener('change', () => {
+            focusIlePole(newItem);
+        });
+
+        index++;
+    }
 
     // Wyszukiwanie produktu po nazwie z podpowiedziami
     $(document).ready(function() {
@@ -147,9 +207,7 @@
                 return;
             }
 
-            const dopasowane = produkty.filter(p => 
-                p.tw_nazwa.toLowerCase().includes(val)
-            );
+            const dopasowane = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val));
 
             if (dopasowane.length === 0) {
                 return;
@@ -177,7 +235,6 @@
             }
         });
     });
-
 
     // Skaner kodów kreskowych
     const scanner = new Html5Qrcode("reader");
@@ -207,103 +264,44 @@
             })
             .then(data => {
                 const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
-
-                if (ilosc !== null && !isNaN(ilosc) && parseInt(ilosc) > 0) {
-                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
-                } else {
-                    alert("Produkt nie został dodany — podano nieprawidłową ilość.");
+                const iloscNum = Number(ilosc);
+                if (iloscNum > 0) {
+                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, iloscNum);
                 }
             })
             .catch(err => {
-                console.error(err);
-                alert(err.message || 'Produkt nie znaleziony lub nie jest produktem własnym.');
+                alert(err.message || 'Błąd podczas wyszukiwania produktu.');
             });
+
         }).catch(err => {
-            console.error("Błąd zatrzymywania skanera:", err);
+            console.error('Błąd zatrzymania skanera:', err);
         });
     }
 
-    // Przycisk skanera
-    document.getElementById('start-scan').addEventListener('click', () => {
-        if (isScanning) return;
-
-        Html5Qrcode.getCameras().then(devices => {
-            if (devices && devices.length) {
-                $('#reader').show();
-                scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess)
-                    .then(() => { isScanning = true; })
-                    .catch(err => { console.error("Błąd uruchamiania skanera:", err); });
-            } else {
-                alert("Brak dostępnych kamer.");
-            }
-        }).catch(err => {
-            console.error("Błąd pobierania kamer:", err);
-        });
-    });
-
-    // Dodawanie produktu do listy (np. ze skanera lub wyszukiwarki)
-    function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
-        const container = document.getElementById('produkty-lista');
-
-        let options = '<option value="">-- wybierz produkt --</option>';
-        produkty.forEach(function(produkt) { // Używamy 'produkty' zamiast 'produktyWlasne'
-            options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
-        });
-
-        const newItem = document.createElement('div');
-        newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
-        newItem.innerHTML = `
-            <select name="produkty[${index}][produkt_id]" class="form-select w-full produkty-select" required>
-                ${options}
-            </select>
-            <input type="number" name="produkty[${index}][ilosc]" min="1" class="form-input w-24 text-black" placeholder="Ilość" required value="${ilosc}">
-            <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
-        `;
-        container.appendChild(newItem);
-
-        // Ustawienie wartości selecta na produkt zeskanowany
-        const selectNowy = newItem.querySelector('select');
-        selectNowy.value = produktId;
-
-        index++;
+    function onScanFailure(error) {
+        // Ignorujemy błędy skanowania
     }
 
-    // Wyszukiwanie produktu po nazwie z podpowiedziami
-    $('#szukaj-produkt').on('input', function() {
-        const val = $(this).val().toLowerCase();
-        const lista = $('#lista-podpowiedzi');
-        lista.empty();
-
-        if (val.length < 2) {
-            lista.hide();
-            return;
-        }
-
-        const dopasowane = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val));
-
-        if (dopasowane.length === 0) {
-            lista.hide();
-            return;
-        }
-
-        dopasowane.forEach(p => {
-            const li = $('<li></li>').text(p.tw_nazwa).addClass('p-2 cursor-pointer hover:bg-gray-200');
-            li.on('click', function() {
-                // Dodaj produkt do listy
-                dodajProduktDoListy(p.id, p.tw_nazwa);
-                $('#szukaj-produkt').val('');
-                lista.hide();
+    $('#start-scan').on('click', function() {
+        if (!isScanning) {
+            $('#reader').show();
+            scanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                isScanning = true;
+            }).catch(err => {
+                alert('Nie można rozpocząć skanowania: ' + err);
             });
-            lista.append(li);
-        });
-
-        lista.show();
-    });
-
-    // Ukrywanie listy podpowiedzi przy kliknięciu poza nią
-    $(document).click(function(event) {
-        if (!$(event.target).closest('#szukaj-produkt, #lista-podpowiedzi').length) {
-            $('#lista-podpowiedzi').hide();
+        } else {
+            scanner.stop().then(() => {
+                isScanning = false;
+                $('#reader').hide();
+            }).catch(err => {
+                alert('Nie można zatrzymać skanowania: ' + err);
+            });
         }
     });
 </script>
