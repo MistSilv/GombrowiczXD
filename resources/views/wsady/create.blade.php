@@ -63,39 +63,7 @@
             </div>
         </form>
 
-        @if($wsadProdukty && $wsadProdukty->count() > 0)
-            <div class="mt-10 bg-gray-800 p-4 rounded text-white">
-                <h2 class="font-bold mb-4">Produkty w automacie {{ $automat->nazwa }}</h2>
-                <table class="w-full text-left">
-                    <thead>
-                        <tr>
-                            <th class="pb-2">Produkt</th>
-                            <th class="pb-2">Ilość</th>
-                            <th class="pb-2">Akcje</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($wsadProdukty as $produkt)
-                            <tr class="border-b border-gray-700">
-                                <td class="py-2">{{ $produkt->tw_nazwa }}</td>
-                                <td class="py-2">{{ $produkt->pivot->ilosc }}</td>
-                                <td class="py-2 flex gap-2">
-                                    <form method="POST" action="{{ route('wsady.decrease', ['produkt_id' => $produkt->id, 'automat_id' => $automat->id]) }}">
-                                        @csrf
-                                        <button type="submit" class="px-2 py-1 bg-yellow-600 rounded hover:bg-yellow-700">-</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('wsady.delete', ['produkt_id' => $produkt->id, 'automat_id' => $automat->id]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="px-2 py-1 bg-red-700 rounded hover:bg-red-800">Usuń</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
+        
     </div>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
