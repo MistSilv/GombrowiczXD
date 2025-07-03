@@ -21,7 +21,7 @@
         </h1>
 
         @if ($zamowienia->isEmpty())
-            <p>Brak aktualnych zamówień.</p>
+            <p class="text-white">Brak aktualnych zamówień.</p>
         @else
             <div class="overflow-x-auto w-full overflow-visible">
                 <!-- tabela z zamówieniami -->

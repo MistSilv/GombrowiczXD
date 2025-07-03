@@ -81,11 +81,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
     Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierzZamowienieCsv'])->name('zamowienia.csv');
 
-    Route::get('/produkty/niewlasne', [ProduktController::class, 'niewlasne']);
-    Route::post('/produkty/niewlasne/upload', [ExportController::class, 'uploadProduktyNiewlasne'])->name('produkty.niewlasne.upload');
-
-    Route::get('/export/produkty-niewlasne', [ExportController::class, 'exportProduktyNiewlasne'])->name('export.produkty.niewlasne');
-
+    
+    Route::get('/produkty/niewlasne/nowe-zamowienie', [ProduktController::class, 'noweZamowienie'])->name('produkty.zamowienie.nowe');
+    Route::get('/produkty/niewlasne/zamowienie/{zamowienieId}', [ProduktController::class, 'edytujZamowienie'])->name('produkty.zamowienie.edytuj');
+    Route::post('/produkty/niewlasne/zamowienie/{zamowienieId}/zapisz', [ProduktController::class, 'zapiszZamowienie'])->name('produkty.zamowienie.zapisz');
   
 
 

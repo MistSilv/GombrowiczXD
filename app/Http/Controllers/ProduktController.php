@@ -64,19 +64,68 @@ class ProduktController extends Controller
         //
     }
 
-    public function niewlasne()
+    public function noweZamowienie()
     {
-        // Pobieramy produkty niewłasne z sumą ilości z wsadów
+        // Tworzenie zamówienia
+        $zamowienieId = DB::table('zamowienia')->insertGetId([
+            'data_zamowienia' => now(),
+            'data_realizacji' => null,
+            'automat_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Przekierowanie do edycji produktów
+        return redirect()->route('produkty.zamowienie.edytuj', ['zamowienieId' => $zamowienieId]);
+    }
+
+    public function edytujZamowienie($zamowienieId)
+    {
         $produkty = DB::table('produkty')
-            ->leftJoin('produkt_wsad', 'produkty.id', '=', 'produkt_wsad.produkt_id')
-            ->leftJoin('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
-            ->select('produkty.tw_nazwa', DB::raw('COALESCE(SUM(produkt_wsad.ilosc), 0) as suma_ilosci'))
+            ->leftJoin('produkt_zamowienie', function($join) use ($zamowienieId) {
+                $join->on('produkty.id', '=', 'produkt_zamowienie.produkt_id')
+                    ->where('produkt_zamowienie.zamowienie_id', $zamowienieId);
+            })
+            ->select('produkty.id', 'produkty.tw_nazwa', 'produkt_zamowienie.ilosc')
             ->where('produkty.is_wlasny', false)
-            ->groupBy('produkty.id', 'produkty.tw_nazwa')
             ->get();
 
-        return view('produkty.niewlasne', compact('produkty'));
+        return view('produkty.niewlasne_edit_zamowienie', [
+            'produkty' => $produkty,
+            'zamowienieId' => $zamowienieId
+        ]);
     }
+
+    public function zapiszZamowienie(Request $request, $zamowienieId)
+    {
+        $ilosci = $request->input('ilosci', []);
+
+        foreach ($ilosci as $produktId => $ilosc) {
+            $istnieje = DB::table('produkt_zamowienie')
+                ->where('zamowienie_id', $zamowienieId)
+                ->where('produkt_id', $produktId)
+                ->exists();
+
+            if ($istnieje) {
+                DB::table('produkt_zamowienie')
+                    ->where('zamowienie_id', $zamowienieId)
+                    ->where('produkt_id', $produktId)
+                    ->update(['ilosc' => $ilosc]);
+            } else {
+                if ($ilosc > 0) {
+                    DB::table('produkt_zamowienie')->insert([
+                        'zamowienie_id' => $zamowienieId,
+                        'produkt_id' => $produktId,
+                        'ilosc' => $ilosc
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('produkty.zamowienie.edytuj', ['zamowienieId' => $zamowienieId])
+                        ->with('success', 'Ilości zostały zapisane.');
+    }
+
 
    
 }

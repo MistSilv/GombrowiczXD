@@ -34,8 +34,13 @@
 
     <a href="{{ url('/produkty/niewlasne') }}"
        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-        Złoż zamówienie nie kraftowe produkty
+        Produky nie kraftowe
     </a>
+
+    <a href="{{ route('produkty.zamowienie.nowe') }}"
+            class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            Nowe zamówienie
+        </a>
 </div>
 
 </x-layout>

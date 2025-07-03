@@ -5,7 +5,7 @@
         <thead class="bg-gray-200">
             <tr>
                 <th class="py-3 px-6 text-left font-semibold text-gray-700">Nazwa produktu</th>
-                <th class="py-3 px-6 text-left font-semibold text-gray-700">Łączna ilość (wsad)</th>
+                <th class="py-3 px-6 text-left font-semibold text-gray-700">Łączna ilość wsadzonych</th>
             </tr>
         </thead>
         <tbody>
@@ -32,6 +32,13 @@
            class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
             Eksportuj CSV
         </a>
+
+       <a href="{{ route('produkty.zamowienie.nowe') }}"
+            class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            Nowe zamówienie
+        </a>
+
+     
 
         <a href="{{ url('/welcome') }}"
            class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
