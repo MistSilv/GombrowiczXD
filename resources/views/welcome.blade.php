@@ -2,7 +2,9 @@
 <x-layout>
     <h1 class="text-2xl font-bold mb-6 text-center text-white">Wybierz automat</h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-2">
+    
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-2 mt-3">
         @foreach ($automaty as $automat) <!-- iteracja po dostępnych automatach -->
             <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}"
                class="border p-4 rounded-2xl shadow hover:bg-slate-900 transition flex flex-col items-center">
@@ -37,5 +39,21 @@
             Nowe zamówienie
         </a>
 </div>
-
+    @auth
+        @if(auth()->user()->isSerwis())
+            <style>
+            @keyframes swing {
+            0%, 100% { transform: rotate(-45deg); }
+            50% { transform: rotate(45deg); }
+            }
+            .animate-swing {
+            animation: swing 1s ease-in-out infinite;
+            }
+            </style>
+            <div class="mt-6 flex justify-center items-center gap-4">
+            <img src="{{ asset('images/icons/iconxd.png') }}" alt="Ikona" class="w-40 h-40 animate-swing" />
+            </div>
+        @endif
+    @endauth
+    </div>
 </x-layout>
