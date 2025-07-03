@@ -8,7 +8,7 @@
         @foreach ($automaty as $automat) <!-- iteracja po dostępnych automatach -->
             <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}"
                class="border p-4 rounded-2xl shadow hover:bg-slate-900 transition flex flex-col items-center">
-                    <img src="{{ asset('images/icons/icon-192x192.png') }}" alt=""> 
+                    <img src="{{ asset('images/icons/icon-192x192.png') }}" alt="" class="rounded-xl"> 
                 <h2 class="text-xl font-bold text-center text-white">{{ $automat->nazwa }}</h2>
                 <p class="text-sm text-center text-white">{{ $automat->lokalizacja }}</p>
             </a>
@@ -51,7 +51,7 @@
             }
             </style>
             <div class="mt-6 flex justify-center items-center gap-4">
-            <img src="{{ asset('images/icons/iconxd.png') }}" alt="Ikona" class="w-40 h-40 animate-swing" />
+            <img src="{{ asset('images/icons/iconxd.png') }}" alt="Ikona" class="w-40 h-40 rounded-3xl invert hue-rotate-90 animate-swing" />
             </div>
         @endif
     @endauth

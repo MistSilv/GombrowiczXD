@@ -2,7 +2,7 @@
     <div class="container text-white">
         <h1 class="text-2xl font-bold mb-4">Szczegóły zamówienia #{{ $zamowienie->id }}</h1>
 
-        <p><strong>Data zamówienia:</strong> {{ $zamowienie->data_zamowienia }}</p>
+        <p><strong>Data zamówienia:</strong> {{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('Y-m-d H:i') }}</p>
         <p><strong>Data realizacji:</strong> {{ $zamowienie->data_realizacji ?? '—' }}</p>
 
         <p><strong>Automat:</strong> 

@@ -2,10 +2,10 @@
 <x-layout>
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-4 text-white">Podsumowanie strat ({{ $typ }})</h1>
-        <p class="mb-6">Okres: <strong>{{ $okres }}</strong></p>
+        <p class="mb-6 text-white">Okres: <strong>{{ $okres }}</strong></p>
 
         @if($produkty->isEmpty())
-            <p>Brak strat w tym okresie.</p>
+            <p class="text-white">Brak strat w tym okresie.</p>
         @else
             @php
                 $zakresMap = [ // mapowanie zakresu

@@ -38,7 +38,7 @@
                         @foreach ($zamowienia as $zamowienie)
                             <tr class="text-white">
                                 <td class="border px-4 py-2">{{ $zamowienie->id }}</td>
-                                <td class="border px-4 py-2">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('d.m.Y H:i') }}</td>
+                                <td class="border px-4 py-2">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('Y.m.d H:i') }}</td>
                                 <td class="border px-4 py-2">{{ $zamowienie->data_realizacji ?? '—' }}</td>
                                 <td class="border px-4 py-2">
                                     <a href="{{ route('zamowienia.show', $zamowienie) }}" class="text-violet-900 hover:underline">ℹ️</a>

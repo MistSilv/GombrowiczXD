@@ -1,5 +1,5 @@
 <x-layout>
-    <h1 class="text-3xl font-bold mb-6">Edytuj ilości produktów dla zamówienia #{{ $zamowienieId }}</h1>
+    <h1 class="text-3xl font-bold mb-6 text-white">Edytuj ilości produktów dla zamówienia</h1>
 
     @if(session('success'))
         <div class="bg-green-200 text-green-800 px-4 py-2 rounded mb-4">
@@ -13,8 +13,8 @@
         <table class="min-w-full bg-white rounded shadow overflow-hidden">
             <thead class="bg-gray-200">
                 <tr>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700">Nazwa produktu</th>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700">Ilość</th>
+                    <th class="py-3 px-6 text-left font-bold text-gray-700">Nazwa produktu</th>
+                    <th class="py-3 px-6 text-left font-bold text-gray-700">Ilość</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,9 +22,10 @@
                     <tr class="border-b last:border-0 hover:bg-gray-100">
                         <td class="py-3 px-6">{{ $produkt->tw_nazwa }}</td>
                         <td class="py-3 px-6">
-                            <input type="number" name="ilosci[{{ $produkt->id }}]" step="0.01"
-                                   value="{{ $produkt->ilosc ?? 0 }}" 
-                                   class="border rounded px-3 py-1 w-32">
+                            <input type="number" name="ilosci[{{ $produkt->id }}]" step="1" 
+                                min="0" max="2147483647"
+                                value="{{ $produkt->ilosc ?? 0 }}" 
+                                class="border rounded px-3 py-1 w-32">
                         </td>
                     </tr>
                 @endforeach

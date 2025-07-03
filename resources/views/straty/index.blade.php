@@ -26,7 +26,7 @@
         <h1 class="text-2xl font-bold mb-4 text-white">Zgłoszone straty</h1>
 
         @if ($straty->isEmpty())
-        <p>Brak zgłoszonych strat.</p>
+        <p class="text-white">Brak zgłoszonych strat.</p>
         @else
             <div class="overflow-x-auto w-full overflow-visible"> <!-- kontener dla tabeli -->
                 <table class="table-auto w-full border-collapse border border-gray-300">
