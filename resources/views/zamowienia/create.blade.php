@@ -112,7 +112,7 @@
         const container = document.getElementById('produkty-lista');
 
         let options = '<option value="">-- wybierz produkt --</option>';
-        produkty.forEach(function(produkt) { // Używamy 'produkty' zamiast 'produktyWlasne'
+        produkty.forEach(function(produkt) {
             options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
         });
 
@@ -135,6 +135,49 @@
             e.target.closest('.produkt-item').remove();
         }
     });
+
+    // Wyszukiwanie produktu po nazwie z podpowiedziami
+    $(document).ready(function() {
+        $('#szukaj-produkt').on('input', function() {
+            const val = $(this).val().toLowerCase();
+            const lista = $('#lista-podpowiedzi');
+            lista.empty().hide();
+
+            if (val.length < 2) {
+                return;
+            }
+
+            const dopasowane = produkty.filter(p => 
+                p.tw_nazwa.toLowerCase().includes(val)
+            );
+
+            if (dopasowane.length === 0) {
+                return;
+            }
+
+            dopasowane.forEach(p => {
+                const li = $('<li></li>')
+                    .text(p.tw_nazwa)
+                    .addClass('p-2 cursor-pointer hover:bg-gray-200')
+                    .on('click', function() {
+                        dodajProduktDoListy(p.id, p.tw_nazwa);
+                        $('#szukaj-produkt').val('');
+                        lista.hide();
+                    });
+                lista.append(li);
+            });
+
+            lista.show();
+        });
+
+        // Ukrywanie listy podpowiedzi przy kliknięciu poza nią
+        $(document).on('click', function(event) {
+            if (!$(event.target).closest('#szukaj-produkt, #lista-podpowiedzi').length) {
+                $('#lista-podpowiedzi').hide();
+            }
+        });
+    });
+
 
     // Skaner kodów kreskowych
     const scanner = new Html5Qrcode("reader");
