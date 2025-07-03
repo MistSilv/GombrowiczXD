@@ -7,6 +7,7 @@
         </h1>
 
         <!-- Sekcja skanowania kodu EAN -->
+        <!--
         <div class="mb-6">
             <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
             <button id="start-scan" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
@@ -15,7 +16,7 @@
             <div id="reader" style="width: 300px; display: none;"></div>
             <div id="scan-result" class="mt-2 text-white"></div>
         </div>
-
+       -->
         <form action="{{ route('zamowienia.store') }}" method="POST">
             @csrf
 
