@@ -98,11 +98,11 @@ class ZamowienieController extends Controller
      */
     public function show(Zamowienie $zamowienie)
     {
-        // Załaduj relację produktów, aby uniknąć lazy loadingu w widoku
-        $zamowienie->load('produkty');
+        $zamowienie->load(['produkty', 'automat']); 
 
         return view('zamowienia.show', compact('zamowienie'));
     }
+
 
 
     /**
