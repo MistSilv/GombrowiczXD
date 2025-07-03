@@ -41,7 +41,7 @@ return new class extends Migration
             $table->id();
             $table->string('tw_nazwa');
             $table->string('tw_idabaco')->nullable();
-            $table->boolean('is_wlasny')->default(true); // true=własny, false=obcy
+            $table->boolean('is_wlasny')->default(false); // true=własny, false=obcy
         });
 
         Schema::create('ean_codes', function (Blueprint $table) {
@@ -62,8 +62,7 @@ return new class extends Migration
             $table->id();
             $table->timestamp('data_zamowienia')->useCurrent();
             $table->date('data_realizacji')->nullable();
-            $table->unsignedBigInteger('automat_id')->nullable();
-            $table->foreign('automat_id')->references('id')->on('automats')->onDelete('cascade');
+            $table->foreignId('automat_id')->constrained('automats')->onDelete('cascade');
             $table->timestamps();
         });
 

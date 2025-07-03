@@ -48,8 +48,19 @@ class ZamowienieController extends Controller
 
 
    public function create(Request $request)
+{
+    // Pobierz tylko produkty własne dla standardowego zamówienia
+    $produkty = Produkt::where('is_wlasny', true)->orderBy('tw_nazwa')->get();
+    
+    $automatId = $request->get('automat_id');
+    $automat = $automatId ? Automat::findOrFail($automatId) : null; 
+
+    return view('zamowienia.create', compact('produkty', 'automat'));
+}
+
+    public function createProdukcja(Request $request)
     {
-        $produkty = Produkt::orderBy('tw_nazwa')->get();
+        $produkty = Produkt::where('is_wlasny', true)->orderBy('tw_nazwa')->get();
         $automatId = $request->get('automat_id');
         $automat = $automatId ? Automat::findOrFail($automatId) : null; 
 

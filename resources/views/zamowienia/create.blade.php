@@ -3,7 +3,7 @@
 
     <div class="max-w-3xl mx-auto p-4">
         <h1 class="text-xl font-semibold mb-4 text-white">
-            Nowe zamówienie dla: {{ $automat ? $automat->nazwa : '---' }}
+            Nowe zamówienie produkcyjne dla: {{ $automat ? $automat->nazwa : '---' }}
         </h1>
 
         <!-- Sekcja skanowania kodu EAN -->
@@ -23,22 +23,16 @@
                 <input type="hidden" name="automat_id" value="{{ $automat->id }}">
             @endif
 
-            <!-- Usunięto pole email na inny adres -->
-
-            <!-- Checkbox do filtrowania produktów własnych -->
-            <div class="mb-4 flex items-center">
-                <input type="checkbox" id="tylko-wlasne" class="form-checkbox h-5 w-5 text-blue-600">
-                <label for="tylko-wlasne" class="ml-2 text-white">Pokaż tylko produkty własne</label>
-            </div>
-
             <div id="produkty-lista">
                 <div class="flex items-center gap-2 mb-2 produkt-item">
                     <select name="produkty[0][produkt_id]" class="form-select w-full produkty-select" required>
                         <option value="">-- wybierz produkt --</option>
                         @foreach($produkty as $produkt)
-                            <option value="{{ $produkt->id }}" data-is-wlasny="{{ $produkt->is_wlasny ? '1' : '0' }}">
-                                {{ $produkt->tw_nazwa }}
-                            </option>
+                            @if($produkt->is_wlasny)
+                                <option value="{{ $produkt->id }}" data-is-wlasny="1">
+                                    {{ $produkt->tw_nazwa }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
 
@@ -108,53 +102,17 @@
 
 <script>
     let index = 1;
-    const produkty = @json($produkty);
+    const produkty = @json($produkty); // Te produkty są już przefiltrowane (tylko własne)
     const produktyMap = new Map();
     produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
 
-    // Funkcja do filtrowania produktów
-    function filtrujProdukty() {
-        const tylkoWlasne = document.getElementById('tylko-wlasne').checked;
-        const wszystkieSelecty = document.querySelectorAll('.produkty-select');
-        
-        wszystkieSelecty.forEach(select => {
-            const options = select.querySelectorAll('option');
-            
-            options.forEach(option => {
-                if (option.value === "") return;
-                
-                const isWlasny = option.getAttribute('data-is-wlasny') === '1';
-                
-                if (tylkoWlasne && !isWlasny) {
-                    option.style.display = 'none';
-                } else {
-                    option.style.display = 'block';
-                }
-            });
-            
-            // Jeśli zaznaczono checkbox, a wybrana opcja jest niewidoczna, czyścimy wartość selecta
-            if (tylkoWlasne && select.value) {
-                const selectedOption = select.querySelector(`option[value="${select.value}"]`);
-                if (selectedOption && selectedOption.style.display === 'none') {
-                    select.value = "";
-                }
-            }
-        });
-    }
-
-    // Obsługa checkboxa "tylko własne"
-    document.getElementById('tylko-wlasne').addEventListener('change', filtrujProdukty);
-
     // Dodawanie nowego produktu
     document.getElementById('dodaj-produkt').addEventListener('click', function() {
-        const tylkoWlasne = document.getElementById('tylko-wlasne').checked;
         const container = document.getElementById('produkty-lista');
 
         let options = '<option value="">-- wybierz produkt --</option>';
-        produkty.forEach(function(produkt) {
-            if (!tylkoWlasne || produkt.is_wlasny) {
-                options += `<option value="${produkt.id}" data-is-wlasny="${produkt.is_wlasny ? '1' : '0'}">${produkt.tw_nazwa}</option>`;
-            }
+        produkty.forEach(function(produkt) { // Używamy 'produkty' zamiast 'produktyWlasne'
+            options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
         });
 
         const newItem = document.createElement('div');
@@ -168,9 +126,6 @@
         `;
         container.appendChild(newItem);
         index++;
-
-        // Uruchamiamy filtrowanie po dodaniu nowego selecta
-        filtrujProdukty();
     });
 
     // Usuwanie produktu
@@ -217,7 +172,7 @@
             })
             .catch(err => {
                 console.error(err);
-                alert(err.message || 'Produkt nie znaleziony lub błąd podczas sprawdzania kodu.');
+                alert(err.message || 'Produkt nie znaleziony lub nie jest produktem własnym.');
             });
         }).catch(err => {
             console.error("Błąd zatrzymywania skanera:", err);
@@ -245,13 +200,10 @@
     // Dodawanie produktu do listy (np. ze skanera lub wyszukiwarki)
     function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
         const container = document.getElementById('produkty-lista');
-        const tylkoWlasne = document.getElementById('tylko-wlasne').checked;
 
         let options = '<option value="">-- wybierz produkt --</option>';
-        produkty.forEach(function(produkt) {
-            if (!tylkoWlasne || produkt.is_wlasny) {
-                options += `<option value="${produkt.id}" data-is-wlasny="${produkt.is_wlasny ? '1' : '0'}">${produkt.tw_nazwa}</option>`;
-            }
+        produkty.forEach(function(produkt) { // Używamy 'produkty' zamiast 'produktyWlasne'
+            options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
         });
 
         const newItem = document.createElement('div');
@@ -270,8 +222,6 @@
         selectNowy.value = produktId;
 
         index++;
-
-        filtrujProdukty();
     }
 
     // Wyszukiwanie produktu po nazwie z podpowiedziami
@@ -312,9 +262,5 @@
             $('#lista-podpowiedzi').hide();
         }
     });
-
-    // Po załadowaniu strony filtruj od razu
-    window.addEventListener('DOMContentLoaded', filtrujProdukty);
-
 </script>
 </x-layout>
