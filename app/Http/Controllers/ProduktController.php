@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produkt;
+use App\Models\Zamowienie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ZamowienieMail;
+use App\Exports\ZamowienieExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProduktController extends Controller
 {
@@ -101,13 +106,10 @@ class ProduktController extends Controller
     {
         return view('produkty.niewlasne_edit_zamowienie', [
             'produkty'    => Produkt::where('is_wlasny', false)->get(),
-            'deficyty'    => $this->buildDeficyty(),   // ← jest
+            'deficyty'    => $this->buildDeficyty(),
             'zamowienieId'=> null,
         ]);
     }
-
-
-
 
     public function edytujZamowienie($zamowienieId)
     {
@@ -130,6 +132,7 @@ class ProduktController extends Controller
     {
         $zamowienieId = $request->input('zamowienieId');
         $ilosci = $request->input('ilosci', []);
+        $wyslijEmail = $request->input('wyslij_email', false);
 
         if (!$zamowienieId) {
             $zamowienieId = DB::table('zamowienia')->insertGetId([
@@ -163,12 +166,54 @@ class ProduktController extends Controller
             }
         }
 
+        // Wysyłka emaila jeśli zaznaczono
+        if ($wyslijEmail) {
+            return $this->wyslijEmailZamowienia($zamowienieId);
+        }
+
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
                 ->with('success', 'Ilości zostały zapisane.');
-
     }
 
+    /**
+     * Wyślij email z zamówieniem produktów nie-własnych
+     */
+     public function wyslijEmailZamowienia($zamowienieId)
+    {
+        // Znajdź zamówienie z produktami i ich kodami EAN
+        $zamowienie = Zamowienie::with(['produkty' => function($query) {
+            $query->select('produkty.id', 'tw_nazwa')
+                  ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+                  ->addSelect('ean_codes.kod_ean as ean');
+        }])->findOrFail($zamowienieId);
 
+        // Generuj plik Excel z dodatkową kolumną EAN
+        $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
 
-   
+        // Wyślij email
+        Mail::to('projekttest100969@gmail.com')->send(new ZamowienieMail($xlsxContent, $zamowienie));
+
+        return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
+            ->with('success', 'Ilości zostały zapisane.')
+            ->with('email_sent', 'Email z zamówieniem został wysłany.');
+    }
+
+    /**
+     * Pobierz plik Excel z zamówieniem (z kodem EAN)
+     */
+    public function pobierzZamowienieExcel($zamowienieId)
+    {
+        $zamowienie = Zamowienie::with(['produkty' => function($query) {
+            $query->select('produkty.id', 'tw_nazwa')
+                  ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+                  ->addSelect('ean_codes.kod_ean as ean');
+        }])->findOrFail($zamowienieId);
+        
+        $date = now()->format('Y-m-d');
+
+        return Excel::download(
+            new ZamowienieExport($zamowienie), 
+            "zamowienie_{$zamowienieId}_{$date}.xlsx"
+        );
+    }
 }
