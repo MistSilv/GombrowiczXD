@@ -70,9 +70,31 @@
     <script>
     let index = 1;
     const produkty = @json($produkty);
-
     const produktyMap = new Map();
     produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
+
+    // Funkcja do aktualizacji dostępnych produktów
+    function aktualizujDostepneProdukty() {
+        const uzyteProdukty = new Set();
+        document.querySelectorAll('#produkty-lista select').forEach(select => {
+            if (select.value) uzyteProdukty.add(parseInt(select.value));
+        });
+
+        // Aktualizacja list rozwijanych
+        document.querySelectorAll('#produkty-lista select').forEach(select => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- wybierz produkt --</option>';
+            
+            produkty.forEach(p => {
+                if (!uzyteProdukty.has(p.id) || p.id == parseInt(currentValue)) {
+                    const selected = p.id == parseInt(currentValue) ? 'selected' : '';
+                    select.innerHTML += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+                }
+            });
+        });
+
+        return uzyteProdukty;
+    }
 
     // Funkcja do focusowania i zaznaczania pola ilości obok selecta
     function focusIloscDlaSelecta(selectElem) {
@@ -94,6 +116,7 @@
     document.addEventListener('click', e => {
         if (e.target.classList.contains('remove-item')) {
             e.target.closest('.produkt-item').remove();
+            aktualizujDostepneProdukty();
         }
     });
 
@@ -125,7 +148,6 @@
                 const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
                 if (ilosc && !isNaN(ilosc) && parseInt(ilosc) > 0) {
                     dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
-                    // focus jest ustawiany w dodajProduktDoListy
                 } else {
                     alert("Nieprawidłowa ilość.");
                 }
@@ -170,10 +192,14 @@
             }
         }
 
+        const uzyteProdukty = aktualizujDostepneProdukty();
         let options = '<option value="">-- wybierz produkt --</option>';
+        
         produkty.forEach(p => {
-            const selected = (produktId && p.id == produktId) ? 'selected' : '';
-            options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+            if (!uzyteProdukty.has(p.id) || (produktId && p.id == produktId)) {
+                const selected = (produktId && p.id == produktId) ? 'selected' : '';
+                options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+            }
         });
 
         const newItem = document.createElement('div');
@@ -188,9 +214,12 @@
 
         container.appendChild(newItem);
 
-        // Podpinamy event change do nowego selecta, żeby po wyborze focus był na ilości
+        // Podpinamy event change do nowego selecta
         const selectNowy = newItem.querySelector('select');
-        selectNowy.addEventListener('change', () => focusIloscDlaSelecta(selectNowy));
+        selectNowy.addEventListener('change', () => {
+            focusIloscDlaSelecta(selectNowy);
+            aktualizujDostepneProdukty();
+        });
 
         // Ustawiamy focus na input ilości
         const inputIloscNowy = newItem.querySelector('input[type="number"]');
@@ -200,11 +229,15 @@
         }
 
         index++;
+        aktualizujDostepneProdukty();
     }
 
     // Podpinamy event change do istniejących selectów na starcie strony
     document.querySelectorAll('#produkty-lista select').forEach(select => {
-        select.addEventListener('change', () => focusIloscDlaSelecta(select));
+        select.addEventListener('change', () => {
+            focusIloscDlaSelecta(select);
+            aktualizujDostepneProdukty();
+        });
     });
 
     // Podpowiedzi przy wpisywaniu nazwy produktu
@@ -219,14 +252,20 @@
             return;
         }
 
-        const dopasowane = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val));
+        const uzyteProdukty = aktualizujDostepneProdukty();
+        const dopasowane = produkty.filter(p => 
+            p.tw_nazwa.toLowerCase().includes(val) && !uzyteProdukty.has(p.id)
+        );
+
         if (!dopasowane.length) {
             listaPodpowiedzi.style.display = 'none';
             listaPodpowiedzi.innerHTML = '';
             return;
         }
 
-        listaPodpowiedzi.innerHTML = dopasowane.map(p => `<li data-id="${p.id}" class="cursor-pointer px-2 py-1 hover:bg-gray-200">${p.tw_nazwa}</li>`).join('');
+        listaPodpowiedzi.innerHTML = dopasowane.map(p => 
+            `<li data-id="${p.id}" class="cursor-pointer px-2 py-1 hover:bg-gray-200">${p.tw_nazwa}</li>`
+        ).join('');
         listaPodpowiedzi.style.display = 'block';
     });
 
@@ -247,5 +286,8 @@
             listaPodpowiedzi.innerHTML = '';
         }
     });
+
+    // Inicjalizacja na starcie
+    aktualizujDostepneProdukty();
     </script>
 </x-layout>

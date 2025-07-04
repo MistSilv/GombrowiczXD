@@ -6,17 +6,6 @@
             Nowe zamówienie produkcyjne dla: {{ $automat ? $automat->nazwa : '---' }}
         </h1>
 
-        <!-- Sekcja skanowania kodu EAN -->
-        <!--
-        <div class="mb-6">
-            <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
-            <button id="start-scan" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                Rozpocznij skanowanie
-            </button>
-            <div id="reader" style="width: 300px; display: none;"></div>
-            <div id="scan-result" class="mt-2 text-white"></div>
-        </div>
-       -->
         <form action="{{ route('zamowienia.store') }}" method="POST">
             @csrf
 
@@ -39,11 +28,10 @@
 
                     <input type="number" name="produkty[0][ilosc]" min="1" max="2147483647" class="form-input w-24 text-black" placeholder="Ilość" required>
 
-                    <button type="button" class=" bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+                    <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
                 </div>
             </div>
 
-            <!-- pole do wyszukiwania produktów po nazwie -->
             <div class="mb-4 relative">
                 <input type="text" id="szukaj-produkt" placeholder="Wpisz nazwę produktu" class="form-input w-full text-black mb-2" />
                 <ul id="lista-podpowiedzi" class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full hidden"></ul>
@@ -107,6 +95,29 @@
     const produktyMap = new Map();
     produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
 
+    // Funkcja do aktualizacji dostępnych produktów
+    function aktualizujDostepneProdukty() {
+        const uzyteProdukty = new Set();
+        document.querySelectorAll('#produkty-lista select').forEach(select => {
+            if (select.value) uzyteProdukty.add(parseInt(select.value));
+        });
+
+        // Aktualizacja list rozwijanych
+        document.querySelectorAll('#produkty-lista select').forEach(select => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- wybierz produkt --</option>';
+            
+            produkty.forEach(p => {
+                if (p.is_wlasny && (!uzyteProdukty.has(p.id) || p.id == parseInt(currentValue))) {
+                    const selected = p.id == parseInt(currentValue) ? 'selected' : '';
+                    select.innerHTML += `<option value="${p.id}" data-is-wlasny="1" ${selected}>${p.tw_nazwa}</option>`;
+                }
+            });
+        });
+
+        return uzyteProdukty;
+    }
+
     // Funkcja ustawiająca focus i zaznaczenie pola ilości po wybraniu produktu
     function focusIlePole(produktItem) {
         const iloscInput = produktItem.querySelector('input[type="number"]');
@@ -119,10 +130,13 @@
     // Dodawanie nowego produktu
     document.getElementById('dodaj-produkt').addEventListener('click', function() {
         const container = document.getElementById('produkty-lista');
+        const uzyteProdukty = aktualizujDostepneProdukty();
 
         let options = '<option value="">-- wybierz produkt --</option>';
         produkty.forEach(function(produkt) {
-            options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
+            if (produkt.is_wlasny && !uzyteProdukty.has(produkt.id)) {
+                options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
+            }
         });
 
         const newItem = document.createElement('div');
@@ -143,6 +157,7 @@
 
         select.addEventListener('change', () => {
             focusIlePole(newItem);
+            aktualizujDostepneProdukty();
         });
     });
 
@@ -150,6 +165,7 @@
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-item')) {
             e.target.closest('.produkt-item').remove();
+            aktualizujDostepneProdukty();
         }
     });
 
@@ -158,16 +174,30 @@
         select.addEventListener('change', (e) => {
             const produktItem = e.target.closest('.produkt-item');
             focusIlePole(produktItem);
+            aktualizujDostepneProdukty();
         });
     });
 
     // Dodawanie produktu do listy (np. ze skanera lub wyszukiwarki)
     function dodajProduktDoListy(produktId, nazwaProduktu, ilosc = 1) {
         const container = document.getElementById('produkty-lista');
+        const uzyteProdukty = aktualizujDostepneProdukty();
+
+        // Sprawdź czy produkt już istnieje na liście
+        const istniejącySelect = [...container.querySelectorAll('select')].find(s => s.value == produktId);
+        if (istniejącySelect) {
+            const inputIlosc = istniejącySelect.closest('.produkt-item').querySelector('input[type="number"]');
+            inputIlosc.value = parseInt(inputIlosc.value) + ilosc;
+            focusIlePole(istniejącySelect.closest('.produkt-item'));
+            return;
+        }
 
         let options = '<option value="">-- wybierz produkt --</option>';
         produkty.forEach(function(produkt) {
-            options += `<option value="${produkt.id}" data-is-wlasny="1">${produkt.tw_nazwa}</option>`;
+            if (produkt.is_wlasny && (!uzyteProdukty.has(produkt.id) || produkt.id == produktId)) {
+                const selected = produkt.id == produktId ? 'selected' : '';
+                options += `<option value="${produkt.id}" data-is-wlasny="1" ${selected}>${produkt.tw_nazwa}</option>`;
+            }
         });
 
         const newItem = document.createElement('div');
@@ -191,9 +221,11 @@
         // Podpięcie eventu change do nowego selecta
         selectNowy.addEventListener('change', () => {
             focusIlePole(newItem);
+            aktualizujDostepneProdukty();
         });
 
         index++;
+        aktualizujDostepneProdukty();
     }
 
     // Wyszukiwanie produktu po nazwie z podpowiedziami
@@ -207,7 +239,12 @@
                 return;
             }
 
-            const dopasowane = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val));
+            const uzyteProdukty = aktualizujDostepneProdukty();
+            const dopasowane = produkty.filter(p => 
+                p.is_wlasny && 
+                p.tw_nazwa.toLowerCase().includes(val) && 
+                !uzyteProdukty.has(p.id)
+            );
 
             if (dopasowane.length === 0) {
                 return;
@@ -217,6 +254,7 @@
                 const li = $('<li></li>')
                     .text(p.tw_nazwa)
                     .addClass('p-2 cursor-pointer hover:bg-gray-200')
+                    .attr('data-id', p.id)
                     .on('click', function() {
                         dodajProduktDoListy(p.id, p.tw_nazwa);
                         $('#szukaj-produkt').val('');
@@ -236,73 +274,7 @@
         });
     });
 
-    // Skaner kodów kreskowych
-    const scanner = new Html5Qrcode("reader");
-    let isScanning = false;
-
-    function onScanSuccess(decodedText) {
-        scanner.stop().then(() => {
-            isScanning = false;
-            $('#reader').hide();
-            $('#scan-result').text(`Zeskanowano: ${decodedText}`);
-
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-            fetch('/api/check-ean', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ kod_ean: decodedText })
-            })
-            .then(res => {
-                if (!res.ok) {
-                    return res.json().then(err => { throw err });
-                }
-                return res.json();
-            })
-            .then(data => {
-                const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
-                const iloscNum = Number(ilosc);
-                if (iloscNum > 0) {
-                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, iloscNum);
-                }
-            })
-            .catch(err => {
-                alert(err.message || 'Błąd podczas wyszukiwania produktu.');
-            });
-
-        }).catch(err => {
-            console.error('Błąd zatrzymania skanera:', err);
-        });
-    }
-
-    function onScanFailure(error) {
-        // Ignorujemy błędy skanowania
-    }
-
-    $('#start-scan').on('click', function() {
-        if (!isScanning) {
-            $('#reader').show();
-            scanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                onScanSuccess,
-                onScanFailure
-            ).then(() => {
-                isScanning = true;
-            }).catch(err => {
-                alert('Nie można rozpocząć skanowania: ' + err);
-            });
-        } else {
-            scanner.stop().then(() => {
-                isScanning = false;
-                $('#reader').hide();
-            }).catch(err => {
-                alert('Nie można zatrzymać skanowania: ' + err);
-            });
-        }
-    });
+    // Inicjalizacja na starcie
+    aktualizujDostepneProdukty();
 </script>
 </x-layout>

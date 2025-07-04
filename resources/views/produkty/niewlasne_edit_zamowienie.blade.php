@@ -13,7 +13,6 @@
         </div>
     @endif
 
-    <h2 class="text-2xl font-semibold mb-2 text-white">Deficyty produktów (wsady - zamówienia ogólne)</h2>
 
     <table class="min-w-full bg-white rounded shadow overflow-hidden mb-6">
         <thead class="bg-gray-300">
