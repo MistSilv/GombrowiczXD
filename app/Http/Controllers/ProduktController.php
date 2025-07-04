@@ -64,20 +64,17 @@ class ProduktController extends Controller
         //
     }
 
-    public function noweZamowienie()
-    {
-        // Tworzenie zamówienia
-        $zamowienieId = DB::table('zamowienia')->insertGetId([
-            'data_zamowienia' => now(),
-            'data_realizacji' => null,
-            'automat_id' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    public function formularzNoweZamowienie()
+{
+    $produkty = DB::table('produkty')
+        ->where('is_wlasny', false)
+        ->get();
 
-        // Przekierowanie do edycji produktów
-        return redirect()->route('produkty.zamowienie.edytuj', ['zamowienieId' => $zamowienieId]);
-    }
+    return view('produkty.niewlasne_edit_zamowienie', [
+        'produkty' => $produkty,
+        'zamowienieId' => null
+    ]);
+}
 
     public function edytujZamowienie($zamowienieId)
     {
@@ -96,9 +93,20 @@ class ProduktController extends Controller
         ]);
     }
 
-    public function zapiszZamowienie(Request $request, $zamowienieId)
+    public function zapiszZamowienie(Request $request)
     {
+        $zamowienieId = $request->input('zamowienieId');
         $ilosci = $request->input('ilosci', []);
+
+        if (!$zamowienieId) {
+            $zamowienieId = DB::table('zamowienia')->insertGetId([
+                'data_zamowienia' => now(),
+                'data_realizacji' => null,
+                'automat_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         foreach ($ilosci as $produktId => $ilosc) {
             $istnieje = DB::table('produkt_zamowienie')
@@ -125,6 +133,7 @@ class ProduktController extends Controller
         return redirect()->route('produkty.zamowienie.edytuj', ['zamowienieId' => $zamowienieId])
                         ->with('success', 'Ilości zostały zapisane.');
     }
+
 
 
    

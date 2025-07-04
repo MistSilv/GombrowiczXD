@@ -34,26 +34,11 @@
         @endif
     @endauth
 
-    <a href="{{ route('produkty.zamowienie.nowe') }}"
-            class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            Nowe zamówienie
-        </a>
+    <a href="{{ route('produkty.zamowienie.formularz') }}"
+        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+        Nowe zamówienie
+    </a>
+
 </div>
-    @auth
-        @if(auth()->user()->isSerwis())
-            <style>
-            @keyframes swing {
-            0%, 100% { transform: rotate(-45deg); }
-            50% { transform: rotate(45deg); }
-            }
-            .animate-swing {
-            animation: swing 1s ease-in-out infinite;
-            }
-            </style>
-            <div class="mt-6 flex justify-center items-center gap-4">
-            <img src="{{ asset('images/icons/iconxd.png') }}" alt="Ikona" class="w-40 h-40 rounded-3xl invert hue-rotate-90 animate-swing" />
-            </div>
-        @endif
-    @endauth
     </div>
 </x-layout>
