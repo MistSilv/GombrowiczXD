@@ -64,17 +64,50 @@ class ProduktController extends Controller
         //
     }
 
-    public function formularzNoweZamowienie()
-{
-    $produkty = DB::table('produkty')
-        ->where('is_wlasny', false)
-        ->get();
+    private function buildDeficyty(): \Illuminate\Support\Collection
+    {
+        // produkty obce
+        $produkty = Produkt::where('is_wlasny', false)->get();
 
-    return view('produkty.niewlasne_edit_zamowienie', [
-        'produkty' => $produkty,
-        'zamowienieId' => null
-    ]);
-}
+        // SUMA wsadów
+        $wsady = DB::table('produkt_wsad')
+            ->join('produkty','produkt_wsad.produkt_id','=','produkty.id')
+            ->where('produkty.is_wlasny',false)
+            ->select('produkt_wsad.produkt_id', DB::raw('SUM(ilosc) as suma'))
+            ->groupBy('produkt_wsad.produkt_id')
+            ->pluck('suma','produkt_id');
+
+        // SUMA zamówień ogólnych (automat_id = null)
+        $zam = DB::table('produkt_zamowienie')
+            ->join('zamowienia','produkt_zamowienie.zamowienie_id','=','zamowienia.id')
+            ->join('produkty',   'produkt_zamowienie.produkt_id',  '=','produkty.id')
+            ->whereNull('zamowienia.automat_id')
+            ->where('produkty.is_wlasny',false)
+            ->select('produkt_zamowienie.produkt_id', DB::raw('SUM(ilosc) as suma'))
+            ->groupBy('produkt_zamowienie.produkt_id')
+            ->pluck('suma','produkt_id');
+
+        // map → kolekcja z nazwą i deficytem
+        return $produkty->map(fn($p) => [
+            'id'         => $p->id,
+            'nazwa'      => $p->tw_nazwa,
+            'wsady'      => $wsady[$p->id] ?? 0,
+            'zamowienia' => $zam[$p->id]   ?? 0,
+            'deficyt'    => ($wsady[$p->id] ?? 0) - ($zam[$p->id] ?? 0),
+        ]);
+    }
+
+    public function formularzNoweZamowienie()
+    {
+        return view('produkty.niewlasne_edit_zamowienie', [
+            'produkty'    => Produkt::where('is_wlasny', false)->get(),
+            'deficyty'    => $this->buildDeficyty(),   // ← jest
+            'zamowienieId'=> null,
+        ]);
+    }
+
+
+
 
     public function edytujZamowienie($zamowienieId)
     {
@@ -130,8 +163,9 @@ class ProduktController extends Controller
             }
         }
 
-        return redirect()->route('produkty.zamowienie.edytuj', ['zamowienieId' => $zamowienieId])
-                        ->with('success', 'Ilości zostały zapisane.');
+        return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
+                ->with('success', 'Ilości zostały zapisane.');
+
     }
 
 

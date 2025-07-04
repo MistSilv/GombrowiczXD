@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/register', [RegisterController::class, 'store']);
 
     Route::resource('straty', StrataController::class, [
-        'parameters' => ['straty' => 'strata']
+'parameters' => ['straty' => 'strata']
     ])->only(['index', 'create', 'store', 'show']);
 
  

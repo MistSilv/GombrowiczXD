@@ -6,8 +6,40 @@
         {{ session('success') }}
     </div>
 @endif
+<h2 class="text-2xl font-semibold mb-2 text-white">Deficyty produktów (wsady - zamówienia ogólne)</h2>
 
-<form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4">
+<table class="min-w-full bg-white rounded shadow overflow-hidden mb-6">
+    <thead class="bg-gray-300">
+        <tr>
+            <th class="py-2 px-4 text-left">Produkt</th>
+            <th class="py-2 px-4 text-left">Wsady</th>
+            <th class="py-2 px-4 text-left">Zamówienia</th>
+            <th class="py-2 px-4 text-left">Różnica</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($deficyty as $item)
+            <tr
+                @class([
+                    'cursor-pointer hover:bg-green-100 font-semibold' => $item['deficyt'] > 0,
+                    'bg-red-100 text-red-700 font-semibold cursor-not-allowed' => $item['deficyt'] < 0,
+                    'bg-white' => $item['deficyt'] == 0,
+                ])
+                @if($item['deficyt'] > 0)
+                    onclick="setQuantity({{ $item['id'] }}, {{ $item['deficyt'] }})"
+                    title="Kliknij, aby wstawić {{ $item['deficyt'] }} do formularza"
+                @endif
+            >
+                <td class="py-2 px-4">{{ $item['nazwa'] }}</td>
+                <td class="py-2 px-4">{{ $item['wsady'] }}</td>
+                <td class="py-2 px-4">{{ $item['zamowienia'] }}</td>
+                <td class="py-2 px-4">{{ $item['deficyt'] }}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+
+<form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
     @csrf
     <input type="hidden" name="zamowienieId" value="{{ $zamowienieId ?? '' }}">
 
@@ -20,16 +52,24 @@
         </thead>
         <tbody>
             @foreach($produkty as $produkt)
-                <tr class="border-b last:border-0 hover:bg-gray-100">
+                <tr class="border-b last:border-0 hover:bg-gray-100" data-produkt-id="{{ $produkt->id }}">
                     <td class="py-3 px-6">{{ $produkt->tw_nazwa }}</td>
                     <td class="py-3 px-6">
-                        <input type="number" name="ilosci[{{ $produkt->id }}]" step="1" min="0" max="2147483647"
-                               value="{{ $produkt->ilosc ?? 0 }}" class="border rounded px-3 py-1 w-32">
+                        <input
+                            type="number"
+                            name="ilosci[{{ $produkt->id }}]"
+                            step="1"
+                            min="0"
+                            max="2147483647"
+                            value="{{ $produkt->ilosc ?? 0 }}"
+                            class="border rounded px-3 py-1 w-32"
+                            id="ilosc-{{ $produkt->id }}"
+                        >
                     </td>
                 </tr>
             @endforeach
         </tbody>
-    </table>s
+    </table>
 
     <div class="mt-6 text-center">
         <button type="submit" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
@@ -40,4 +80,16 @@
         </a>
     </div>
 </form>
+
+<script>
+    function setQuantity(produktId, ilosc) {
+        const input = document.getElementById('ilosc-' + produktId);
+        if(input) {
+            input.value = ilosc;
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+</script>
+
 </x-layout>
