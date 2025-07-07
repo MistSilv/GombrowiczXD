@@ -11,7 +11,7 @@ export default defineConfig({
 
         // Integracja z Laravel - automatyczny reload i podpięcie plików startowych
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'], // Pliki wejściowe CSS i JS
+            input: ['resources/css/app.css', 'resources/js/app.js' ], // Pliki wejściowe CSS i JS
             refresh: true, // Automatyczne odświeżanie przy zmianach plików backendowych
         }),
 
