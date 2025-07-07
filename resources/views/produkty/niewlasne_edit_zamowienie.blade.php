@@ -13,7 +13,6 @@
         </div>
     @endif
 
-
     <table class="min-w-full bg-white rounded shadow overflow-hidden mb-6">
         <thead class="bg-gray-300">
             <tr>
@@ -93,6 +92,7 @@
         </div>
     </form>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function setQuantity(produktId, ilosc) {
             const input = document.getElementById('ilosc-' + produktId);

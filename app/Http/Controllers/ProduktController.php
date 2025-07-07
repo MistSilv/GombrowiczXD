@@ -178,7 +178,7 @@ class ProduktController extends Controller
     /**
      * Wyślij email z zamówieniem produktów nie-własnych
      */
-     public function wyslijEmailZamowienia($zamowienieId)
+    public function wyslijEmailZamowienia($zamowienieId)
     {
         // Znajdź zamówienie z produktami i ich kodami EAN
         $zamowienie = Zamowienie::with(['produkty' => function($query) {
