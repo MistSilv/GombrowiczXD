@@ -93,6 +93,16 @@
             });
         });
 
+        // Zablokuj/odblokuj przycisk dodawania produktu
+        const btnDodaj = document.getElementById('dodaj-produkt');
+        if (uzyteProdukty.size >= produkty.length) {
+            btnDodaj.disabled = true;
+            btnDodaj.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            btnDodaj.disabled = false;
+            btnDodaj.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
         return uzyteProdukty;
     }
 
