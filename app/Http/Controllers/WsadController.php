@@ -63,7 +63,7 @@ class WsadController extends Controller
             'automat_id' => 'required|exists:automats,id',
             'produkty' => 'required|array',
             'produkty.*.produkt_id' => 'required|exists:produkty,id',
-            'produkty.*.ilosc' => 'required|integer|min:1 | max:2147483647',
+            'produkty.*.ilosc' => 'required|integer|min:1 | max:3000',
         ]);
 
         $wsad = Wsad::create([

@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <select name="produkty[${index}][produkt_id]" class="form-select w-full produkty-select" required>
                 ${options}
             </select>
-            <input type="number" name="produkty[${index}][ilosc]" min="1" class="form-input w-24 text-black" placeholder="Ilość" required value="${ilosc}">
+            <input type="number" name="produkty[${index}][ilosc]" min="1" max="3000" class="form-input w-24 text-black" placeholder="Ilość" required value="${ilosc}">
             <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
         `;
         container.appendChild(newItem);

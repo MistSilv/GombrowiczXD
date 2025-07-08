@@ -74,7 +74,7 @@ class ZamowienieController extends Controller
     $request->validate([
         'produkty' => 'required|array|min:1',
         'produkty.*.produkt_id' => 'required|exists:produkty,id',
-        'produkty.*.ilosc' => 'required|integer|min:1|max:2147483647',
+        'produkty.*.ilosc' => 'required|integer|min:1|max:3000',
         'automat_id' => 'required|exists:automats,id',
     ]);
 
