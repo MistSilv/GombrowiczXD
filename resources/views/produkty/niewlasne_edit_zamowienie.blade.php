@@ -92,7 +92,6 @@
         </div>
     </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function setQuantity(produktId, ilosc) {
             const input = document.getElementById('ilosc-' + produktId);
