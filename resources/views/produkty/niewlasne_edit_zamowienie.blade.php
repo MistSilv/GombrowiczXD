@@ -66,7 +66,7 @@
                                 name="ilosci[{{ $produkt->id }}]"
                                 step="1"
                                 min="0"
-                                max="2147483647"
+                                max="3000"
                                 value="{{ $produkt->ilosc ?? 0 }}"
                                 class="border rounded px-3 py-1 w-32"
                                 id="ilosc-{{ $produkt->id }}"
