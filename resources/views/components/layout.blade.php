@@ -5,27 +5,85 @@
     <title>{{ $title ?? 'Aplikacja Zamówień' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            safelist: [
+                'active', 
+                'mobile-menu-active',
+                'burger-active'
+        ]
+        }
+    </script>
+    <link href="/css/burger.css" rel="stylesheet">
+    <script src="/js/burger.js" defer></script>
     <link rel="manifest" href="/build/manifest.webmanifest">
     <meta name="theme-color" content="#1e293b">
 </head>
-<body class="bg-black">
-    
-    <nav class="bg-black px-4 py-3 flex items-center shadow mb-6 relative">
-        <div class="flex items-center space-x-4 absolute top-0 left-0 ml-3 mt-3">
-            <a href="{{ url('/welcome') }}" class="text-white font-bold text-lg hover:text-blue-900 transition flex items-center">
-                Strona główna
+<body class="bg-black font-sans min-h-screen">
+    <nav class="bg-black text-white shadow-md px-6 py-4 flex justify-between items-center rounded-b-xl">
+        <div class="flex items-center space-x-6">
+            <a href="{{ url('/welcome') }}" class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                🏠 Strona główna
             </a>
+            <div class="hidden md:flex items-center space-x-6">
+                @auth
+                    @if(!auth()->user()->isSerwis())
+                        <a href="{{ route('zamowienia.index') }}"
+                           class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                            📦 Zamówienia
+                        </a>
+                    @endif
+                @endauth
+                <a href="{{ route('straty.index') }}"
+                   class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                    🗑️ Straty
+                </a>
+            </div>
         </div>
-        <form method="POST" action="{{ route('logout') }}" class="absolute top-0 right-0 mr-3 mt-3">
+        @auth
+        <div class="flex items-center space-x-4">
+            <div class="hidden md:block">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                        🚪 Wyloguj
+                    </button>
+                </form>
+            </div>
+            <button class="burger-btn md:hidden focus:outline-none">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        @endauth
+    </nav>
+    <div class="mobile-menu md:hidden flex-col bg-gray-900 p-4 space-y-2">
+        @auth
+            @if(!auth()->user()->isSerwis())
+                <a href="{{ route('zamowienia.index') }}"
+                   class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
+                    📦 Zamówienia
+                </a>
+            @endif
+        @endauth
+        <a href="{{ route('straty.index') }}"
+           class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
+            🗑️ Straty
+        </a>
+        <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="text-white font-bold text-lg hover:text-blue-900 transition flex items-center">
-                Wyloguj
+            <button type="submit"
+                    class="bg-gray-800 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition w-full">
+                🚪 Wyloguj
             </button>
         </form>
-    </nav>
-    
+    </div>
+
     <main class="container mx-auto py-6 px-4">
         {{ $slot }}
     </main>
+
 </body>
 </html>

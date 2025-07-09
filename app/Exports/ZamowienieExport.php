@@ -29,9 +29,9 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
 
         $mapped = $this->zamowienie->produkty->map(function ($produkt) {
             return [
-                'Produkt' => $produkt->tw_nazwa,
-                'Kod EAN' => $produkt->ean ? (int)$produkt->ean : 'Brak kodu', // Rzutowanie na integer
-                'Ilość' => $produkt->pivot->ilosc,
+                'Produkt' => mb_convert_encoding($produkt->tw_nazwa ?? '', 'UTF-8', 'UTF-8'),
+                'Kod EAN' => $produkt->ean ? (string)$produkt->ean : 'Brak kodu',
+                'Ilość'   => $produkt->pivot->ilosc,
             ];
         })->toArray();
 
@@ -40,17 +40,13 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
 
     public function headings(): array
     {
-        return [
-            'Produkt', 
-            'Kod EAN',
-            'Ilość'
-        ];
+        return ['Produkt', 'Kod EAN', 'Ilość'];
     }
 
     public function columnFormats(): array
     {
         return [
-            'B' => '0', // Format liczbowy bez miejsc po przecinku
+            'B' => NumberFormat::FORMAT_NUMBER, // Liczba bez zer po przecinku
         ];
     }
 
@@ -60,31 +56,25 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // Ustaw szerokość kolumn
                 $sheet->getColumnDimension('A')->setWidth(30);
                 $sheet->getColumnDimension('B')->setWidth(20);
                 $sheet->getColumnDimension('C')->setWidth(10);
 
-                // Wymuś format liczbowy dla kolumny EAN
-                $sheet->getStyle('B2:B' . ($this->zamowienie->produkty->count() + 1))
-                     ->getNumberFormat()
-                     ->setFormatCode('0');
+                $count = $this->zamowienie->produkty->count();
+                $rowCount = $count + 1;
 
-                $rowCount = $this->zamowienie->produkty->count() + 1;
-
-                $sumCell = 'C' . ($rowCount + 1);
-                $sheet->setCellValue($sumCell, "=SUM(C2:C{$rowCount})");
-                $sheet->getStyle($sumCell)->getFont()->setBold(true);
+                $sheet->getStyle('B2:B' . $rowCount)
+                      ->getNumberFormat()
+                      ->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
                 $sheet->setCellValue('B' . ($rowCount + 1), 'Suma:');
                 $sheet->getStyle('B' . ($rowCount + 1))->getFont()->setBold(true);
-                
-                // Styl nagłówków
+
+                $sheet->setCellValue('C' . ($rowCount + 1), "=SUM(C2:C{$rowCount})");
+                $sheet->getStyle('C' . ($rowCount + 1))->getFont()->setBold(true);
+
                 $sheet->getStyle('A1:C1')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'color' => ['rgb' => 'FFFFFF'],
-                    ],
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'color' => ['rgb' => '4F81BD'],

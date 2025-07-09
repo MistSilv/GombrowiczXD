@@ -68,16 +68,6 @@
                         </a>
                     @endif 
                     @endauth
-                    @auth
-                    @if(!auth()->user()->isSerwis())
-                        <a href="{{ route('zamowienia.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                            Zamówienia
-                        </a>
-                    @endif
-                    @endauth
-                    <a href="{{ route('straty.index') }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                        Straty
-                    </a>
                     <a href="{{ route('wsady.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                         Powrót
                     </a>

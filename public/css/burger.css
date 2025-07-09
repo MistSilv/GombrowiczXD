@@ -1,0 +1,46 @@
+.mobile-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-menu.mobile-menu-active {
+    display: flex !important; 
+    opacity: 1 !important;
+}
+
+.burger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1000;
+}
+
+.burger-btn.burger-active span:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px) !important;
+}
+
+.burger-btn.burger-active span:nth-child(2) {
+    opacity: 0 !important;
+}
+
+.burger-btn.burger-active span:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px) !important;
+}
+
+@media (max-width: 767px) {
+    .burger-btn {
+        display: block;
+    }
+    
+    .burger-btn span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        margin: 5px 0;
+        background-color: white;
+        transition: all 0.3s ease;
+    }
+}

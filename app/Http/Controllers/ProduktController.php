@@ -191,7 +191,7 @@ class ProduktController extends Controller
         $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
 
         // Wyślij email
-        Mail::to('projekttest100969@gmail.com')->send(new ZamowienieMail($xlsxContent, $zamowienie));
+       Mail::to('projekttest100969@gmail.com')->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
             ->with('success', 'Ilości zostały zapisane.')

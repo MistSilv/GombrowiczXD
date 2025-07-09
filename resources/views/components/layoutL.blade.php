@@ -9,17 +9,17 @@
     <link rel="manifest" href="/build/manifest.webmanifest">
     <meta name="theme-color" content="#1e293b">
 </head>
-<body class="bg-black">
-    <nav class="bg-black px-4 py-3 flex items-center shadow mb-6 relative">
+<body class="bg-black font-sans min-h-screen">
+    <nav class="bg-black text-white shadow-md px-6 py-4 flex justify-between items-center rounded-b-xl">
         <div class="flex items-center space-x-4 absolute top-0 left-0 ml-3 mt-3">
             <a href="{{ url('/login') }}" class="text-white font-bold text-lg hover:text-blue-900 transition flex items-center">
-                Powrót
+                🡨 Powrót
             </a>
         </div>
     </nav>
     
     <main class="container mx-auto py-6 px-4">
-        {{ $slot }} <!-- miejsce na zawartość strony -->
+        {{ $slot }} 
     </main>
 </body>
 </html>
