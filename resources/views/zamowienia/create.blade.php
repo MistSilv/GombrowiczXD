@@ -49,7 +49,10 @@
                 <form method="POST" action="{{ route('zloz.zamowienie') }}">
                     @csrf
                     <div class="mt-4">
-                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
+                        <button 
+                        type="submit" 
+                        onclick="return confirm('Czy na pewno chcesz potwierdzić zamówienie?')"
+                        class="bg-green-600 text-white px-4 py-2 rounded">
                             Złóż zamówienie
                         </button>
                     </div>
