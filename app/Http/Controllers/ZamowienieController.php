@@ -91,7 +91,7 @@ class ZamowienieController extends Controller
     $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
 
     // Wysyłka maila z załącznikiem XLSX
-    Mail::to('domgggzzz@gmail.com')->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
+    Mail::to(config('mail.produkcja'))->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
 
     return redirect()->route('zamowienia.index', ['automat_id' => $request->get('automat_id')])
         ->with('success', 'Zamówienie zostało zapisane i mail wysłany.');
