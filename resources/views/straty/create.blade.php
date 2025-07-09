@@ -71,6 +71,7 @@
         <div>
             <button
                 type="submit"
+                onclick="return confirm('Czy na pewno chcesz potwierdzić aktualnie wykonywaną operację?')"
                 class="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition w-full sm:w-auto">
                 Zapisz stratę
             </button>

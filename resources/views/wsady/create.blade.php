@@ -48,11 +48,13 @@
                 + Dodaj produkt
             </button>
 
-            <div class="mt-4">
-                <button type="submit" class="px-4 py-2 rounded bg-green-700 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                    Dodaj wsad
-                </button>
-            </div>
+            <button
+                type="submit"
+                onclick="return confirm('Czy na pewno chcesz dodać wsad?')"
+                class="px-4 py-2 rounded bg-green-700 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                Dodaj wsad
+            </button>
+
 
             <div class="mt-6 flex flex-col md:flex-row md:items-center">
                 @if($automat)
