@@ -29,10 +29,9 @@ Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name(
 Route::middleware(['auth'])->group(function () {
     Route::get('/welcome', [AutomatController::class, 'index'])->name('welcome');
 
-        Route::get('/zamowienia/produkcja/nowe', [ZamowienieController::class, 'createProdukcja'])->name('zamowienia.produkcja.create');
+
+    Route::get('/zamowienia/produkcja/nowe', [ZamowienieController::class, 'createProdukcja'])->name('zamowienia.produkcja.create');
     Route::get('/zamowienia/nowe', [ZamowienieController::class, 'create'])->name('zamowienia.create');
-    Route::post('/zamowienia', [ZamowienieController::class, 'store'])->name('zamowienia.store');
-    Route::resource('zamowienia', ZamowienieController::class)->only(['create', 'store', 'index']);
     Route::get('/zamowienia', [ZamowienieController::class, 'index'])->name('zamowienia.index');
     Route::get('/zamowienia/archiwum', [ZamowienieController::class, 'archiwum'])->name('zamowienia.archiwum');
     Route::get('/zamowienia/{zamowienie}', [ZamowienieController::class, 'show'])->name('zamowienia.show');
@@ -40,7 +39,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/podsumowanie/tydzien/{date?}', [ZamowienieController::class, 'podsumowanieTygodnia'])->name('zamowienia.podsumowanie.tydzien');
     Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
     Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
-    
+    Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
+    Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierzZamowienieCsv'])->name('zamowienia.csv');
+
+    Route::post('/zamowienia', [ZamowienieController::class, 'store'])->name('zamowienia.store');
+    Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
+
+    Route::resource('zamowienia', ZamowienieController::class)->only(['create', 'store', 'index']);
 
 
     Route::get('/straty/podsumowanie/dzien/{date?}', [StrataController::class, 'podsumowanieDnia'])->name('straty.podsumowanie.dzien');
@@ -48,37 +53,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/straty/podsumowanie/miesiac/{month?}', [StrataController::class, 'podsumowanieMiesiaca'])->name('straty.podsumowanie.miesiac');
     Route::get('/straty/podsumowanie/rok/{year?}', [StrataController::class, 'podsumowanieRoku'])->name('straty.podsumowanie.rok');
 
+    Route::resource('straty', StrataController::class, ['parameters' => ['straty' => 'strata']])->only(['index', 'create', 'store', 'show']);
+
 
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
     Route::post('/register', [RegisterController::class, 'store']);
 
-    Route::resource('straty', StrataController::class, [
-'parameters' => ['straty' => 'strata']
-    ])->only(['index', 'create', 'store', 'show']);
-
  
-    Route::get('/export/zamowienia/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])
-        ->name('export.zamowienia');
-
-
-    Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty'])
-        ->name('export.straty');
-
+    Route::get('/export/zamowienia/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('export.zamowienia');
+    Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty'])->name('export.straty');
     Route::get('/export/zamowienie/{zamowienie_id}/{format}', [ExportController::class, 'exportPojedynczeZamowienie'])->name('export.zamowienie');
 
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::resource('wsady', WsadController::class);
+    
     Route::get('/wsady/automat/{automat_id}', [WsadController::class, 'index'])->name('wsady.byAutomat');
     Route::get('/wsady', [WsadController::class, 'create'])->name('wsady.index');
     Route::post('/wsady/{produkt_id}/{automat_id}/decrease', [WsadController::class, 'decrease'])->name('wsady.decrease');
     Route::delete('/wsady/{produkt_id}/{automat_id}/delete', [WsadController::class, 'delete'])->name('wsady.delete');
-
-    Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
-
-    Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
-    Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierzZamowienieCsv'])->name('zamowienia.csv');
+    Route::resource('wsady', WsadController::class);
 
     
     // Wyświetlenie formularza bez tworzenia zamówienia
