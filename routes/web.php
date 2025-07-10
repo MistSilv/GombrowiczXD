@@ -29,6 +29,8 @@ Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name(
 Route::middleware(['auth'])->group(function () {
     Route::get('/welcome', [AutomatController::class, 'index'])->name('welcome');
 
+    Route::resource('zamowienia', ZamowienieController::class)->only(['create', 'store', 'index']);
+
         Route::get('/zamowienia/produkcja/nowe', [ZamowienieController::class, 'createProdukcja'])->name('zamowienia.produkcja.create');
     Route::get('/zamowienia/nowe', [ZamowienieController::class, 'create'])->name('zamowienia.create');
     Route::post('/zamowienia', [ZamowienieController::class, 'store'])->name('zamowienia.store');
@@ -40,6 +42,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/podsumowanie/tydzien/{date?}', [ZamowienieController::class, 'podsumowanieTygodnia'])->name('zamowienia.podsumowanie.tydzien');
     Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
     Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
+    Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
+    Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierzZamowienieCsv'])->name('zamowienia.csv');
+
+    Route::post('/zamowienia', [ZamowienieController::class, 'store'])->name('zamowienia.store');
+    Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
+
     
 
 
