@@ -1,3 +1,5 @@
+window._produkty = [];
+
 let index = 0;
 
 function aktualizujDostepneProdukty() {
@@ -31,7 +33,6 @@ function dodajWiersz(produktId = '', ilosc = '') {
     const tbody = document.querySelector('#produkty-lista tbody');
     const uzyteProdukty = aktualizujDostepneProdukty();
 
-    // jeśli produkt już jest dodany, nie dodaj duplikatu
     if (produktId && uzyteProdukty.has(produktId)) {
         return;
     }
@@ -67,7 +68,6 @@ function dodajWiersz(produktId = '', ilosc = '') {
     const input = tr.querySelector('input[type="number"]');
     const hiddenInput = tr.querySelector('input[type="hidden"]');
 
-    // Obsługa wyboru produktu w select
     if (!produktId) {
         select.addEventListener('change', () => {
             const val = select.value;
@@ -82,7 +82,6 @@ function dodajWiersz(produktId = '', ilosc = '') {
         });
     }
 
-    // Aktualizacja ukrytego inputa z ilością
     input.addEventListener('input', () => {
         hiddenInput.value = input.value;
     });
@@ -96,17 +95,16 @@ function setQuantity(produktId, ilosc) {
     for (const row of rows) {
         if (parseInt(row.getAttribute('data-produkt-id')) === produktId) {
             const input = row.querySelector('input[type="number"]');
-            if(input) {
+            if (input) {
                 input.value = ilosc;
                 input.focus();
                 input.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             const hiddenInput = row.querySelector('input[type="hidden"]');
-            if(hiddenInput) hiddenInput.value = ilosc;
+            if (hiddenInput) hiddenInput.value = ilosc;
             return;
         }
     }
-    // jeśli nie znaleziono, dodaj nowy wiersz i ustaw ilość
     dodajWiersz(produktId, ilosc);
     setTimeout(() => {
         const rowsNowe = document.querySelectorAll('#produkty-lista tbody tr');
@@ -124,12 +122,20 @@ function setQuantity(produktId, ilosc) {
 }
 
 function filtrujDeficyty() {
-    const input = document.getElementById('minDeficyt');
-    const min = input.value.trim() === '' ? null : parseInt(input.value);
+    const maxStanInput = document.getElementById('maxStan');
+    const filterNazwaInput = document.getElementById('filterNazwa');
+
+    const maxStan = maxStanInput.value.trim() === '' ? null : parseInt(maxStanInput.value);
+    const filterNazwa = filterNazwaInput.value.trim().toLowerCase();
 
     document.querySelectorAll('.deficyt-row').forEach(row => {
-        const deficyt = parseInt(row.getAttribute('data-deficyt')) || 0;
-        if (min === null || deficyt >= min) {
+        const naStanie = parseInt(row.getAttribute('data-deficyt')) || 0;
+        const nazwa = row.querySelector('.product-name').textContent.toLowerCase();
+
+        const pokazPoStanie = (maxStan === null || naStanie < maxStan);
+        const pokazPoNazwie = (filterNazwa === '' || nazwa.includes(filterNazwa));
+
+        if (pokazPoStanie && pokazPoNazwie) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
@@ -146,18 +152,32 @@ document.addEventListener('click', function (e) {
 
 document.getElementById('dodaj-produkt').addEventListener('click', () => dodajWiersz());
 
-// Dodajemy eventy do wierszy deficytów, by dodawać produkt do zamówienia
+document.querySelectorAll('.product-name').forEach(el => {
+    el.addEventListener('click', () => {
+        const nazwa = el.textContent.trim();
+        const produkt = window._produkty.find(p => p.tw_nazwa === nazwa);
+        if (produkt) {
+            dodajWiersz(produkt.id, 0);
+            setTimeout(() => {
+                const rows = document.querySelectorAll('#produkty-lista tbody tr');
+                for (const row of rows) {
+                    if (parseInt(row.getAttribute('data-produkt-id')) === produkt.id) {
+                        const inputIlosc = row.querySelector('input[type="number"]');
+                        if (inputIlosc) {
+                            inputIlosc.focus();
+                            inputIlosc.select();
+                        }
+                        break;
+                    }
+                }
+            }, 100);
+        }
+    });
+});
+
 window.addEventListener('DOMContentLoaded', () => {
     aktualizujDostepneProdukty();
     filtrujDeficyty();
-    document.getElementById('minDeficyt').addEventListener('input', filtrujDeficyty);
-
-    document.querySelectorAll('.deficyt-row').forEach(row => {
-        row.addEventListener('click', () => {
-            const produktId = parseInt(row.getAttribute('data-produkt-id'));
-            if (!isNaN(produktId)) {
-                dodajWiersz(produktId, 0);
-            }
-        });
-    });
+    document.getElementById('maxStan').addEventListener('input', filtrujDeficyty);
+    document.getElementById('filterNazwa').addEventListener('input', filtrujDeficyty);
 });
