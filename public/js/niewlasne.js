@@ -47,23 +47,28 @@ function dodajWiersz(produktId = '', ilosc = '') {
     });
 
     const tr = document.createElement('tr');
-    tr.setAttribute('data-produkt-id', produktId || '');
-    tr.innerHTML = `
-        <td class="py-3 px-2 sm:px-6 w-full">
-            <select class="w-full border rounded px-2 py-1" required ${produktId ? 'disabled' : ''}>
-                ${options}
-            </select>
-            <input type="hidden" name="ilosci[${produktId}]" value="${ilosc || 0}">
-        </td>
-        <td class="py-3 px-2 sm:px-6">
-            <input type="number" min="0" max="3000" step="1" value="${ilosc || 0}"
-            class="border rounded px-3 py-2 w-full sm:w-32 text-right text-base sm:text-sm text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required>
-        </td>
-        <td class="py-3 px-2 sm:px-6 text-right">
-            <button type="button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded transition remove-row">✕</button>
-        </td>
-    `;
+        tr.setAttribute('data-produkt-id', produktId || '');
+        tr.classList.add('flex', 'flex-col', 'sm:table-row', 'w-full'); // dodajemy mobilną kolumnę
+        tr.innerHTML = `
+            <td class="py-2 px-2 w-full sm:table-cell">
+                <select class="w-full border rounded px-3 py-2 text-base text-black focus:outline-none focus:ring-2 focus:ring-blue-500" required ${produktId ? 'disabled' : ''}>
+                    ${options}
+                </select>
+                <input type="hidden" name="ilosci[${produktId}]" value="${ilosc || 0}">
+            </td>
+            <td class="py-2 px-2 w-full sm:table-cell">
+                <input type="number" min="0" max="3000" step="1" value="${ilosc || 0}"
+                    class="border rounded px-4 py-3 w-full text-right text-xl text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+            </td>
+            <td class="py-2 px-2 text-right w-full sm:table-cell sm:w-auto">
+                <button type="button"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto remove-row">
+                    ✕
+                </button>
+            </td>
+        `;
+
 
     tbody.appendChild(tr);
 
