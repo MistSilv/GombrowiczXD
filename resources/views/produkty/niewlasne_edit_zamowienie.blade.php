@@ -1,11 +1,7 @@
 <x-layout>
-    <h1 class="text-xl sm:text-3xl font-bold mb-6 text-white text-center sm:text-left">
-        Edytuj ilości produktów dla zamówienia
-    </h1>
-
     <div class="flex flex-col sm:flex-row sm:items-center sm:gap-8 mb-6">
         <div class="flex flex-col flex-1 mb-4 sm:mb-0">
-            <label for="maxStan" class="text-white font-semibold mb-1">Pokaż tylko produkty z ilością na stanie mniejszą niż:</label>
+            <label for="maxStan" class="text-white font-semibold mb-1">Ilość na stanie < niż:</label>
             <input type="number" id="maxStan" min="0"
                 class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Np. 200">
@@ -20,7 +16,7 @@
 
     {{-- Tabela deficytów --}}
     <div class="p-4 bg-white rounded shadow-md overflow-x-auto mb-6">
-        <h2 class="text-xl font-bold mb-4 text-gray-800">Deficyty Produktów Obcych</h2>
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Stan Produktów niekraftowych</h2>
         <table class="min-w-full table-auto border-collapse border border-gray-300 text-sm sm:text-base">
             <thead class="bg-gray-100">
                 <tr>
@@ -58,9 +54,9 @@
             <table class="min-w-full table-auto text-sm sm:text-base" id="produkty-lista">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="py-3 px-2 sm:px-6 text-left font-bold text-gray-700">Nazwa produktu</th>
-                        <th class="py-3 px-2 sm:px-6 text-left font-bold text-gray-700 w-24">Ilość</th>
-                        <th class="py-3 px-2 sm:px-6 w-12"></th>
+                        <th class="py-3 px-2 text-left font-bold text-gray-700 w-1/2 sm:w-auto">Nazwa</th>
+                        <th class="py-3 px-2 text-right font-bold text-gray-700 w-1/3 sm:w-32">Ilość</th>
+                        <th class="py-3 px-2 w-1/6 sm:w-12"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,6 +64,7 @@
                 </tbody>
             </table>
         </div>
+
 
         <button type="button" id="dodaj-produkt"
             class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition w-full sm:w-auto">
