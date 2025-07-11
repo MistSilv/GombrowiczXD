@@ -69,12 +69,10 @@ class ProduktController extends Controller
         //
     }
 
-    private function buildDeficyty(): \Illuminate\Support\Collection
+   private function buildDeficyty(): \Illuminate\Support\Collection
     {
-        // produkty obce
         $produkty = Produkt::where('is_wlasny', false)->get();
 
-        // SUMA wsadów
         $wsady = DB::table('produkt_wsad')
             ->join('produkty','produkt_wsad.produkt_id','=','produkty.id')
             ->where('produkty.is_wlasny',false)
@@ -82,7 +80,6 @@ class ProduktController extends Controller
             ->groupBy('produkt_wsad.produkt_id')
             ->pluck('suma','produkt_id');
 
-        // SUMA zamówień ogólnych (automat_id = null)
         $zam = DB::table('produkt_zamowienie')
             ->join('zamowienia','produkt_zamowienie.zamowienie_id','=','zamowienia.id')
             ->join('produkty',   'produkt_zamowienie.produkt_id',  '=','produkty.id')
@@ -92,15 +89,15 @@ class ProduktController extends Controller
             ->groupBy('produkt_zamowienie.produkt_id')
             ->pluck('suma','produkt_id');
 
-        // map → kolekcja z nazwą i deficytem
         return $produkty->map(fn($p) => [
             'id'         => $p->id,
             'nazwa'      => $p->tw_nazwa,
             'wsady'      => $wsady[$p->id] ?? 0,
             'zamowienia' => $zam[$p->id]   ?? 0,
-            'deficyt'    => ($wsady[$p->id] ?? 0) - ($zam[$p->id] ?? 0),
+            'na_stanie'  => ($zam[$p->id] ?? 0) - ($wsady[$p->id] ?? 0),
         ]);
     }
+
 
     public function formularzNoweZamowienie()
     {

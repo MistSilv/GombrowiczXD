@@ -20,59 +20,33 @@
             placeholder="Np. 500">
     </div>
     {{-- Tabela deficytów --}}
-    <div class="overflow-x-auto mb-6">
-        <table class="min-w-full bg-white rounded shadow text-sm sm:text-base">
-            <thead class="bg-gray-300">
+    <div class="p-4">
+    <h2 class="text-xl font-bold mb-4">Deficyty Produktów Obcych</h2>
+    <table class="min-w-full bg-white border border-gray-300">
+        <thead>
+            <tr>
+                <th class="border px-4 py-2">Produkt</th>
+                <th class="border px-4 py-2">Wsady</th>
+                <th class="border px-4 py-2">Zamówienia</th>
+                <th class="border px-4 py-2">Na Stanie</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($deficyty as $d)
                 <tr>
-                    <th class="py-2 px-2 sm:px-4 text-left">Produkt</th>
-                    <th class="py-2 px-2 sm:px-4 text-left">Wsady</th>
-                    <th class="py-2 px-2 sm:px-4 text-left">Zamówienia</th>
-                    <th class="py-2 px-2 sm:px-4 text-left">Różnica</th>
+                    <td class="border px-4 py-2">{{ $d['nazwa'] }}</td>
+                    <td class="border px-4 py-2">{{ $d['wsady'] }}</td>
+                    <td class="border px-4 py-2">{{ $d['zamowienia'] }}</td>
+                    <td class="border px-4 py-2 
+                        {{ $d['na_stanie'] < 0 ? 'text-red-600 font-bold' : 'text-green-700' }}">
+                        {{ $d['na_stanie'] }}
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (collect($deficyty)->sortByDesc('deficyt') as $item)
-                    @php
-                        $deficyt = $item['deficyt'];
-                        $rowClasses = 'deficyt-row';
-                        $warningIcon = '';
+            @endforeach
+        </tbody>
+    </table>
+</div>
 
-                        if ($deficyt < 0) {
-                            $rowClasses .= ' bg-purple-100 text-fuchsia-600 font-semibold cursor-not-allowed';
-                        } elseif ($deficyt > 3000) {
-                            $rowClasses .= ' bg-red-600 text-white font-bold cursor-pointer';
-                            $warningIcon = '⚠️ ';
-                        } elseif ($deficyt > 1000) {
-                            $rowClasses .= ' bg-red-300 font-semibold cursor-pointer';
-                        } elseif ($deficyt > 500) {
-                            $rowClasses .= ' bg-yellow-100 font-semibold cursor-pointer';
-                        } elseif ($deficyt > 200) {
-                            $rowClasses .= ' bg-green-100 font-semibold cursor-pointer';
-                        } elseif ($deficyt > 0) {
-                            $rowClasses .= ' bg-white font-semibold cursor-pointer';
-                        } else {
-                            $rowClasses .= ' bg-white';
-                        }
-                    @endphp
-                    <tr
-                        class="{{ $rowClasses }}"
-                        data-deficyt="{{ $deficyt }}"
-                        @if($deficyt > 0)
-                            onclick="setQuantity({{ $item['id'] }}, {{ $deficyt }})"
-                            title="Kliknij, aby wstawić {{ $deficyt }} do formularza"
-                        @endif
-                    >
-                        <td class="py-2 px-2 sm:px-4 break-words max-w-[150px]">
-                            {!! $warningIcon !!}{{ $item['nazwa'] }}
-                        </td>
-                        <td class="py-2 px-2 sm:px-4">{{ $item['wsady'] }}</td>
-                        <td class="py-2 px-2 sm:px-4">{{ $item['zamowienia'] }}</td>
-                        <td class="py-2 px-2 sm:px-4">{{ $deficyt }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
 
     {{-- Formularz --}}
     <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
