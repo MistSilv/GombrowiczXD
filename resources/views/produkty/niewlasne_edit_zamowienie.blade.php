@@ -19,34 +19,33 @@
             class="px-3 py-2 rounded border w-full sm:w-64 text-black"
             placeholder="Np. 500">
     </div>
+    
     {{-- Tabela deficytów --}}
     <div class="p-4">
-    <h2 class="text-xl font-bold mb-4">Deficyty Produktów Obcych</h2>
-    <table class="min-w-full bg-white border border-gray-300">
-        <thead>
-            <tr>
-                <th class="border px-4 py-2">Produkt</th>
-                <th class="border px-4 py-2">Wsady</th>
-                <th class="border px-4 py-2">Zamówienia</th>
-                <th class="border px-4 py-2">Na Stanie</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($deficyty as $d)
+        <h2 class="text-xl font-bold mb-4">Deficyty Produktów Obcych</h2>
+        <table class="min-w-full bg-white border border-gray-300">
+            <thead>
                 <tr>
-                    <td class="border px-4 py-2">{{ $d['nazwa'] }}</td>
-                    <td class="border px-4 py-2">{{ $d['wsady'] }}</td>
-                    <td class="border px-4 py-2">{{ $d['zamowienia'] }}</td>
-                    <td class="border px-4 py-2 
-                        {{ $d['na_stanie'] < 0 ? 'text-red-600 font-bold' : 'text-green-700' }}">
-                        {{ $d['na_stanie'] }}
-                    </td>
+                    <th class="border px-4 py-2">Produkt</th>
+                    <th class="border px-4 py-2">Wsady</th>
+                    <th class="border px-4 py-2">Zamówienia</th>
+                    <th class="border px-4 py-2">Na Stanie</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
-
+            </thead>
+            <tbody>
+                @foreach($deficyty as $d)
+                    <tr class="deficyt-row cursor-pointer" data-produkt-id="{{ $d['id'] }}">
+                        <td class="border px-4 py-2">{{ $d['nazwa'] }}</td>
+                        <td class="border px-4 py-2">{{ $d['wsady'] }}</td>
+                        <td class="border px-4 py-2">{{ $d['zamowienia'] }}</td>
+                        <td class="border px-4 py-2 {{ $d['na_stanie'] < 0 ? 'text-red-600 font-bold' : 'text-green-700' }}">
+                            {{ $d['na_stanie'] }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
     {{-- Formularz --}}
     <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
@@ -64,29 +63,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($produkty as $produkt)
-                        <tr data-produkt-id="{{ $produkt->id }}">
-                            <td class="py-3 px-2 sm:px-6 w-full">
-                                <span>{{ $produkt->tw_nazwa }}</span>
-                                <input type="hidden" name="ilosci[{{ $produkt->id }}]" value="{{ $produkt->ilosc ?? 0 }}">
-                            </td>
-                            <td class="py-3 px-2 sm:px-6">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="3000"
-                                    step="1"
-                                    name="ilosci[{{ $produkt->id }}]"
-                                    value="{{ $produkt->ilosc ?? 0 }}"
-                                    class="border rounded px-2 py-1 w-full max-w-[6rem] sm:w-32 text-black"
-                                    required
-                                >
-                            </td>
-                            <td class="py-3 px-2 sm:px-6 text-right">
-                                <button type="button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded transition remove-row">✕</button>
-                            </td>
-                        </tr>
-                    @endforeach
+                    {{-- Pusta na start --}}
                 </tbody>
             </table>
         </div>

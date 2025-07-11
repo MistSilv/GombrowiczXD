@@ -146,8 +146,18 @@ document.addEventListener('click', function (e) {
 
 document.getElementById('dodaj-produkt').addEventListener('click', () => dodajWiersz());
 
+// Dodajemy eventy do wierszy deficytów, by dodawać produkt do zamówienia
 window.addEventListener('DOMContentLoaded', () => {
     aktualizujDostepneProdukty();
     filtrujDeficyty();
     document.getElementById('minDeficyt').addEventListener('input', filtrujDeficyty);
+
+    document.querySelectorAll('.deficyt-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const produktId = parseInt(row.getAttribute('data-produkt-id'));
+            if (!isNaN(produktId)) {
+                dodajWiersz(produktId, 0);
+            }
+        });
+    });
 });
