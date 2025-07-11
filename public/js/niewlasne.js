@@ -1,4 +1,4 @@
-window._produkty = [];
+window._produkty = JSON.parse(document.getElementById('produkty-data').textContent);
 
 let index = 0;
 
@@ -33,6 +33,7 @@ function dodajWiersz(produktId = '', ilosc = '') {
     const tbody = document.querySelector('#produkty-lista tbody');
     const uzyteProdukty = aktualizujDostepneProdukty();
 
+    // jeśli produkt już jest dodany, nie dodaj duplikatu
     if (produktId && uzyteProdukty.has(produktId)) {
         return;
     }
@@ -68,6 +69,7 @@ function dodajWiersz(produktId = '', ilosc = '') {
     const input = tr.querySelector('input[type="number"]');
     const hiddenInput = tr.querySelector('input[type="hidden"]');
 
+    // Obsługa wyboru produktu w select
     if (!produktId) {
         select.addEventListener('change', () => {
             const val = select.value;
@@ -82,6 +84,7 @@ function dodajWiersz(produktId = '', ilosc = '') {
         });
     }
 
+    // Aktualizacja ukrytego inputa z ilością
     input.addEventListener('input', () => {
         hiddenInput.value = input.value;
     });
@@ -95,16 +98,17 @@ function setQuantity(produktId, ilosc) {
     for (const row of rows) {
         if (parseInt(row.getAttribute('data-produkt-id')) === produktId) {
             const input = row.querySelector('input[type="number"]');
-            if (input) {
+            if(input) {
                 input.value = ilosc;
                 input.focus();
                 input.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             const hiddenInput = row.querySelector('input[type="hidden"]');
-            if (hiddenInput) hiddenInput.value = ilosc;
+            if(hiddenInput) hiddenInput.value = ilosc;
             return;
         }
     }
+    // jeśli nie znaleziono, dodaj nowy wiersz i ustaw ilość
     dodajWiersz(produktId, ilosc);
     setTimeout(() => {
         const rowsNowe = document.querySelectorAll('#produkty-lista tbody tr');
@@ -150,14 +154,17 @@ document.addEventListener('click', function (e) {
     }
 });
 
+// Dodawanie pustego wiersza na kliknięcie przycisku
 document.getElementById('dodaj-produkt').addEventListener('click', () => dodajWiersz());
 
+// Dodaj produkt do zamówienia po kliknięciu nazwy z tabeli deficytów
 document.querySelectorAll('.product-name').forEach(el => {
     el.addEventListener('click', () => {
         const nazwa = el.textContent.trim();
         const produkt = window._produkty.find(p => p.tw_nazwa === nazwa);
         if (produkt) {
             dodajWiersz(produkt.id, 0);
+
             setTimeout(() => {
                 const rows = document.querySelectorAll('#produkty-lista tbody tr');
                 for (const row of rows) {
