@@ -24,12 +24,10 @@ class Wsad extends Model
                     ->withPivot('ilosc');
     }
 
-
     protected $table = 'wsady';
 
-    /*
     protected $casts = [
         'data_wsadu' => 'datetime',
     ];
-    */
+    
 }

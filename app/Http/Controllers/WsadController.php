@@ -15,13 +15,18 @@ class WsadController extends Controller
         $automatId = $request->get('automat_id');
         $automat = $automatId ? Automat::findOrFail($automatId) : null;
 
-        $query = Wsad::with('automat', 'produkty')->latest();
+        $query = Wsad::with(['automat', 'produkty'])->latest();
 
         if ($automat) {
             $query->where('automat_id', $automat->id);
         }
 
-        $wsady = $query->get();
+        $query->getQuery()->orders = null;
+
+        $query = $query->orderBy('created_at', 'desc');
+
+        $wsady = $query->paginate(20);
+
         $produkty = Produkt::orderBy('tw_nazwa')->get();
 
         $wsadProdukty = collect();
@@ -83,11 +88,13 @@ class WsadController extends Controller
                          ->with('success', 'Wsad został dodany.');
     }
 
-    public function show(Wsad $wsad)
+    public function show($id)
     {
-        $wsad->load('automat', 'produkty');
+        $wsad = Wsad::with(['automat', 'produkty'])->findOrFail($id);
+
         return view('wsady.show', compact('wsad'));
     }
+
 
     // Usuń produkt z ostatniego wsadu automatu
     public function delete(Request $request)
