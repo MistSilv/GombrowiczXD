@@ -20,6 +20,11 @@ Route::get('/login', function () {
     return view('login');
 })->name('login');
 
+    Route::get('/capybara', function () {
+    return view('capybara');
+})->name('capybara.show');
+
+
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -100,6 +105,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/produkty/wlasne/nowy', [ProduktController::class, 'createWlasny'])->name('produkty.create.wlasny');
     Route::post('/produkty/wlasne/nowy', [ProduktController::class, 'storeWlasny'])->name('produkty.store.wlasny');
 
-    
+
 
 });

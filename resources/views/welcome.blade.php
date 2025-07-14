@@ -41,7 +41,11 @@
     <a href="{{ route('produkty.create.wlasny') }}"
         class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
             ➕ Dodaj produkt własny
-</a>
+    </a>
+    <a href="{{ route('capybara.show') }}"
+        class="bg-lime-700 hover:bg-lime-900 text-white font-bold py-2 px-4 rounded-lg transition">
+            🐹 Zobacz Kapibarę
+    </a>
 
 
 </div>
