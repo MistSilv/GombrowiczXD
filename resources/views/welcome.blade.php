@@ -39,8 +39,8 @@
         Nowe zamówienie
     </a>
     <a href="{{ route('produkty.create.wlasny') }}"
-   class="bg-red-700 hover:bg-red-800 text-white font-semibold px-4 py-2 rounded-lg transition">
-    ➕ Dodaj produkt własny
+        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            ➕ Dodaj produkt własny
 </a>
 
 

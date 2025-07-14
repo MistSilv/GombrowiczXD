@@ -2,7 +2,7 @@
     <h1 class="text-2xl text-white mb-4">Dodaj produkt własny</h1>
 
     @if (session('success'))
-        <div class="bg-green-600 text-white p-2 mb-4 rounded">{{ session('success') }}</div>
+    <div class="bg-green-600 text-white p-6 mb-4 rounded max-w-lg w-full shadow-lg">{{ session('success') }}</div>
     @endif
 
     <form method="POST" action="{{ route('produkty.store.wlasny') }}" class="space-y-4 max-w-lg bg-gray-800 p-6 rounded-xl shadow-lg">
@@ -20,6 +20,6 @@
 
         <input type="hidden" name="is_wlasny" value="1">
 
-        <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-2 rounded w-full">💾 Zapisz</button>
+        <button type="submit" class="bg-green-700 hover:bg-green-800 text-white font-bold px-4 py-2 rounded w-full">Zapisz</button>
     </form>
 </x-layout>
