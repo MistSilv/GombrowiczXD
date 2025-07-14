@@ -213,4 +213,23 @@ class ProduktController extends Controller
             "zamowienie_{$zamowienieId}_{$date}.xlsx"
         );
     }
+    public function createWlasny()
+    {
+        return view('produkty.create_wlasny');
+    }
+
+    public function storeWlasny(Request $request)
+    {
+        $validated = $request->validate([
+            'tw_nazwa' => 'required|string|max:255',
+            'tw_idabaco' => 'nullable|string|max:255',
+        ]);
+
+        $validated['is_wlasny'] = true;
+
+        Produkt::create($validated);
+
+        return redirect()->route('produkty.create.wlasny')->with('success', 'Produkt został dodany.');
+    }
+
 }
