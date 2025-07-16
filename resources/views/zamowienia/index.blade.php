@@ -13,43 +13,36 @@
             @endif
         @endauth
 
-        <h1 class="text-2xl font-bold mb-4 text-white">
-            Aktualne zamówienia
-            @if(request('automat_id'))
-                dla automatu #{{ request('automat_id') }}
-            @endif
-        </h1>
+        <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista zamówień</h1>
 
-        @if ($zamowienia->isEmpty())
-            <p class="text-white">Brak aktualnych zamówień.</p>
-        @else
-            <div class="overflow-x-auto w-full overflow-visible">
-                <!-- tabela z zamówieniami -->
-                <table class="table-auto w-full border-collapse border border-gray-300"> 
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border px-4 py-2">ID</th>
-                            <th class="border px-4 py-2">Data zamówienia</th>
-                            <th class="border px-4 py-2">Data realizacji</th>
-                            <th class="border px-4 py-2">Akcje</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($zamowienia as $zamowienie)
-                            <tr class="text-white">
-                                <td class="border px-4 py-2">{{ $zamowienie->id }}</td>
-                                <td class="border px-4 py-2">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('Y.m.d H:i') }}</td>
-                                <td class="border px-4 py-2">{{ $zamowienie->data_realizacji ?? '—' }}</td>
-                                <td class="border px-4 py-2">
-                                    <a href="{{ route('zamowienia.show', $zamowienie) }}" class="text-violet-900 hover:underline">ℹ️</a>
-                                    <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'csv']) }}" class="text-violet-900 hover:underline">📥 CSV</a>
-                                    <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'xlsx']) }}" class="text-violet-900 hover:underline">📊 XLSX</a>
+        <div class="overflow-x-auto rounded-lg border border-gray-700">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-gray-800">
+                    <tr>
+                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">ID</th>
+                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Data zamówienia</th>
+                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Data realizacji</th>
+                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-gray-900 divide-y divide-gray-700">
+                    @forelse ( $zamowienia as $zamowienie )
+                    <tr class="hover:bg-gray-700 text-white text-center">
+                        <td class="py-2 px-4 text-smą">{{ $zamowienie->id }}</td>
+                                <td class="py-2 px-4 text-sm">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('Y.m.d H:i') }}</td>
+                                <td class="py-2 px-4 text-sm">{{ $zamowienie->data_realizacji ?? '—' }}</td>
+                                <td class="py-2 px-4"
+                                    <a href="{{ route('zamowienia.show', $zamowienie) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded aria-label="Szczegóły"">👁️</a>
+                                    <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'csv']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded aria-label="CSV"">📄</a>
+                                    <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'xlsx']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded aria-label="XLSX"">📊</a>
                                 </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </div>
+                    </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="py-4 text-center text-white">Brak zamówień do wyświetlenia</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 </x-layout>
