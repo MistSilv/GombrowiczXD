@@ -50,26 +50,22 @@ class ProduktSeeder extends Seeder
             ],
             [
                 'tw_nazwa' => 'Pepsi 850 ml PET', 
-                'tw_idabaco' => null, 
-                'is_wlasny' => false,
+                'tw_idabaco' => null,
                 'ean_kody' => ['5900497311502']
             ],
             [
                 'tw_nazwa' => 'Tarczyński Kabanos Exclusive Chilli', 
-                'tw_idabaco' => null, 
-                'is_wlasny' => false,
+                'tw_idabaco' => null,
                 'ean_kody' => ['5908230521522']
             ],
             [
                 'tw_nazwa' => '7Days Croissant Super Max Vanilla', 
-                'tw_idabaco' => null, 
-                'is_wlasny' => false,
+                'tw_idabaco' => null,
                 'ean_kody' => ['5201360535705']
             ],
             [
                 'tw_nazwa' => '7Days Croissant Truskawka', 
-                'tw_idabaco' => null, 
-                'is_wlasny' => false,
+                'tw_idabaco' => null,
                 'ean_kody' => ['5201360535706']
             ],
         ];
@@ -77,6 +73,9 @@ class ProduktSeeder extends Seeder
         foreach ($produkty as $produktData) {
             $eanKody = $produktData['ean_kody'];
             unset($produktData['ean_kody']);
+
+            // Ustaw is_wlasny: true tylko jeśli jest dokładnie true, inaczej false
+            $produktData['is_wlasny'] = isset($produktData['is_wlasny']) && $produktData['is_wlasny'] === true;
 
             $produkt = Produkt::create($produktData);
 
