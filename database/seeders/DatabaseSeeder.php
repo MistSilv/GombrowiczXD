@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ProduktSeeder::class);
         $this->call(AutomatSeeder::class);
         $this->call(UserSeeder::class);
+        $this->call(WsadSeeder::class);// zakomentować aby nie tworzyć wsadów
 
     }
 }
