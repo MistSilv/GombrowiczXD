@@ -41,7 +41,7 @@ return new class extends Migration
             $table->id();
             $table->string('tw_nazwa');
             $table->string('tw_idabaco')->nullable();
-            $table->boolean('is_wlasny')->default(true); // true=własny, false=obcy
+            $table->boolean('is_wlasny')->default(false); // true=własny, false=obcy
         });
 
         Schema::create('ean_codes', function (Blueprint $table) {
