@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Produkt;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,8 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        
-        $this->call(ProduktSeeder::class);
+        $this->call(ProduktSeederCSV::class);
+        //$this->call(ProduktSeeder::class);
         $this->call(AutomatSeeder::class);
         $this->call(UserSeeder::class);
        //$this->call(WsadSeeder::class);// zakomentować aby nie tworzyć wsadów

@@ -11,7 +11,7 @@ class Produkt extends Model
     public $timestamps = false;
 
     // Dodajemy 'is_wlasny' do fillable
-    protected $fillable = ['tw_nazwa', 'tw_idabaco', 'is_wlasny'];
+    protected $fillable = ['id','tw_nazwa', 'tw_idabaco', 'is_wlasny'];
 
     // Relacja many-to-many z zamówieniami
     public function zamowienia()
