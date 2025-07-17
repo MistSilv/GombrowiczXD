@@ -43,8 +43,11 @@ $(document).ready(function () {
             $input.val(productName);
             $input.siblings('.produkt-id-hidden').val(productId);
             $suggestions.hide().empty();
-            $input.focus();
+
+            const $iloscInput = $input.closest('.produkt-item').find('input[type="number"]');
+            $iloscInput.focus().select();
         });
+
 
         $(document).on('click', function (e) {
             if (!$(e.target).closest($suggestions).length && e.target !== $input[0]) {
