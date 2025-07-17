@@ -4,11 +4,10 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Produkt>
- */
 class ProduktFactory extends Factory
 {
+    protected static array $usedNames = [];
+
     public function definition(): array
     {
         $nazwy = [
@@ -20,8 +19,19 @@ class ProduktFactory extends Factory
             'Panini vege', 'Mini pizza', 'Zapiekanka z pieczarkami'
         ];
 
+        // Spróbuj wziąć unikalną nazwę z listy
+        $availableNames = array_diff($nazwy, self::$usedNames);
+
+        if (!empty($availableNames)) {
+            $nazwa = $this->faker->randomElement($availableNames);
+            self::$usedNames[] = $nazwa;
+        } else {
+            // Fallback na losowe miasto (nie unikalne)
+            $nazwa = $this->faker->city();
+        }
+
         return [
-            'tw_nazwa' => $this->faker->unique()->randomElement($nazwy),
+            'tw_nazwa' => $nazwa,
             'tw_idabaco' => null,
             'is_wlasny' => true,
         ];
