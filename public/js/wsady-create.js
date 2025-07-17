@@ -1,60 +1,128 @@
-document.addEventListener('DOMContentLoaded', function () {
-    let index = 1;
+$(document).ready(function () {
+    const $searchInput = $('#szukaj-produkt');
+    const $suggestions = $('#lista-podpowiedzi');
+    const $produktyLista = $('#produkty-lista');
+
+    let debounceTimer;
+    let index = $produktyLista.children().length || 1; // continue index after existing items
+
+    // Cached products from server
     const produkty = window._produkty || [];
-    const produktyMap = new Map();
-    produkty.forEach(p => produktyMap.set(p.id, p.tw_nazwa));
 
-    function aktualizujDostepneProdukty() {
-        const uzyteProdukty = new Set();
-        document.querySelectorAll('#produkty-lista select').forEach(select => {
-            if (select.value) uzyteProdukty.add(parseInt(select.value));
-        });
+    // --- Autocomplete AJAX search with debounce ---
+    $searchInput.on('input', function () {
+        clearTimeout(debounceTimer);
+        const query = $(this).val().trim();
 
-        document.querySelectorAll('#produkty-lista select').forEach(select => {
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">-- wybierz produkt --</option>';
-            produkty.forEach(p => {
-                if (!uzyteProdukty.has(p.id) || p.id == parseInt(currentValue)) {
-                    const selected = p.id == parseInt(currentValue) ? 'selected' : '';
-                    select.innerHTML += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+        if (query.length < 2) {
+            $suggestions.hide().empty();
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            $.ajax({
+                url: '/produkty/search',
+                data: { q: query },
+                success: function (products) {
+                    $suggestions.empty();
+                    if (products.length === 0) {
+                        $suggestions.hide();
+                        return;
+                    }
+
+                    products.forEach(p => {
+                        $('<li>')
+                            .text(p.tw_nazwa)
+                            .attr('data-id', p.id)
+                            .addClass('cursor-pointer px-2 py-1 hover:bg-gray-300')
+                            .appendTo($suggestions);
+                    });
+                    $suggestions.show();
+                },
+                error: function () {
+                    $suggestions.hide();
                 }
             });
+        }, 300);
+    });
+
+    // --- Handle click on autocomplete suggestion ---
+    $suggestions.on('click', 'li', function () {
+        const productId = $(this).data('id');
+        const productName = $(this).text();
+
+        dodajProduktDoListy(productId, productName);
+        $searchInput.val('');
+        $suggestions.hide().empty();
+    });
+
+    // --- Add product row to the list ---
+    function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
+        // Check if product already exists - just increase quantity
+        if (produktId) {
+            const existingSelect = $produktyLista.find(`select option:selected[value="${produktId}"]`);
+            if (existingSelect.length) {
+                const $inputIlosc = existingSelect.closest('.produkt-item').find('input[type="number"]');
+                $inputIlosc.val(parseInt($inputIlosc.val()) + ilosc).focus().select();
+                return;
+            }
+        }
+
+        // Build options for select
+        let options = '<option value="">-- wybierz produkt --</option>';
+        produkty.forEach(p => {
+            const selected = (produktId && p.id == produktId) ? 'selected' : '';
+            options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
         });
 
-        const btnDodaj = document.getElementById('dodaj-produkt');
-        if (uzyteProdukty.size >= produkty.length) {
-            btnDodaj.disabled = true;
-            btnDodaj.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-            btnDodaj.disabled = false;
-            btnDodaj.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
+        const newItem = $(`
+            <div class="flex items-center gap-2 mb-2 produkt-item">
+                <select name="produkty[${index}][produkt_id]" class="form-select w-full" required>
+                    ${options}
+                </select>
+                <input type="number" name="produkty[${index}][ilosc]" min="1" max="3000" value="${ilosc}" class="form-input w-24 text-black" placeholder="Ilość" required>
+                <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+            </div>
+        `);
 
-        return uzyteProdukty;
+        $produktyLista.append(newItem);
+        const $selectNowy = newItem.find('select');
+
+        // On select change: merge duplicates or focus input
+        $selectNowy.on('change', function () {
+            const val = $(this).val();
+            if (!val) return;
+
+            const duplicates = $produktyLista.find(`select`).filter(function () {
+                return $(this).val() === val && this !== $selectNowy[0];
+            });
+
+            if (duplicates.length) {
+                const $input = duplicates.closest('.produkt-item').find('input[type="number"]');
+                $input.val(parseInt($input.val()) + 1).focus().select();
+                newItem.remove();
+            } else {
+                const $inputIlosc = newItem.find('input[type="number"]');
+                $inputIlosc.focus().select();
+            }
+        });
+
+        index++;
     }
 
-    function focusIloscDlaSelecta(selectElem) {
-        const produktItem = selectElem.closest('.produkt-item');
-        if (!produktItem) return;
-        const inputIlosc = produktItem.querySelector('input[type="number"]');
-        if (inputIlosc) {
-            inputIlosc.focus();
-            setTimeout(() => inputIlosc.select(), 100);
-        }
-    }
-
-    document.getElementById('dodaj-produkt').addEventListener('click', () => {
-        dodajProduktDoListy();
+    // --- Remove product row ---
+    $produktyLista.on('click', '.remove-item', function () {
+        $(this).closest('.produkt-item').remove();
     });
 
-    document.addEventListener('click', e => {
-        if (e.target.classList.contains('remove-item')) {
-            e.target.closest('.produkt-item').remove();
-            aktualizujDostepneProdukty();
+    // --- Hide suggestions when clicking outside ---
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#lista-podpowiedzi, #szukaj-produkt').length) {
+            $suggestions.hide().empty();
         }
     });
 
-    // Skaner
+    // --- EAN Scanner setup ---
     const scanner = new Html5Qrcode("reader");
     let isScanning = false;
 
@@ -64,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $('#reader').hide();
             $('#scan-result').text(`Zeskanowano: ${decodedText}`);
 
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const token = $('meta[name="csrf-token"]').attr('content');
 
             fetch('/api/check-ean', {
                 method: 'POST',
@@ -81,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
                 if (ilosc && !isNaN(ilosc) && parseInt(ilosc) > 0) {
-                    dodajProduktDoListy(data.produkt.id, data.produkt.tw_nazwa, parseInt(ilosc));
+                    dodajProduktDoListy(data.produkt.id.toString(), data.produkt.tw_nazwa, parseInt(ilosc));
                 } else {
                     alert("Nieprawidłowa ilość.");
                 }
@@ -90,130 +158,45 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('start-scan').addEventListener('click', () => {
+    $('#start-scan').on('click', () => {
         if (isScanning) return;
-        Html5Qrcode.getCameras().then(devices => {
-            if (devices.length) {
-                $('#reader').show();
-                scanner.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: 250 },
-                    onScanSuccess
-                ).then(() => {
-                    isScanning = true;
-                }).catch(err => {
-                    alert("Błąd startu skanera: " + err);
-                });
-            } else {
-                alert("Brak kamer.");
-            }
-        }).catch(err => alert("Błąd pobierania kamer: " + err));
+
+        Html5Qrcode.getCameras()
+            .then(devices => {
+                if (devices.length) {
+                    $('#reader').show();
+                    scanner.start(
+                        { facingMode: "environment" },
+                        { fps: 10, qrbox: 250 },
+                        onScanSuccess
+                    ).then(() => {
+                        isScanning = true;
+                    }).catch(err => {
+                        alert("Błąd startu skanera: " + err);
+                    });
+                } else {
+                    alert("Brak kamer.");
+                }
+            })
+            .catch(err => alert("Błąd pobierania kamer: " + err));
     });
 
-    function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
-        const container = document.getElementById('produkty-lista');
+    // --- Handle initial selects on page load ---
+    $produktyLista.find('select').each(function () {
+        $(this).on('change', function () {
+            const val = $(this).val();
+            if (!val) return;
 
-        if (produktId) {
-            const istniejącySelect = [...container.querySelectorAll('select')].find(s => s.value == produktId);
-            if (istniejącySelect) {
-                const inputIlosc = istniejącySelect.closest('.produkt-item').querySelector('input[type="number"]');
-                inputIlosc.value = parseInt(inputIlosc.value) + ilosc;
-                inputIlosc.focus();
-                setTimeout(() => inputIlosc.select(), 100);
-                return;
-            }
-        }
+            const duplicates = $produktyLista.find('select').filter(function () {
+                return $(this).val() === val && this !== this;
+            });
 
-        const uzyteProdukty = aktualizujDostepneProdukty();
-        let options = '<option value="">-- wybierz produkt --</option>';
-
-        produkty.forEach(p => {
-            if (!uzyteProdukty.has(p.id) || (produktId && p.id == produktId)) {
-                const selected = (produktId && p.id == produktId) ? 'selected' : '';
-                options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+            if (duplicates.length) {
+                const $input = duplicates.closest('.produkt-item').find('input[type="number"]');
+                $input.val(parseInt($input.val()) + 1).focus().select();
+                $(this).closest('.produkt-item').remove();
             }
         });
-
-        const newItem = document.createElement('div');
-        newItem.classList.add('flex', 'items-center', 'gap-2', 'mb-2', 'produkt-item');
-        newItem.innerHTML = `
-            <select name="produkty[${index}][produkt_id]" class="form-select w-full" required>
-                ${options}
-            </select>
-            <input type="number" name="produkty[${index}][ilosc]" min="1" max="3000" value="${ilosc}" class="form-input w-24 text-black" placeholder="Ilość" required>
-            <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
-        `;
-
-        container.appendChild(newItem);
-
-        const selectNowy = newItem.querySelector('select');
-        selectNowy.addEventListener('change', () => {
-            focusIloscDlaSelecta(selectNowy);
-            aktualizujDostepneProdukty();
-        });
-
-        const inputIloscNowy = newItem.querySelector('input[type="number"]');
-        if (inputIloscNowy) {
-            inputIloscNowy.focus();
-            setTimeout(() => inputIloscNowy.select(), 100);
-        }
-
-        index++;
-        aktualizujDostepneProdukty();
-    }
-
-    document.querySelectorAll('#produkty-lista select').forEach(select => {
-        select.addEventListener('change', () => {
-            focusIloscDlaSelecta(select);
-            aktualizujDostepneProdukty();
-        });
     });
 
-    const szukajInput = document.getElementById('szukaj-produkt');
-    const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
-
-    szukajInput.addEventListener('input', () => {
-        const val = szukajInput.value.toLowerCase();
-        if (val.length < 2) {
-            listaPodpowiedzi.style.display = 'none';
-            listaPodpowiedzi.innerHTML = '';
-            return;
-        }
-
-        const uzyteProdukty = aktualizujDostepneProdukty();
-        const dopasowane = produkty.filter(p =>
-            p.tw_nazwa.toLowerCase().includes(val) && !uzyteProdukty.has(p.id)
-        );
-
-        if (!dopasowane.length) {
-            listaPodpowiedzi.style.display = 'none';
-            listaPodpowiedzi.innerHTML = '';
-            return;
-        }
-
-        listaPodpowiedzi.innerHTML = dopasowane.map(p =>
-            `<li data-id="${p.id}" class="cursor-pointer px-2 py-1 hover:bg-gray-200">${p.tw_nazwa}</li>`
-        ).join('');
-        listaPodpowiedzi.style.display = 'block';
-    });
-
-    listaPodpowiedzi.addEventListener('click', e => {
-        if (e.target.tagName.toLowerCase() === 'li') {
-            const id = e.target.getAttribute('data-id');
-            const nazwa = e.target.textContent;
-            dodajProduktDoListy(id, nazwa);
-            szukajInput.value = '';
-            listaPodpowiedzi.style.display = 'none';
-            listaPodpowiedzi.innerHTML = '';
-        }
-    });
-
-    document.addEventListener('click', e => {
-        if (!listaPodpowiedzi.contains(e.target) && e.target !== szukajInput) {
-            listaPodpowiedzi.style.display = 'none';
-            listaPodpowiedzi.innerHTML = '';
-        }
-    });
-
-    aktualizujDostepneProdukty();
 });

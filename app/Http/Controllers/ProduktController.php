@@ -232,4 +232,22 @@ class ProduktController extends Controller
         return redirect()->route('produkty.create.wlasny')->with('success', 'Produkt został dodany.');
     }
 
+    public function search(Request $request)
+    {
+        $q = $request->query('q', '');
+
+        if (strlen($q) < 2) {
+            // Return empty if search too short to avoid heavy queries
+            return response()->json([]);
+        }
+
+        $results = Produkt::select('id', 'tw_nazwa', 'tw_idabaco', 'is_wlasny')
+            ->where('tw_nazwa', 'like', "%{$q}%")
+            ->limit(20)
+            ->get();
+
+        return response()->json($results);
+    }
+
+    
 }

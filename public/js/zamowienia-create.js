@@ -1,3 +1,4 @@
+/*
 document.addEventListener('DOMContentLoaded', function () {
     let index = 1;
     const produkty = window._produkty || [];
@@ -180,4 +181,111 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     aktualizujDostepneProdukty();
+});
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+    let index = 1;
+    const produkty = window._produkty || [];
+
+    function focusIloscInput(item) {
+        const iloscInput = item.querySelector('input[type="number"]');
+        if (iloscInput) {
+            iloscInput.focus();
+            iloscInput.select();
+        }
+    }
+
+    function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
+        const container = document.getElementById('produkty-lista');
+
+        const istniejącySelect = [...container.querySelectorAll('select')].find(s => s.value == produktId);
+        if (istniejącySelect) {
+            const inputIlosc = istniejącySelect.closest('.produkt-item').querySelector('input[type="number"]');
+            inputIlosc.value = parseInt(inputIlosc.value) + ilosc;
+            focusIloscInput(istniejącySelect.closest('.produkt-item'));
+            return;
+        }
+
+        let options = '<option value="">-- wybierz produkt --</option>';
+        produkty.forEach(p => {
+            if (p.is_wlasny) {
+                const selected = produktId == p.id ? 'selected' : '';
+                options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+            }
+        });
+
+        const newItem = document.createElement('div');
+        newItem.className = 'flex items-center gap-2 mb-2 produkt-item';
+        newItem.innerHTML = `
+            <select name="produkty[${index}][produkt_id]" class="form-select w-full produkty-select" required>
+                ${options}
+            </select>
+            <input type="number" name="produkty[${index}][ilosc]" min="1" max="3000" class="form-input w-24 text-black" value="${ilosc}" required>
+            <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+        `;
+
+        container.appendChild(newItem);
+        index++;
+
+        const select = newItem.querySelector('select');
+        if (produktId) select.value = produktId;
+
+        focusIloscInput(newItem);
+
+        select.addEventListener('change', () => focusIloscInput(newItem));
+    }
+
+    document.getElementById('dodaj-produkt').addEventListener('click', () => dodajProduktDoListy());
+
+    document.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-item')) {
+            e.target.closest('.produkt-item').remove();
+        }
+    });
+
+    // Wyszukiwarka
+    const szukajInput = document.getElementById('szukaj-produkt');
+    const listaPodpowiedzi = document.getElementById('lista-podpowiedzi');
+
+    szukajInput.addEventListener('input', () => {
+        const val = szukajInput.value.toLowerCase();
+        listaPodpowiedzi.innerHTML = '';
+        if (val.length < 2) {
+            listaPodpowiedzi.style.display = 'none';
+            return;
+        }
+
+        const dopasowane = produkty.filter(p =>
+            p.is_wlasny && p.tw_nazwa.toLowerCase().includes(val)
+        );
+
+        if (!dopasowane.length) {
+            listaPodpowiedzi.style.display = 'none';
+            return;
+        }
+
+        dopasowane.forEach(p => {
+            const li = document.createElement('li');
+            li.textContent = p.tw_nazwa;
+            li.className = 'cursor-pointer px-2 py-1 hover:bg-gray-200';
+            li.setAttribute('data-id', p.id);
+            li.addEventListener('click', () => {
+                dodajProduktDoListy(p.id, p.tw_nazwa);
+                szukajInput.value = '';
+                listaPodpowiedzi.style.display = 'none';
+                listaPodpowiedzi.innerHTML = '';
+            });
+            listaPodpowiedzi.appendChild(li);
+        });
+
+        listaPodpowiedzi.style.display = 'block';
+    });
+
+    document.addEventListener('click', e => {
+        if (!listaPodpowiedzi.contains(e.target) && e.target !== szukajInput) {
+            listaPodpowiedzi.style.display = 'none';
+            listaPodpowiedzi.innerHTML = '';
+        }
+    });
 });
