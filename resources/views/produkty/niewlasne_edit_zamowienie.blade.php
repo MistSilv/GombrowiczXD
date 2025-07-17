@@ -29,7 +29,7 @@
             <tbody>
                 @foreach($deficyty as $d)
                     <tr class="deficyt-row hover:bg-gray-50 cursor-pointer" data-deficyt="{{ $d['na_stanie'] }}">
-                        <td class="border border-gray-300 px-3 py-2 product-name text-blue-600 underline">
+                        <td class="border border-gray-300 px-3 py-2 product-name text-blue-600 underline cursor-pointer">
                             {{ $d['nazwa'] }}
                         </td>
                         <td class="border border-gray-300 px-3 py-2">{{ $d['wsady'] }}</td>
@@ -68,6 +68,13 @@
             </table>
         </div>
 
+        {{-- Wyszukiwarka produktów do dodania --}}
+        <div class="mt-4">
+            <label for="product-search" class="text-black font-semibold mb-1 block">Wyszukaj produkt do dodania:</label>
+            <input type="text" id="product-search" placeholder="Wpisz nazwę produktu..."
+                class="px-3 py-2 rounded border border-gray-300 w-full sm:w-96 text-black focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
+            <ul id="product-suggestions" class="bg-white border border-gray-300 rounded max-h-48 overflow-y-auto mt-1 hidden z-50 absolute w-96"></ul>
+        </div>
 
         <button type="button" id="dodaj-produkt"
             class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition w-full sm:w-auto">

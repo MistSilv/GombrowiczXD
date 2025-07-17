@@ -4,11 +4,15 @@ let index = 0;
 
 function aktualizujDostepneProdukty() {
     const uzyteProdukty = new Set();
-    document.querySelectorAll('#produkty-lista select').forEach(select => {
-        if (select.value) uzyteProdukty.add(parseInt(select.value));
+    document.querySelectorAll('#produkty-lista tbody tr').forEach(tr => {
+        const pid = parseInt(tr.getAttribute('data-produkt-id'));
+        if(pid) uzyteProdukty.add(pid);
     });
 
-    document.querySelectorAll('#produkty-lista select').forEach(select => {
+    document.querySelectorAll('#produkty-lista tbody tr').forEach(tr => {
+        const select = tr.querySelector('select');
+        if(!select) return; // w naszej wersji nie ma selectów
+
         const currentValue = select.value;
         select.innerHTML = '<option value="">-- wybierz produkt --</option>';
         window._produkty.forEach(p => {
@@ -35,70 +39,41 @@ function dodajWiersz(produktId = '', ilosc = '') {
 
     // jeśli produkt już jest dodany, nie dodaj duplikatu
     if (produktId && uzyteProdukty.has(produktId)) {
+        setQuantity(produktId, ilosc);
         return;
     }
 
-    let options = '<option value="">-- wybierz produkt --</option>';
-    window._produkty.forEach(p => {
-        if (!uzyteProdukty.has(p.id) || p.id === parseInt(produktId)) {
-            const selected = p.id === parseInt(produktId) ? 'selected' : '';
-            options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
-        }
-    });
+    const produkt = window._produkty.find(p => p.id === produktId);
+
+    const nazwa = produkt ? produkt.tw_nazwa : '';
 
     const tr = document.createElement('tr');
-        tr.setAttribute('data-produkt-id', produktId || '');
-        tr.innerHTML = `
-        <td colspan="2" class="py-3 px-2 sm:px-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div class="flex-1">
-                <select
-                class="w-full border rounded px-3 py-2 text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-normal break-words"
-                required ${produktId ? 'disabled' : ''}>
-                ${options}
-                </select>
-                <input type="hidden" name="ilosci[${produktId}]" value="${ilosc || 0}">
-            </div>
-            <div class="sm:w-32">
-                <input
-                type="number" min="0" max="3000" step="1" value="${ilosc || 0}"
-                class="border rounded px-3 py-2 w-full text-right text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required>
-            </div>
-            </div>
+    tr.setAttribute('data-produkt-id', produktId || '');
+    tr.innerHTML = `
+        <td class="border border-gray-300 px-3 py-2 text-left">${nazwa}</td>
+        <td class="border border-gray-300 px-3 py-2 text-right">
+            <input
+                type="number"
+                name="ilosci[${produktId}]"
+                min="0" max="3000" step="1"
+                value="${ilosc || 0}"
+                class="border rounded px-3 py-1 w-24 text-right text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+            />
         </td>
-        <td class="py-3 px-2 sm:px-6 text-right">
+        <td class="border border-gray-300 px-3 py-2 text-center">
             <button type="button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded transition remove-row">✕</button>
         </td>
-        `;
-
-
+    `;
 
     tbody.appendChild(tr);
 
-    const select = tr.querySelector('select');
-    const input = tr.querySelector('input[type="number"]');
-    const hiddenInput = tr.querySelector('input[type="hidden"]');
-
-    // Obsługa wyboru produktu w select
-    if (!produktId) {
-        select.addEventListener('change', () => {
-            const val = select.value;
-            if (!val) return;
-            tr.setAttribute('data-produkt-id', val);
-            hiddenInput.name = `ilosci[${val}]`;
-            hiddenInput.value = input.value || 0;
-            select.disabled = true;
-            aktualizujDostepneProdukty();
-            input.focus();
-            input.select();
-        });
+    // focus i select inputa ilości
+    const inputIlosc = tr.querySelector('input[type="number"]');
+    if(inputIlosc) {
+        inputIlosc.focus();
+        inputIlosc.select();
     }
-
-    // Aktualizacja ukrytego inputa z ilością
-    input.addEventListener('input', () => {
-        hiddenInput.value = input.value;
-    });
 
     index++;
     aktualizujDostepneProdukty();
@@ -112,28 +87,14 @@ function setQuantity(produktId, ilosc) {
             if(input) {
                 input.value = ilosc;
                 input.focus();
+                input.select();
                 input.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            const hiddenInput = row.querySelector('input[type="hidden"]');
-            if(hiddenInput) hiddenInput.value = ilosc;
             return;
         }
     }
     // jeśli nie znaleziono, dodaj nowy wiersz i ustaw ilość
     dodajWiersz(produktId, ilosc);
-    setTimeout(() => {
-        const rowsNowe = document.querySelectorAll('#produkty-lista tbody tr');
-        for (const row of rowsNowe) {
-            if (parseInt(row.getAttribute('data-produkt-id')) === produktId) {
-                const input = row.querySelector('input[type="number"]');
-                if (input) {
-                    input.focus();
-                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                break;
-            }
-        }
-    }, 100);
 }
 
 function filtrujDeficyty() {
@@ -158,6 +119,7 @@ function filtrujDeficyty() {
     });
 }
 
+// Usuwanie wiersza
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('remove-row')) {
         e.target.closest('tr').remove();
@@ -174,25 +136,73 @@ document.querySelectorAll('.product-name').forEach(el => {
         const nazwa = el.textContent.trim();
         const produkt = window._produkty.find(p => p.tw_nazwa === nazwa);
         if (produkt) {
-            dodajWiersz(produkt.id, 0);
-
-            setTimeout(() => {
-                const rows = document.querySelectorAll('#produkty-lista tbody tr');
-                for (const row of rows) {
-                    if (parseInt(row.getAttribute('data-produkt-id')) === produkt.id) {
-                        const inputIlosc = row.querySelector('input[type="number"]');
-                        if (inputIlosc) {
-                            inputIlosc.focus();
-                            inputIlosc.select();
-                        }
-                        break;
-                    }
-                }
-            }, 100);
+            setQuantity(produkt.id, 0);
         }
     });
 });
 
+// --- WYSZUKIWARKA PRODUKTÓW DO DODANIA ---
+
+const searchInput = document.getElementById('product-search');
+const suggestionsList = document.getElementById('product-suggestions');
+
+function clearSuggestions() {
+    suggestionsList.innerHTML = '';
+    suggestionsList.classList.add('hidden');
+}
+
+function showSuggestions(matches) {
+    suggestionsList.innerHTML = '';
+    if (matches.length === 0) {
+        clearSuggestions();
+        return;
+    }
+    matches.forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = p.tw_nazwa;
+        li.className = 'px-3 py-2 hover:bg-blue-100 cursor-pointer';
+        li.dataset.produktId = p.id;
+        suggestionsList.appendChild(li);
+    });
+    suggestionsList.classList.remove('hidden');
+}
+
+searchInput.addEventListener('input', () => {
+    const val = searchInput.value.trim().toLowerCase();
+    if (!val) {
+        clearSuggestions();
+        return;
+    }
+    const uzyteProdukty = new Set();
+    document.querySelectorAll('#produkty-lista tbody tr').forEach(row => {
+        const pid = parseInt(row.getAttribute('data-produkt-id'));
+        if(pid) uzyteProdukty.add(pid);
+    });
+
+    const matches = window._produkty.filter(p => 
+        p.tw_nazwa.toLowerCase().includes(val) &&
+        !uzyteProdukty.has(p.id)
+    ).slice(0, 10);
+
+    showSuggestions(matches);
+});
+
+suggestionsList.addEventListener('click', (e) => {
+    if (e.target.tagName === 'LI') {
+        const produktId = parseInt(e.target.dataset.produktId);
+        setQuantity(produktId, 0);
+        clearSuggestions();
+        searchInput.value = '';
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (e.target !== searchInput && e.target.parentNode !== suggestionsList) {
+        clearSuggestions();
+    }
+});
+
+// Obsługa filtrów deficytów
 window.addEventListener('DOMContentLoaded', () => {
     aktualizujDostepneProdukty();
     filtrujDeficyty();

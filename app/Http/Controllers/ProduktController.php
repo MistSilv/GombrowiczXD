@@ -71,33 +71,43 @@ class ProduktController extends Controller
     }
 
    private function buildDeficyty(): \Illuminate\Support\Collection
-    {
-        $produkty = Produkt::where('is_wlasny', false)->get();
+{
+    $produkty = Produkt::where('is_wlasny', false)->get();
 
-        $wsady = DB::table('produkt_wsad')
-            ->join('produkty','produkt_wsad.produkt_id','=','produkty.id')
-            ->where('produkty.is_wlasny',false)
-            ->select('produkt_wsad.produkt_id', DB::raw('SUM(ilosc) as suma'))
-            ->groupBy('produkt_wsad.produkt_id')
-            ->pluck('suma','produkt_id');
+    $wsady = DB::table('produkt_wsad')
+        ->join('produkty','produkt_wsad.produkt_id','=','produkty.id')
+        ->where('produkty.is_wlasny',false)
+        ->select('produkt_wsad.produkt_id', DB::raw('SUM(ilosc) as suma'))
+        ->groupBy('produkt_wsad.produkt_id')
+        ->pluck('suma','produkt_id');
 
-        $zam = DB::table('produkt_zamowienie')
-            ->join('zamowienia','produkt_zamowienie.zamowienie_id','=','zamowienia.id')
-            ->join('produkty',   'produkt_zamowienie.produkt_id',  '=','produkty.id')
-            ->whereNull('zamowienia.automat_id')
-            ->where('produkty.is_wlasny',false)
-            ->select('produkt_zamowienie.produkt_id', DB::raw('SUM(ilosc) as suma'))
-            ->groupBy('produkt_zamowienie.produkt_id')
-            ->pluck('suma','produkt_id');
+    $zam = DB::table('produkt_zamowienie')
+        ->join('zamowienia','produkt_zamowienie.zamowienie_id','=','zamowienia.id')
+        ->join('produkty',   'produkt_zamowienie.produkt_id',  '=','produkty.id')
+        ->whereNull('zamowienia.automat_id')
+        ->where('produkty.is_wlasny',false)
+        ->select('produkt_zamowienie.produkt_id', DB::raw('SUM(ilosc) as suma'))
+        ->groupBy('produkt_zamowienie.produkt_id')
+        ->pluck('suma','produkt_id');
 
-        return $produkty->map(fn($p) => [
-            'id'         => $p->id,
-            'nazwa'      => $p->tw_nazwa,
-            'wsady'      => $wsady[$p->id] ?? 0,
-            'zamowienia' => $zam[$p->id]   ?? 0,
-            'na_stanie'  => ($zam[$p->id] ?? 0) - ($wsady[$p->id] ?? 0),
-        ]);
-    }
+    return $produkty
+        ->map(function($p) use ($wsady, $zam) {
+            $wsadyVal = $wsady[$p->id] ?? 0;
+            $zamVal   = $zam[$p->id] ?? 0;
+
+            return [
+                'id'         => $p->id,
+                'nazwa'      => $p->tw_nazwa,
+                'wsady'      => $wsadyVal,
+                'zamowienia' => $zamVal,
+                'na_stanie'  => ($zamVal) - ($wsadyVal),
+            ];
+        })
+        // *** filtrujemy aby pokazywało tylko gdy WSADY > 0 I ZAMÓWIENIA > 0 ***
+        ->filter(fn($item) => $item['wsady'] > 0 || $item['zamowienia'] > 0)
+        ->values();
+}
+
 
 
     public function formularzNoweZamowienie()
