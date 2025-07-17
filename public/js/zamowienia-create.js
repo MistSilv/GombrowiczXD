@@ -53,6 +53,17 @@ $(document).ready(function () {
         });
     }
 
+    function focusIlosc(item) {
+        const iloscInput = item.querySelector('input[type="number"]');
+        if (iloscInput) {
+            setTimeout(() => {
+                iloscInput.focus();
+                iloscInput.select();
+            }, 50);
+        }
+    }
+
+
     function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
         // Sprawdź czy produkt już jest
         if (produktId) {

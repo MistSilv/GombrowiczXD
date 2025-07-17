@@ -13,6 +13,7 @@
                 <input type="hidden" name="automat_id" value="{{ $automat->id }}">
             @endif
 
+            <!-- Lista produktów -->
             <div id="produkty-lista">
                 <div class="flex items-center gap-2 mb-2 produkt-item">
                     <input
@@ -37,6 +38,7 @@
                 </div>
             </div>
 
+            <!-- Wyszukiwarka główna (opcjonalna) -->
             <div class="mb-4 relative">
                 <input
                     type="text"
@@ -47,21 +49,33 @@
                 <ul id="lista-podpowiedzi" class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full" style="display: none;"></ul>
             </div>
 
+            <!-- Przyciski -->
             <button type="button" id="dodaj-produkt" class="mt-2 mb-4 bg-blue-500 text-white px-3 py-1 rounded">
                 + Dodaj produkt
             </button>
 
-            <button
-                type="submit"
-                onclick="return confirm('Czy na pewno chcesz złożyć zamówienie?')"
-                class="px-4 py-2 rounded bg-green-700 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2"
-            >
-                Złóż zamówienie
-            </button>
+            <div class="mt-4">
+                <button 
+                    type="submit" 
+                    onclick="return confirm('Czy na pewno chcesz potwierdzić zamówienie?')"
+                    class="bg-green-600 text-white px-4 py-2 rounded">
+                        Złóż zamówienie
+                </button>
+            </div>
 
             <div class="mt-6 flex flex-col md:flex-row md:items-center">
                 @if($automat)
-                    <a href="{{ route('wsady.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                        Wprowadź straty
+                    </a>
+                    @auth
+                    @if(!auth()->user()->isProdukcja())
+                        <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                            Lista zamówień tego automatu
+                        </a>
+                    @endif 
+                    @endauth
+                    <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
                         Powrót
                     </a>
                 @endif
@@ -70,8 +84,8 @@
     </div>
 
     <script>
-        // Przekazujemy produkty do JS
-        window._produkty = @json($produkty);
+        // Tylko produkty is_wlasny = true
+        window._produkty = @json($produkty->filter(fn($p) => $p->is_wlasny));
     </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

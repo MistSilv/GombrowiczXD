@@ -56,6 +56,17 @@ $(document).ready(function () {
         $suggestions.hide().empty();
     });
 
+    function focusIlosc(item) {
+        const iloscInput = item.querySelector('input[type="number"]');
+        if (iloscInput) {
+            setTimeout(() => {
+                iloscInput.focus();
+                iloscInput.select();
+            }, 50);
+        }
+    }
+
+
     // --- Add product row to the list with input text + hidden ID + qty ---
     function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
         // Check if product already exists in list by produktId and increase qty
