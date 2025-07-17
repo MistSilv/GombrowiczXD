@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call(ProduktSeederCSV::class);
-        //$this->call(ProduktSeeder::class);
+        $this->call(ProduktSeeder::class);
         $this->call(AutomatSeeder::class);
         $this->call(UserSeeder::class);
-       //$this->call(WsadSeeder::class);// zakomentować aby nie tworzyć wsadów
+        //$this->call(WsadSeeder::class);// zakomentować aby nie tworzyć wsadów
 
     }
 }

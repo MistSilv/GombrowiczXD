@@ -26,21 +26,35 @@
 
             <div id="produkty-lista">
                 <div class="flex items-center gap-2 mb-2 produkt-item">
-                    <select name="produkty[0][produkt_id]" class="form-select w-full" required>
-                        <option value="">-- wybierz produkt --</option>
-                        @foreach($produkty as $produkt)
-                            <option value="{{ $produkt->id }}">{{ $produkt->tw_nazwa }}</option>
-                        @endforeach
-                    </select>
-
-                    <input type="number" name="produkty[0][ilosc]" min="1" max="3000" class="form-input w-24 text-black" placeholder="Ilość" required>
-
+                    <input
+                        type="text"
+                        name="produkty[0][tw_nazwa]"
+                        class="form-input w-full autocomplete-input text-black"
+                        placeholder="Wpisz nazwę produktu"
+                        required
+                        autocomplete="off"
+                    >
+                    <input type="hidden" name="produkty[0][produkt_id]" class="produkt-id-hidden">
+                    <input
+                        type="number"
+                        name="produkty[0][ilosc]"
+                        min="1" max="3000"
+                        class="form-input w-24 text-black"
+                        placeholder="Ilość"
+                        required
+                        value="1"
+                    >
                     <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
                 </div>
             </div>
 
             <div class="mb-4 relative">
-                <input type="text" id="szukaj-produkt" placeholder="Wpisz nazwę produktu" class="form-input w-full text-black mb-2" />
+                <input
+                    type="text"
+                    id="szukaj-produkt"
+                    placeholder="Wpisz nazwę produktu"
+                    class="form-input w-full text-black mb-2"
+                />
                 <ul id="lista-podpowiedzi" class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full" style="display: none;"></ul>
             </div>
 
@@ -51,10 +65,10 @@
             <button
                 type="submit"
                 onclick="return confirm('Czy na pewno chcesz dodać wsad?')"
-                class="px-4 py-2 rounded bg-green-700 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                class="px-4 py-2 rounded bg-green-700 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2"
+            >
                 Dodaj wsad
             </button>
-
 
             <div class="mt-6 flex flex-col md:flex-row md:items-center">
                 @if($automat)
@@ -66,10 +80,10 @@
         </form>
     </div>
 
-
     <script>
         window._produkty = @json($produkty);
     </script>
+
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('js/wsady-create.js') }}"></script>

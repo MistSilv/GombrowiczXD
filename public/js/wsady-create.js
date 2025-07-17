@@ -4,12 +4,12 @@ $(document).ready(function () {
     const $produktyLista = $('#produkty-lista');
 
     let debounceTimer;
-    let index = $produktyLista.children().length || 1; // continue index after existing items
+    let index = $produktyLista.children().length || 1;
 
     // Cached products from server
     const produkty = window._produkty || [];
 
-    // --- Autocomplete AJAX search with debounce ---
+    // --- Autocomplete AJAX search with debounce (search input on top) ---
     $searchInput.on('input', function () {
         clearTimeout(debounceTimer);
         const query = $(this).val().trim();
@@ -46,7 +46,7 @@ $(document).ready(function () {
         }, 300);
     });
 
-    // --- Handle click on autocomplete suggestion ---
+    // --- When user clicks a suggestion on top search input ---
     $suggestions.on('click', 'li', function () {
         const productId = $(this).data('id');
         const productName = $(this).text();
@@ -56,56 +56,53 @@ $(document).ready(function () {
         $suggestions.hide().empty();
     });
 
-    // --- Add product row to the list ---
+    // --- Add product row to the list with input text + hidden ID + qty ---
     function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
-        // Check if product already exists - just increase quantity
+        // Check if product already exists in list by produktId and increase qty
         if (produktId) {
-            const existingSelect = $produktyLista.find(`select option:selected[value="${produktId}"]`);
-            if (existingSelect.length) {
-                const $inputIlosc = existingSelect.closest('.produkt-item').find('input[type="number"]');
-                $inputIlosc.val(parseInt($inputIlosc.val()) + ilosc).focus().select();
-                return;
-            }
+            let found = false;
+            $produktyLista.find('.produkt-item').each(function () {
+                const $hiddenId = $(this).find('.produkt-id-hidden');
+                if ($hiddenId.val() == produktId) {
+                    const $iloscInput = $(this).find('input[type="number"]');
+                    $iloscInput.val(parseInt($iloscInput.val()) + ilosc).focus().select();
+                    found = true;
+                    return false; // break each
+                }
+            });
+            if (found) return;
         }
 
-        // Build options for select
-        let options = '<option value="">-- wybierz produkt --</option>';
-        produkty.forEach(p => {
-            const selected = (produktId && p.id == produktId) ? 'selected' : '';
-            options += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
-        });
-
-        const newItem = $(`
+        // Create new product row
+        const $newItem = $(`
             <div class="flex items-center gap-2 mb-2 produkt-item">
-                <select name="produkty[${index}][produkt_id]" class="form-select w-full" required>
-                    ${options}
-                </select>
-                <input type="number" name="produkty[${index}][ilosc]" min="1" max="3000" value="${ilosc}" class="form-input w-24 text-black" placeholder="Ilość" required>
+                <input
+                    type="text"
+                    name="produkty[${index}][tw_nazwa]"
+                    class="form-input w-full autocomplete-input text-black"
+                    placeholder="Wpisz nazwę produktu"
+                    required
+                    autocomplete="off"
+                    value="${nazwaProduktu}"
+                >
+                <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${produktId ?? ''}">
+                <input
+                    type="number"
+                    name="produkty[${index}][ilosc]"
+                    min="1" max="3000"
+                    class="form-input w-24 text-black"
+                    placeholder="Ilość"
+                    required
+                    value="${ilosc}"
+                >
                 <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
             </div>
         `);
 
-        $produktyLista.append(newItem);
-        const $selectNowy = newItem.find('select');
+        $produktyLista.append($newItem);
 
-        // On select change: merge duplicates or focus input
-        $selectNowy.on('change', function () {
-            const val = $(this).val();
-            if (!val) return;
-
-            const duplicates = $produktyLista.find(`select`).filter(function () {
-                return $(this).val() === val && this !== $selectNowy[0];
-            });
-
-            if (duplicates.length) {
-                const $input = duplicates.closest('.produkt-item').find('input[type="number"]');
-                $input.val(parseInt($input.val()) + 1).focus().select();
-                newItem.remove();
-            } else {
-                const $inputIlosc = newItem.find('input[type="number"]');
-                $inputIlosc.focus().select();
-            }
-        });
+        // Attach autocomplete to new input
+        attachAutocomplete($newItem.find('.autocomplete-input'));
 
         index++;
     }
@@ -120,6 +117,62 @@ $(document).ready(function () {
         if (!$(e.target).closest('#lista-podpowiedzi, #szukaj-produkt').length) {
             $suggestions.hide().empty();
         }
+    });
+
+    // --- Autocomplete for input text fields in product rows ---
+    function attachAutocomplete($input) {
+        let timer = null;
+        const $localSuggestions = $('<ul class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full" style="display:none;"></ul>');
+        $input.after($localSuggestions);
+
+        $input.on('input', function () {
+            clearTimeout(timer);
+            const val = $(this).val().trim();
+
+            if (val.length < 2) {
+                $localSuggestions.hide().empty();
+                return;
+            }
+
+            timer = setTimeout(() => {
+                const matches = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val.toLowerCase()));
+                if (matches.length === 0) {
+                    $localSuggestions.hide().empty();
+                    return;
+                }
+
+                $localSuggestions.empty();
+                matches.forEach(p => {
+                    $('<li>')
+                        .text(p.tw_nazwa)
+                        .attr('data-id', p.id)
+                        .addClass('cursor-pointer px-2 py-1 hover:bg-gray-300')
+                        .appendTo($localSuggestions);
+                });
+                $localSuggestions.show();
+            }, 200);
+        });
+
+        $localSuggestions.on('click', 'li', function () {
+            const productId = $(this).data('id');
+            const productName = $(this).text();
+
+            $input.val(productName);
+            $input.siblings('.produkt-id-hidden').val(productId);
+            $localSuggestions.hide().empty();
+            $input.focus();
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest($localSuggestions).length && e.target !== $input[0]) {
+                $localSuggestions.hide().empty();
+            }
+        });
+    }
+
+    // Attach autocomplete to existing inputs on page load
+    $produktyLista.find('.autocomplete-input').each(function () {
+        attachAutocomplete($(this));
     });
 
     // --- EAN Scanner setup ---
@@ -180,23 +233,4 @@ $(document).ready(function () {
             })
             .catch(err => alert("Błąd pobierania kamer: " + err));
     });
-
-    // --- Handle initial selects on page load ---
-    $produktyLista.find('select').each(function () {
-        $(this).on('change', function () {
-            const val = $(this).val();
-            if (!val) return;
-
-            const duplicates = $produktyLista.find('select').filter(function () {
-                return $(this).val() === val && this !== this;
-            });
-
-            if (duplicates.length) {
-                const $input = duplicates.closest('.produkt-item').find('input[type="number"]');
-                $input.val(parseInt($input.val()) + 1).focus().select();
-                $(this).closest('.produkt-item').remove();
-            }
-        });
-    });
-
 });
