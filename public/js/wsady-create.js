@@ -222,6 +222,7 @@ $(document).ready(function () {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': token
                 },
                 body: JSON.stringify({ kod_ean: decodedText })
