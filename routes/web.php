@@ -53,9 +53,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/zamowienia', [ZamowienieController::class, 'store'])->name('zamowienia.store');
     Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
 
-    
 
-
+    Route::get('/straty/archiwum', [StrataController::class, 'archiwum'])->name('straty.archiwum');
     Route::get('/straty/podsumowanie/dzien/{date?}', [StrataController::class, 'podsumowanieDnia'])->name('straty.podsumowanie.dzien');
     Route::get('/straty/podsumowanie/tydzien/{date?}', [StrataController::class, 'podsumowanieTygodnia'])->name('straty.podsumowanie.tydzien');
     Route::get('/straty/podsumowanie/miesiac/{month?}', [StrataController::class, 'podsumowanieMiesiaca'])->name('straty.podsumowanie.miesiac');

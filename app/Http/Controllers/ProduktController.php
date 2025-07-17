@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ZamowienieMail;
 use App\Exports\ZamowienieExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProduktController extends Controller
 {
@@ -101,10 +102,21 @@ class ProduktController extends Controller
 
     public function formularzNoweZamowienie()
     {
+        $deficyty = $this->buildDeficyty();
+
+        $perPage = 30;
+        $currentPage = request()->get('page', 1);
+        $items = $deficyty->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $paginated = new LengthAwarePaginator($items, $deficyty->count(), $perPage, $currentPage, [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]);
+
         return view('produkty.niewlasne_edit_zamowienie', [
-            'produkty'    => Produkt::where('is_wlasny', false)->get(),
-            'deficyty'    => $this->buildDeficyty(),
-            'zamowienieId'=> null,
+            'produkty'     => Produkt::where('is_wlasny', false)->get(),
+            'deficyty'     => $paginated,
+            'zamowienieId' => null,
         ]);
     }
 

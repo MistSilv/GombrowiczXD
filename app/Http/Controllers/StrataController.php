@@ -19,10 +19,27 @@ class StrataController extends Controller
      */
     public function index()
     {
-        $straty = Strata::with('automat')->orderByDesc('data_straty')->paginate(20); // Pobierz straty z bazy danych, posortowane malejąco według daty straty i paginuj wyniki
+        $start = Carbon::now()->startOfMonth();
+        $end = Carbon::now()->endOfMonth();
+
+        $straty = Strata::with('automat')
+            ->whereBetween('data_straty', [$start, $end])
+            ->orderByDesc('data_straty')
+            ->paginate(20);
 
         return view('straty.index', compact('straty'));
     }
+
+
+    public function archiwum()
+    {
+        $straty = Strata::with('automat')
+            ->orderByDesc('data_straty')
+            ->paginate(20);
+
+        return view('straty.archiwum', compact('straty'));
+    }
+
 
     /**
      * Show the form for creating a new resource.

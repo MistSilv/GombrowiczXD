@@ -1,22 +1,9 @@
 <!-- strona do wyświetlania zgłoszonych strat -->
 <x-layout>
-    <div class="container mx-auto px-4 py-6 ">
-            <div class="mb-6 flex flex-wrap gap-2">
-                <a href="{{ route('straty.archiwum') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
-            <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                Podsumowanie dnia
-            </a>
-            <a href="{{ route('straty.podsumowanie.tydzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                Podsumowanie tygodnia
-            </a>
-            <a href="{{ route('straty.podsumowanie.miesiac') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                Podsumowanie miesiąca
-            </a>
-            <a href="{{ route('straty.podsumowanie.rok') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                Podsumowanie roku
-            </a>
-            </div>
-  
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6 flex flex-wrap gap-2">
+        <a href="{{ route('straty.index') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
+    </div>
         <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista strat</h1>
 
         <div class="overflow-x-auto rounded-lg border border-gray-700">
@@ -42,7 +29,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="py-4 text-center text-white">Brak zgłoszonych strat</td>
+                            <td colspan="4" class="py-4 text-center text-white">Brak strat w archiwum</td>
                         </tr>
                         @endforelse
                     </tbody>

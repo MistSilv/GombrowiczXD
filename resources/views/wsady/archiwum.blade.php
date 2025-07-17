@@ -1,5 +1,8 @@
 <x-layout>
 <div class="container mx-auto px-4 py-6">
+    <div class="mb-6 flex flex-wrap gap-2">
+        <a href="{{ route('wsady.index')}} " class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
+    </div>
     <h1 class="my-4 text-white text-2xl font-semibold text-center">Archiwum wsadów</h1>
 
     <div class="overflow-x-auto rounded-lg border border-gray-700">

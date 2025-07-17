@@ -5,15 +5,6 @@
     </div>
     <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista wsadów</h1>
     
-    @if(request('automat_id'))
-        <div class="alert alert-info bg-blue-600 text-white rounded p-3 mb-4 flex justify-between items-center">
-            <span>Filtrowanie dla automatu: <strong>{{ $automat->nazwa ?? 'Brak danych' }}</strong></span>
-            <a href="{{ route('wsady.index') }}" class="btn btn-sm btn-light bg-white text-blue-600 rounded px-3 py-1 hover:bg-gray-100">
-                Wyczyść filtr
-            </a>
-        </div>
-    @endif
-
     <div class="overflow-x-auto rounded-lg border border-gray-700">
         <table class="min-w-full divide-y divide-gray-700">
             <thead class="bg-gray-800">

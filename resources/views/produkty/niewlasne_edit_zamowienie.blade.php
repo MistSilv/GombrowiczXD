@@ -43,6 +43,9 @@
             </tbody>
         </table>
     </div>
+    <div class="mt-6">
+        {{ $deficyty->links() }}
+    </div>
 
     {{-- Formularz zamówień --}}
     <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
