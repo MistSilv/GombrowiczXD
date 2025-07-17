@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/register', [RegisterController::class, 'store']);
 
     Route::resource('straty', StrataController::class, [
-'parameters' => ['straty' => 'strata']
+    'parameters' => ['straty' => 'strata']
     ])->only(['index', 'create', 'store', 'show']);
 
  
@@ -82,11 +82,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::resource('wsady', WsadController::class);
+    Route::get('/wsady/archiwum', [WsadController::class, 'archiwum'])->name('wsady.archiwum');
     Route::get('/wsady/automat/{automat_id}', [WsadController::class, 'index'])->name('wsady.byAutomat');
     Route::post('/wsady/{produkt_id}/{automat_id}/decrease', [WsadController::class, 'decrease'])->name('wsady.decrease');
     Route::delete('/wsady/{produkt_id}/{automat_id}/delete', [WsadController::class, 'delete'])->name('wsady.delete');
-
+    Route::resource('wsady', WsadController::class);
+    
     Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
 
     Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');

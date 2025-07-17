@@ -1,18 +1,6 @@
 <x-layout>
 <div class="container mx-auto px-4 py-6">
-    <div class="mb-6 flex flex-wrap gap-2">
-        <a href="{{ route('wsady.archiwum') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
-    </div>
-    <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista wsadów</h1>
-    
-    @if(request('automat_id'))
-        <div class="alert alert-info bg-blue-600 text-white rounded p-3 mb-4 flex justify-between items-center">
-            <span>Filtrowanie dla automatu: <strong>{{ $automat->nazwa ?? 'Brak danych' }}</strong></span>
-            <a href="{{ route('wsady.index') }}" class="btn btn-sm btn-light bg-white text-blue-600 rounded px-3 py-1 hover:bg-gray-100">
-                Wyczyść filtr
-            </a>
-        </div>
-    @endif
+    <h1 class="my-4 text-white text-2xl font-semibold text-center">Archiwum wsadów</h1>
 
     <div class="overflow-x-auto rounded-lg border border-gray-700">
         <table class="min-w-full divide-y divide-gray-700">
@@ -32,25 +20,20 @@
                     <td class="py-2 px-4 text-sm">{{ $wsad->created_at->format('Y-m-d H:i') }}</td>
                     <td class="py-2 px-4">
                         <a href="{{ route('wsady.show', $wsad->id) }}" 
-                           class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl px-3 py-1 rounded" 
-                           aria-label="Szczegóły">
-                            👁️
-                        </a>
+                           class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl px-3 py-1 rounded">👁️</a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="py-4 text-center text-white">Brak wsadów do wyświetlenia</td>
+                    <td colspan="4" class="py-4 text-center text-white">Brak danych w archiwum</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    @if($wsady instanceof \Illuminate\Pagination\LengthAwarePaginator)
-        <div class="d-flex justify-content-center mt-4">
-            {{ $wsady->links() }}
-        </div>
-    @endif
+    <div class="d-flex justify-content-center mt-4">
+        {{ $wsady->links() }}
+    </div>
 </div>
 </x-layout>

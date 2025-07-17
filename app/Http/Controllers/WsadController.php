@@ -15,7 +15,9 @@ class WsadController extends Controller
         $automatId = $request->get('automat_id');
         $automat = $automatId ? Automat::findOrFail($automatId) : null;
 
-        $query = Wsad::with(['automat', 'produkty'])->latest();
+        $query = Wsad::with(['automat', 'produkty'])
+        ->whereYear('created_at', now()->year)
+        ->whereMonth('created_at', now()->month);
 
         if ($automat) {
             $query->where('automat_id', $automat->id);
@@ -120,4 +122,12 @@ class WsadController extends Controller
 
         return redirect()->back()->with('success', 'Produkt został usunięty z wsadu.');
     }
+
+    public function archiwum(Request $request)
+    {
+        $wsady = Wsad::with(['automat', 'produkty'])->orderBy('created_at', 'desc')->paginate(30);
+
+        return view('wsady.archiwum', compact('wsady'));
+    }
+
 }
