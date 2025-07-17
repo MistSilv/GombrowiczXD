@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
-    function focusIlosc(selectElem) {
-        const produktRow = selectElem.closest('.produkt-row');
+    let index = document.querySelectorAll('#produkty-list .produkt-row').length || 1;
+    const produkty = window._produkty || [];
+
+    function focusIlosc(element) {
+        const produktRow = element.closest('.produkt-row');
         if (!produktRow) return;
         const iloscInput = produktRow.querySelector('input[type="number"]');
         if (iloscInput) {
@@ -9,44 +12,125 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Nasłuchuj na wszystkie istniejące selecty
-    document.querySelectorAll('#produkty-list select').forEach(select => {
-        select.addEventListener('change', () => focusIlosc(select));
+    // --- Autocomplete dla pojedynczego inputu ---
+    function attachAutocomplete(input) {
+        let timer = null;
+        let suggestions = document.createElement('ul');
+        suggestions.className = 'autocomplete-suggestions absolute z-10 bg-gray-700 text-white max-h-40 overflow-auto border border-gray-600 rounded w-full';
+        suggestions.style.display = 'none';
+        suggestions.style.position = 'absolute';
+        suggestions.style.listStyle = 'none';
+        suggestions.style.margin = 0;
+        suggestions.style.padding = '0';
+        suggestions.style.maxHeight = '160px';
+        suggestions.style.overflowY = 'auto';
+        suggestions.style.boxSizing = 'border-box';
+
+        input.parentNode.style.position = 'relative'; // dla pozycji absolute podpowiedzi
+        input.parentNode.appendChild(suggestions);
+
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            const val = input.value.trim().toLowerCase();
+            if (val.length < 2) {
+                suggestions.style.display = 'none';
+                suggestions.innerHTML = '';
+                input.nextElementSibling.value = ''; // czyścimy produkt_id jeśli jest
+                return;
+            }
+            timer = setTimeout(() => {
+                // filtruj produkty lokalnie
+                const matches = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(val));
+                if (matches.length === 0) {
+                    suggestions.style.display = 'none';
+                    suggestions.innerHTML = '';
+                    input.nextElementSibling.value = '';
+                    return;
+                }
+                suggestions.innerHTML = '';
+                matches.forEach(p => {
+                    const li = document.createElement('li');
+                    li.textContent = p.tw_nazwa;
+                    li.dataset.id = p.id;
+                    li.style.padding = '6px 10px';
+                    li.style.cursor = 'pointer';
+                    li.addEventListener('mouseenter', () => li.style.backgroundColor = '#374151');
+                    li.addEventListener('mouseleave', () => li.style.backgroundColor = '');
+                    li.addEventListener('click', () => {
+                        input.value = p.tw_nazwa;
+                        // ukryte input produkt_id jest zaraz po input tekstowym
+                        input.nextElementSibling.value = p.id;
+                        suggestions.style.display = 'none';
+                        suggestions.innerHTML = '';
+                        focusIlosc(input);
+                    });
+                    suggestions.appendChild(li);
+                });
+                suggestions.style.display = 'block';
+            }, 200);
+        });
+
+        // schowaj podpowiedzi po kliknięciu poza input i suggestions
+        document.addEventListener('click', (e) => {
+            if (e.target !== input && !suggestions.contains(e.target)) {
+                suggestions.style.display = 'none';
+                suggestions.innerHTML = '';
+            }
+        });
+    }
+
+    // --- Dołącz autocomplete do wszystkich istniejących inputów na starcie ---
+    document.querySelectorAll('#produkty-list .produkt-row .autocomplete-input').forEach(input => {
+        attachAutocomplete(input);
     });
 
-    // Obsługa dodawania nowego produktu
+    // --- Dodawanie nowego produktu ---
     document.getElementById('add-produkt').addEventListener('click', function () {
         const produktyList = document.getElementById('produkty-list');
         const count = produktyList.children.length;
 
         const newRow = document.createElement('div');
         newRow.classList.add('produkt-row', 'flex', 'flex-col', 'sm:flex-row', 'gap-2', 'items-stretch', 'sm:items-center');
-
-        // Pobierz opcje produktów z pierwszego selecta (z serwera)
-        const selectOptions = produktyList.querySelector('select').innerHTML;
+        newRow.style.position = 'relative'; // dla podpowiedzi
 
         newRow.innerHTML = `
-            <select name="produkty[${count}][produkt_id]" required class="border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 flex-1 focus:outline-none focus:border-blue-500">
-                ${selectOptions}
-            </select>
-            <input type="number" name="produkty[${count}][ilosc]" min="1" max="100" value="1" required class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500">
-            <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">X</button>
+            <input
+                type="text"
+                name="produkty[${count}][tw_nazwa]"
+                required
+                placeholder="Wpisz nazwę produktu"
+                autocomplete="off"
+                class="form-input w-full text-white bg-gray-800 border border-gray-700 rounded px-3 py-2 autocomplete-input"
+            />
+            <input type="hidden" name="produkty[${count}][produkt_id]" class="produkt-id-hidden" value="">
+            <input
+                type="number"
+                name="produkty[${count}][ilosc]"
+                min="1"
+                max="100"
+                value="1"
+                required
+                class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+            >
+            <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
+                X
+            </button>
         `;
 
         produktyList.appendChild(newRow);
 
-        // Podpięcie eventu change do nowo dodanego selecta
-        const newSelect = newRow.querySelector('select');
-        newSelect.addEventListener('change', () => focusIlosc(newSelect));
+        // attach autocomplete do nowo dodanego inputa
+        const newInput = newRow.querySelector('.autocomplete-input');
+        attachAutocomplete(newInput);
 
-        // Od razu ustaw focus na nowo dodanym select
-        newSelect.focus();
+        // focus na input tekstowy produktu
+        newInput.focus();
     });
 
-    // Usuwanie produktu z listy
+    // --- Usuwanie produktu ---
     document.getElementById('produkty-list').addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-produkty')) {
-            e.target.parentElement.remove();
+            e.target.closest('.produkt-row').remove();
         }
     });
 });

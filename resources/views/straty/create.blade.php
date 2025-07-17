@@ -1,5 +1,7 @@
 <x-layout>
-    <h1 class="text-2xl font-bold mb-4 text-center text-white">Wprowadź stratę dla automatu: {{ $automat ? $automat->nazwa : 'Nie wybrano' }}</h1>
+    <h1 class="text-2xl font-bold mb-4 text-center text-white">
+        Wprowadź stratę dla automatu: {{ $automat ? $automat->nazwa : 'Nie wybrano' }}
+    </h1>
 
     <form method="POST" action="{{ route('straty.store') }}" class="bg-gray-900 p-6 rounded shadow-md max-w-xl mx-auto w-full">
         @csrf
@@ -33,19 +35,22 @@
 
         <h2 class="text-xl font-semibold mb-2 text-white">Produkty</h2>
         <div id="produkty-list" class="space-y-4 mb-4">
-            <div class="produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-                <select
-                    name="produkty[0][produkt_id]"
+            <div class="produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative">
+                <input
+                    type="text"
+                    name="produkty[0][tw_nazwa]"
                     required
-                    class="border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 flex-1 focus:outline-none focus:border-blue-500">
-                    <option value="">-- wybierz produkt --</option>
-                    @foreach($produkty as $produkt)
-                        <option value="{{ $produkt->id }}" {{ old('produkty.0.produkt_id') == $produkt->id ? 'selected' : '' }}>
-                            {{ $produkt->tw_nazwa }}
-                        </option>
-                    @endforeach
-                </select>
-
+                    placeholder="Wpisz nazwę produktu"
+                    autocomplete="off"
+                    class="form-input w-full text-white bg-gray-800 border border-gray-700 rounded px-3 py-2 autocomplete-input"
+                    value="{{ old('produkty.0.tw_nazwa') ?? '' }}"
+                />
+                <input
+                    type="hidden"
+                    name="produkty[0][produkt_id]"
+                    class="produkt-id-hidden"
+                    value="{{ old('produkty.0.produkt_id') ?? '' }}"
+                />
                 <input
                     type="number"
                     name="produkty[0][ilosc]"
@@ -53,12 +58,46 @@
                     max="100"
                     value="{{ old('produkty.0.ilosc', 1) }}"
                     required
-                    class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500">
-
+                    class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                >
                 <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
                     X
                 </button>
             </div>
+            @if(old('produkty'))
+                @foreach(old('produkty') as $i => $produkt)
+                    @continue($i === 0)
+                    <div class="produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative">
+                        <input
+                            type="text"
+                            name="produkty[{{ $i }}][tw_nazwa]"
+                            required
+                            placeholder="Wpisz nazwę produktu"
+                            autocomplete="off"
+                            class="form-input w-full text-white bg-gray-800 border border-gray-700 rounded px-3 py-2 autocomplete-input"
+                            value="{{ $produkt['tw_nazwa'] ?? '' }}"
+                        />
+                        <input
+                            type="hidden"
+                            name="produkty[{{ $i }}][produkt_id]"
+                            class="produkt-id-hidden"
+                            value="{{ $produkt['produkt_id'] ?? '' }}"
+                        />
+                        <input
+                            type="number"
+                            name="produkty[{{ $i }}][ilosc]"
+                            min="1"
+                            max="100"
+                            value="{{ $produkt['ilosc'] ?? 1 }}"
+                            required
+                            class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                        >
+                        <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
+                            X
+                        </button>
+                    </div>
+                @endforeach
+            @endif
         </div>
 
         <button
@@ -77,6 +116,10 @@
             </button>
         </div>
     </form>
+
+    <script>
+        window._produkty = @json($produkty);
+    </script>
 
     <script src="{{ asset('js/straty-create.js') }}"></script>
 </x-layout>
