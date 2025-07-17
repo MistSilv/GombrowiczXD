@@ -54,6 +54,13 @@ $(document).ready(function () {
         dodajProduktDoListy(productId, productName);
         $searchInput.val('');
         $suggestions.hide().empty();
+
+        // Focus and select the quantity input of the newly added product
+        const lastItem = $('#produkty-lista .produkt-item').last();
+        const iloscInput = lastItem.find('input[type="number"]');
+        if (iloscInput.length) {
+            iloscInput.focus().select();
+        }
     });
 
     function focusIlosc(item) {
@@ -115,6 +122,12 @@ $(document).ready(function () {
         // Attach autocomplete to new input
         attachAutocomplete($newItem.find('.autocomplete-input'));
 
+        // Ustaw focus na pole ilości i zaznacz tekst
+        const iloscInput = $newItem.find('input[type="number"]');
+        if (iloscInput.length) {
+            iloscInput.focus().select();
+        }
+
         index++;
     }
 
@@ -171,8 +184,15 @@ $(document).ready(function () {
             $input.val(productName);
             $input.siblings('.produkt-id-hidden').val(productId);
             $localSuggestions.hide().empty();
-            $input.focus();
+
+            // Przesuń focus na input typu number w tym samym wierszu (produkt-item)
+            const parentProduktItem = $input.closest('.produkt-item');
+            const iloscInput = parentProduktItem.find('input[type="number"]');
+            if (iloscInput.length) {
+                iloscInput.focus().select();
+            }
         });
+
 
         $(document).on('click', function (e) {
             if (!$(e.target).closest($localSuggestions).length && e.target !== $input[0]) {
@@ -202,6 +222,7 @@ $(document).ready(function () {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': token
                 },
                 body: JSON.stringify({ kod_ean: decodedText })
@@ -243,5 +264,10 @@ $(document).ready(function () {
                 }
             })
             .catch(err => alert("Błąd pobierania kamer: " + err));
+    });
+
+    // --- Add product button handler ---
+    $('#dodaj-produkt').on('click', () => {
+        dodajProduktDoListy();
     });
 });
