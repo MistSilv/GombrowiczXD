@@ -111,12 +111,6 @@
             <ul id="lista-podpowiedzi" class="absolute bg-white text-black max-h-40 overflow-auto border border-gray-600 rounded w-full z-50 hidden"></ul>
         </div>
 
-        <button
-            type="button"
-            id="add-produkt"
-            class="mb-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full sm:w-auto">
-            Dodaj produkt
-        </button>
 
         <div>
             <button
