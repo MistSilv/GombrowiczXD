@@ -54,4 +54,13 @@ class Produkt extends Model
     {
         return !$this->isWlasny();
     }
+
+    public function getNaStanieAttribute()
+    {
+        $wsadyIlosc = $this->wsady->sum('pivot.ilosc');
+        $zamowieniaIlosc = $this->zamowienia->sum('pivot.ilosc');
+        $naStanie = $zamowieniaIlosc - $wsadyIlosc;
+
+        return $naStanie >= 0 ? $naStanie : null;
+    }
 }

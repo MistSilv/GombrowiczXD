@@ -1,51 +1,6 @@
 <x-layout>
-    <div class="flex flex-col sm:flex-row sm:items-center sm:gap-8 mb-6">
-        <div class="flex flex-col flex-1 mb-4 sm:mb-0">
-            <label for="maxStan" class="text-white font-semibold mb-1">Ilość na stanie < niż:</label>
-            <input type="number" id="maxStan" min="0"
-                class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Np. 200">
-        </div>
-        <div class="flex flex-col flex-1">
-            <label for="filterNazwa" class="text-white font-semibold mb-1">Filtruj po nazwie produktu:</label>
-            <input type="text" id="filterNazwa" 
-                class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Wpisz nazwę produktu">
-        </div>
-    </div>
-
-    {{-- Tabela deficytów --}}
-    <div class="p-4 bg-white rounded shadow-md overflow-x-auto mb-6">
-        <h2 class="text-xl font-bold mb-4 text-gray-800">Stan Produktów niekraftowych</h2>
-        <table class="min-w-full table-auto border-collapse border border-gray-300 text-sm sm:text-base">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="border border-gray-300 px-3 py-2 text-left">Produkt</th>
-                    <th class="border border-gray-300 px-3 py-2 text-left">Wsady</th>
-                    <th class="border border-gray-300 px-3 py-2 text-left">Zam.</th>
-                    <th class="border border-gray-300 px-3 py-2 text-left">Na Stanie</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($deficyty as $d)
-                    <tr class="deficyt-row hover:bg-gray-50 cursor-pointer" data-deficyt="{{ $d['na_stanie'] }}">
-                        <td class="border border-gray-300 px-3 py-2 product-name text-blue-600 underline cursor-pointer">
-                            {{ $d['nazwa'] }}
-                        </td>
-                        <td class="border border-gray-300 px-3 py-2">{{ $d['wsady'] }}</td>
-                        <td class="border border-gray-300 px-3 py-2">{{ $d['zamowienia'] }}</td>
-                        <td class="border border-gray-300 px-3 py-2
-                            {{ $d['na_stanie'] < 0 ? 'text-red-600 font-bold' : 'text-green-700' }}">
-                            {{ $d['na_stanie'] }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    <div class="mt-6">
-        {{ $deficyty->links() }}
-    </div>
+    
+    @livewire('deficyty-tabela')
 
     {{-- Formularz zamówień --}}
     <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">

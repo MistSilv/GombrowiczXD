@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="manifest" href="/build/manifest.webmanifest">
     <meta name="theme-color" content="#1e293b">
+    @livewireStyles
 </head>
 <body class="bg-black font-sans min-h-screen">
     <nav class="bg-black text-white shadow-md px-6 py-4 flex justify-between items-center rounded-b-xl">
@@ -21,5 +22,7 @@
     <main class="container mx-auto py-6 px-4">
         {{ $slot }} 
     </main>
+    
+@livewireScripts
 </body>
 </html>

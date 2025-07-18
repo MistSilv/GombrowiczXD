@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use App\Http\Livewire\DeficytyTabela;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,5 +23,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         $this->loadViewsFrom(resource_path('views/emails'), 'mail');
+        Livewire::component('deficyty-tabela', DeficytyTabela::class);
     }
 }

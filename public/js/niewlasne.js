@@ -209,3 +209,15 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('maxStan').addEventListener('input', filtrujDeficyty);
     document.getElementById('filterNazwa').addEventListener('input', filtrujDeficyty);
 });
+
+document.addEventListener('livewire:load', function () {
+    Livewire.on('produktClicked', function (produktId) {
+        const produkt = window._produkty.find(p => p.id === produktId);
+        if (produkt) {
+            setQuantity(produkt.id, 0);
+        }
+    });
+});
+
+
+

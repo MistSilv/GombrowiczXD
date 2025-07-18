@@ -104,7 +104,7 @@ class ProduktController extends Controller
             ];
         })
         // *** filtrujemy aby pokazywało tylko gdy WSADY > 0 I ZAMÓWIENIA > 0 ***
-        //->filter(fn($item) => $item['wsady'] > 0 || $item['zamowienia'] > 0)
+        ->filter(fn($item) => $item['wsady'] > 0 || $item['zamowienia'] > 0)
         ->values();
 }
 
