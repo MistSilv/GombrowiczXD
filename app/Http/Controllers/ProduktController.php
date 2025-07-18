@@ -104,7 +104,7 @@ class ProduktController extends Controller
             ];
         })
         // *** filtrujemy aby pokazywało tylko gdy WSADY > 0 I ZAMÓWIENIA > 0 ***
-        //->filter(fn($item) => $item['wsady'] > 0 || $item['zamowienia'] > 0)
+        ->filter(fn($item) => $item['wsady'] > 0 || $item['zamowienia'] > 0)
         ->values();
 }
 
@@ -259,17 +259,23 @@ class ProduktController extends Controller
         $q = $request->query('q', '');
 
         if (strlen($q) < 2) {
-            // Return empty if search too short to avoid heavy queries
             return response()->json([]);
         }
 
+        $q_normalized = str_replace(' ', '', strtolower($q));
+
         $results = Produkt::select('id', 'tw_nazwa', 'tw_idabaco', 'is_wlasny')
-            ->where('tw_nazwa', 'like', "%{$q}%")
-            ->limit(20)
-            ->get();
+            ->get()
+            ->filter(function ($produkt) use ($q_normalized) {
+                $name_normalized = str_replace(' ', '', strtolower($produkt->tw_nazwa));
+                return str_contains($name_normalized, $q_normalized);
+            })
+            ->take(20)
+            ->values();
 
         return response()->json($results);
     }
+
 
     
 }
