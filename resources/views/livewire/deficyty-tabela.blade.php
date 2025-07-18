@@ -2,13 +2,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:gap-8 mb-6">
         <div class="flex flex-col flex-1 mb-4 sm:mb-0">
             <label class="text-white font-semibold mb-1">Ilość na stanie < niż:</label>
-            <input type="number" wire:model.debounce.300ms="maxStan" min="0"
+            <input id="maxStan" type="number" wire:model.debounce.300ms="maxStan" min="0"
                    class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                    placeholder="Np. 200">
         </div>
         <div class="flex flex-col flex-1">
             <label class="text-white font-semibold mb-1">Filtruj po nazwie produktu:</label>
-            <input type="text" wire:model.debounce.300ms="filterNazwa"
+            <input id="filterNazwa" type="text" wire:model.debounce.300ms="filterNazwa"
                    class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                    placeholder="Wpisz nazwę produktu">
         </div>
