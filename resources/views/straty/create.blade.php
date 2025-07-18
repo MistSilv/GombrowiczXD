@@ -44,7 +44,6 @@
                     autocomplete="off"
                     class="form-input w-full text-white bg-gray-800 border border-gray-700 rounded px-3 py-2 autocomplete-input"
                     value="{{ old('produkty.0.tw_nazwa') ?? '' }}"
-                    readonly
                 />
                 <input
                     type="hidden"

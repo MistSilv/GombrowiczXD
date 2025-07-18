@@ -22,7 +22,7 @@
                 <tr>
                     <th class="border border-gray-300 px-3 py-2 text-left">Produkt</th>
                     <th class="border border-gray-300 px-3 py-2 text-left">Wsady</th>
-                    <th class="border border-gray-300 px-3 py-2 text-left">Zamówienia</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left">Zam.</th>
                     <th class="border border-gray-300 px-3 py-2 text-left">Na Stanie</th>
                 </tr>
             </thead>
