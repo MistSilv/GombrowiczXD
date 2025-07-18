@@ -136,7 +136,7 @@ document.querySelectorAll('.product-name').forEach(el => {
         const nazwa = el.textContent.trim();
         const produkt = window._produkty.find(p => p.tw_nazwa === nazwa);
         if (produkt) {
-            setQuantity(produkt.id, 0);
+            setQuantity(produkt.id, 1);
         }
     });
 });
