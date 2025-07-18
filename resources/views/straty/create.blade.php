@@ -44,6 +44,7 @@
                     autocomplete="off"
                     class="form-input w-full text-white bg-gray-800 border border-gray-700 rounded px-3 py-2 autocomplete-input"
                     value="{{ old('produkty.0.tw_nazwa') ?? '' }}"
+                    readonly
                 />
                 <input
                     type="hidden"
@@ -98,6 +99,16 @@
                     </div>
                 @endforeach
             @endif
+        </div>
+        <div class="mb-4 relative">
+            <input
+                type="text"
+                id="szukaj-produkt"
+                placeholder="Szukaj produktu..."
+                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                autocomplete="off"
+            >
+            <ul id="lista-podpowiedzi" class="absolute bg-white text-black max-h-40 overflow-auto border border-gray-600 rounded w-full z-50 hidden"></ul>
         </div>
 
         <button

@@ -1,32 +1,31 @@
 $(document).ready(function () {
-    const $searchInput = $('#szukaj-produkt');
-    const $suggestions = $('#lista-podpowiedzi');
-    const $produktyLista = $('#produkty-lista');
+    const $globalSearchInput = $('#szukaj-produkt');
+    const $globalSuggestions = $('#lista-podpowiedzi');
+    const $productContainer = $('#produkty-lista');
 
     let debounceTimer;
-    let index = $produktyLista.children().length || 1;
+    let index = $productContainer.children().length || 1;
 
-    // Cached products from server
     const produkty = window._produkty || [];
 
-    // --- Autocomplete AJAX search with debounce (search input on top) ---
-    $searchInput.on('input', function () {
+    // --- Global search with AJAX ---
+    $globalSearchInput.on('input', function () {
         clearTimeout(debounceTimer);
         const query = $(this).val().trim();
 
         if (query.length < 2) {
-            $suggestions.hide().empty();
+            $globalSuggestions.hide().empty();
             return;
         }
 
         debounceTimer = setTimeout(() => {
             $.ajax({
-                url: '/produkty/search',
+                url: '/api/produkty/search',
                 data: { q: query },
                 success: function (products) {
-                    $suggestions.empty();
+                    $globalSuggestions.empty();
                     if (products.length === 0) {
-                        $suggestions.hide();
+                        $globalSuggestions.hide();
                         return;
                     }
 
@@ -35,63 +34,59 @@ $(document).ready(function () {
                             .text(p.tw_nazwa)
                             .attr('data-id', p.id)
                             .addClass('cursor-pointer px-2 py-1 hover:bg-gray-300')
-                            .appendTo($suggestions);
+                            .appendTo($globalSuggestions);
                     });
-                    $suggestions.show();
+                    $globalSuggestions.show();
                 },
                 error: function () {
-                    $suggestions.hide();
+                    $globalSuggestions.hide();
                 }
             });
         }, 300);
     });
 
-    // --- When user clicks a suggestion on top search input ---
-    $suggestions.on('click', 'li', function () {
+    // --- Click on suggestion from global search ---
+    $globalSuggestions.on('click', 'li', function () {
         const productId = $(this).data('id');
         const productName = $(this).text();
 
-        dodajProduktDoListy(productId, productName);
-        $searchInput.val('');
-        $suggestions.hide().empty();
+        addProductRow(productId, productName);
+        $globalSearchInput.val('');
+        $globalSuggestions.hide().empty();
 
-        // Focus and select the quantity input of the newly added product
+        // Focus quantity
         const lastItem = $('#produkty-lista .produkt-item').last();
-        const iloscInput = lastItem.find('input[type="number"]');
-        if (iloscInput.length) {
-            iloscInput.focus().select();
-        }
+        focusQuantityField(lastItem);
     });
 
-    function focusIlosc(item) {
-        const iloscInput = item.querySelector('input[type="number"]');
-        if (iloscInput) {
+    // --- Focus helper ---
+    function focusQuantityField($item) {
+        const $iloscInput = $item.find('input[type="number"]');
+        if ($iloscInput.length) {
             setTimeout(() => {
-                iloscInput.focus();
-                iloscInput.select();
+                $iloscInput.focus().select();
             }, 50);
         }
     }
 
-
-    // --- Add product row to the list with input text + hidden ID + qty ---
-    function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
-        // Check if product already exists in list by produktId and increase qty
-        if (produktId) {
+    // --- Add product row ---
+    function addProductRow(productId = null, productName = '', qty = 1) {
+        // If product already exists, increment quantity
+        if (productId) {
             let found = false;
-            $produktyLista.find('.produkt-item').each(function () {
+            $productContainer.find('.produkt-item').each(function () {
                 const $hiddenId = $(this).find('.produkt-id-hidden');
-                if ($hiddenId.val() == produktId) {
+                if ($hiddenId.val() == productId) {
                     const $iloscInput = $(this).find('input[type="number"]');
-                    $iloscInput.val(parseInt($iloscInput.val()) + ilosc).focus().select();
+                    $iloscInput.val(parseInt($iloscInput.val()) + qty);
+                    focusQuantityField($(this));
                     found = true;
-                    return false; // break each
+                    return false;
                 }
             });
             if (found) return;
         }
 
-        // Create new product row
         const $newItem = $(`
             <div class="flex items-center gap-2 mb-2 produkt-item">
                 <input
@@ -101,9 +96,9 @@ $(document).ready(function () {
                     placeholder="Wpisz nazwę produktu"
                     required
                     autocomplete="off"
-                    value="${nazwaProduktu}"
+                    value="${productName}"
                 >
-                <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${produktId ?? ''}">
+                <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${productId ?? ''}">
                 <input
                     type="number"
                     name="produkty[${index}][ilosc]"
@@ -111,40 +106,32 @@ $(document).ready(function () {
                     class="form-input w-24 text-black"
                     placeholder="Ilość"
                     required
-                    value="${ilosc}"
+                    value="${qty}"
                 >
                 <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
             </div>
         `);
 
-        $produktyLista.append($newItem);
-
-        // Attach autocomplete to new input
-        attachAutocomplete($newItem.find('.autocomplete-input'));
-
-        // Ustaw focus na pole ilości i zaznacz tekst
-        const iloscInput = $newItem.find('input[type="number"]');
-        if (iloscInput.length) {
-            iloscInput.focus().select();
-        }
-
+        $productContainer.append($newItem);
+        attachRowAutocomplete($newItem.find('.autocomplete-input'));
+        focusQuantityField($newItem);
         index++;
     }
 
     // --- Remove product row ---
-    $produktyLista.on('click', '.remove-item', function () {
+    $productContainer.on('click', '.remove-item', function () {
         $(this).closest('.produkt-item').remove();
     });
 
-    // --- Hide suggestions when clicking outside ---
+    // --- Hide global suggestions on click outside ---
     $(document).on('click', function (e) {
         if (!$(e.target).closest('#lista-podpowiedzi, #szukaj-produkt').length) {
-            $suggestions.hide().empty();
+            $globalSuggestions.hide().empty();
         }
     });
 
-    // --- Autocomplete for input text fields in product rows ---
-    function attachAutocomplete($input) {
+    // --- Autocomplete inside rows ---
+    function attachRowAutocomplete($input) {
         let timer = null;
         const $localSuggestions = $('<ul class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full" style="display:none;"></ul>');
         $input.after($localSuggestions);
@@ -185,14 +172,9 @@ $(document).ready(function () {
             $input.siblings('.produkt-id-hidden').val(productId);
             $localSuggestions.hide().empty();
 
-            // Przesuń focus na input typu number w tym samym wierszu (produkt-item)
-            const parentProduktItem = $input.closest('.produkt-item');
-            const iloscInput = parentProduktItem.find('input[type="number"]');
-            if (iloscInput.length) {
-                iloscInput.focus().select();
-            }
+            const $parentItem = $input.closest('.produkt-item');
+            focusQuantityField($parentItem);
         });
-
 
         $(document).on('click', function (e) {
             if (!$(e.target).closest($localSuggestions).length && e.target !== $input[0]) {
@@ -201,12 +183,17 @@ $(document).ready(function () {
         });
     }
 
-    // Attach autocomplete to existing inputs on page load
-    $produktyLista.find('.autocomplete-input').each(function () {
-        attachAutocomplete($(this));
+    // Attach autocomplete to existing inputs on load
+    $productContainer.find('.autocomplete-input').each(function () {
+        attachRowAutocomplete($(this));
     });
 
-    // --- EAN Scanner setup ---
+    // --- Add product manually ---
+    $('#dodaj-produkt').on('click', () => {
+        addProductRow();
+    });
+
+    // --- EAN Scanner ---
     const scanner = new Html5Qrcode("reader");
     let isScanning = false;
 
@@ -227,19 +214,19 @@ $(document).ready(function () {
                 },
                 body: JSON.stringify({ kod_ean: decodedText })
             })
-            .then(res => {
-                if (!res.ok) return res.json().then(err => { throw err });
-                return res.json();
-            })
-            .then(data => {
-                const ilosc = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
-                if (ilosc && !isNaN(ilosc) && parseInt(ilosc) > 0) {
-                    dodajProduktDoListy(data.produkt.id.toString(), data.produkt.tw_nazwa, parseInt(ilosc));
-                } else {
-                    alert("Nieprawidłowa ilość.");
-                }
-            })
-            .catch(err => alert(err.message || 'Błąd przy sprawdzaniu kodu.'));
+                .then(res => {
+                    if (!res.ok) return res.json().then(err => { throw err });
+                    return res.json();
+                })
+                .then(data => {
+                    const qty = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
+                    if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                        addProductRow(data.produkt.id.toString(), data.produkt.tw_nazwa, parseInt(qty));
+                    } else {
+                        alert("Nieprawidłowa ilość.");
+                    }
+                })
+                .catch(err => alert(err.message || 'Błąd przy sprawdzaniu kodu.'));
         });
     }
 
@@ -264,10 +251,5 @@ $(document).ready(function () {
                 }
             })
             .catch(err => alert("Błąd pobierania kamer: " + err));
-    });
-
-    // --- Add product button handler ---
-    $('#dodaj-produkt').on('click', () => {
-        dodajProduktDoListy();
     });
 });

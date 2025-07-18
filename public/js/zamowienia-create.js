@@ -1,7 +1,7 @@
 $(document).ready(function () {
     const $produktyLista = $('#produkty-lista');
     let index = $produktyLista.children().length || 1;
-    const produkty = (window._produkty || []).filter(p => p.is_wlasny); // tylko własne produkty
+    const produkty = (window._produkty || []).filter(p => p.is_wlasny);
 
     function attachAutocomplete($input) {
         let timer = null;
@@ -56,17 +56,6 @@ $(document).ready(function () {
         });
     }
 
-    function focusIlosc(item) {
-        const iloscInput = item.querySelector('input[type="number"]');
-        if (iloscInput) {
-            setTimeout(() => {
-                iloscInput.focus();
-                iloscInput.select();
-            }, 50);
-        }
-    }
-
-
     function dodajProduktDoListy(produktId = null, nazwaProduktu = '', ilosc = 1) {
         // Sprawdź czy produkt już jest
         if (produktId) {
@@ -83,7 +72,7 @@ $(document).ready(function () {
             if (found) return;
         }
 
-        const $newItem = $(`
+        const $newItem = $(` 
             <div class="flex items-center gap-2 mb-2 produkt-item">
                 <input
                     type="text"
@@ -126,5 +115,62 @@ $(document).ready(function () {
     // Autocomplete dla pierwszego inputa
     $produktyLista.find('.autocomplete-input').each(function () {
         attachAutocomplete($(this));
+    });
+
+    // ✅ Nowa sekcja – globalna wyszukiwarka produktów
+    const $searchInput = $('#szukaj-produkt');
+    const $globalSuggestions = $('#lista-podpowiedzi');
+
+    let debounceTimer;
+    $searchInput.on('input', function () {
+        clearTimeout(debounceTimer);
+        const query = $(this).val().trim();
+
+        if (query.length < 2) {
+            $globalSuggestions.hide().empty();
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            const matches = produkty.filter(p => p.tw_nazwa.toLowerCase().includes(query.toLowerCase()));
+            if (matches.length === 0) {
+                $globalSuggestions.hide().empty();
+                return;
+            }
+
+            $globalSuggestions.empty();
+            matches.forEach(p => {
+                $('<li>')
+                    .text(p.tw_nazwa)
+                    .attr('data-id', p.id)
+                    .addClass('cursor-pointer px-2 py-1 hover:bg-gray-300')
+                    .appendTo($globalSuggestions);
+            });
+            $globalSuggestions.show();
+        }, 300);
+    });
+
+    $globalSuggestions.on('click', 'li', function () {
+        const productId = $(this).data('id');
+        const productName = $(this).text();
+
+        dodajProduktDoListy(productId, productName);
+
+        // ✅ Focus na pole ilości w nowo dodanym wierszu
+        const lastItem = $('#produkty-lista .produkt-item').last();
+        const iloscInput = lastItem.find('input[type="number"]');
+        if (iloscInput.length) {
+            iloscInput.focus().select();
+        }
+
+        $searchInput.val('');
+        $globalSuggestions.hide().empty();
+    });
+
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest($globalSuggestions).length && e.target !== $searchInput[0]) {
+            $globalSuggestions.hide().empty();
+        }
     });
 });
