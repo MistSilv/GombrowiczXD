@@ -3,19 +3,19 @@
         <div class="flex flex-col flex-1 mb-4 sm:mb-0">
             <label class="text-white font-semibold mb-1">Ilość na stanie < niż:</label>
             <input id="maxStan" type="number" wire:keydown.debounce.300ms="$set('maxStan', $event.target.value)" min="0"
-                   class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="px-3 py-2 mb-4 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                    placeholder="Np. 200">
         </div>
         <div class="flex flex-col flex-1">
             <label class="text-white font-semibold mb-1">Filtruj po nazwie produktu:</label>
             <input id="filterNazwa" type="text" wire:keydown.debounce.300ms="$set('filterNazwa', $event.target.value)"
-                   class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="px-3 py-2 mb-4 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                    placeholder="Wpisz nazwę produktu">
         </div>
         <div class="flex flex-col flex-1">
             <label for="showEmpty" class="text-white font-semibold mb-1">Pokaż wszystko</label>
             
-            <label class="relative inline-flex items-center cursor-pointer">
+            <label class="relative inline-flex items-center cursor-pointer mb-4">
                 <input type="checkbox" id="showEmpty" wire:click="$toggle('showEmpty')"  class="sr-only peer">
                 <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-purple-600 transition duration-300"></div>
                 <div class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-300 peer-checked:translate-x-full"></div>
