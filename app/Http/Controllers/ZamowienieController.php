@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\Zamowienie;
 use App\Models\Produkt;
@@ -70,32 +71,42 @@ class ZamowienieController extends Controller
 
 
     public function store(Request $request)
-{
-    $request->validate([
-        'produkty' => 'required|array|min:1',
-        'produkty.*.produkt_id' => 'required|exists:produkty,id',
-        'produkty.*.ilosc' => 'required|integer|min:1|max:3000',
-        'automat_id' => 'required|exists:automats,id',
-    ]);
+    {
+        $request->validate([
+            'produkty' => 'required|array|min:1',
+            'produkty.*.produkt_id' => 'required|exists:produkty,id',
+            'produkty.*.ilosc' => 'required|integer|min:1|max:3000',
+            'automat_id' => 'required|exists:automats,id',
+        ]);
 
-    $zamowienie = Zamowienie::create([
-        'data_realizacji' => now()->addDay(),
-        'automat_id' => $request->get('automat_id'),
-    ]);
+        $zamowienie = Zamowienie::create([
+            'data_realizacji' => now()->addDay(),
+            'automat_id' => $request->get('automat_id'),
+        ]);
 
-    foreach ($request->produkty as $pozycja) {
-        $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
+        foreach ($request->produkty as $pozycja) {
+            $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
+        }
+
+        $message = "📦 **Nowe zamówienie #{$zamowienie->id}**\n";
+        $message .= "Automat ID: {$zamowienie->automat_id}\n";
+        $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d')}\n\n";
+        $message .= "**Produkty:**\n";
+
+        foreach ($zamowienie->produkty as $produkt) {
+            $message .= "- {$produkt->tw_nazwa} x {$produkt->pivot->ilosc}\n";
+        }
+
+        // Wyślij na Discorda
+        $webhookUrl = config('services.discord.webhook_url'); 
+
+        Http::post($webhookUrl, [
+            'content' => $message
+        ]);
+
+        return redirect()->route('zamowienia.index', ['automat_id' => $request->get('automat_id')])
+            ->with('success', 'Zamówienie zostało zapisane i powiadomienie wysłane na Discord.');
     }
-
-    // Tworzenie pliku XLSX
-    $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
-
-    // Wysyłka maila z załącznikiem XLSX
-    Mail::to(config('mail.produkcja'))->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
-
-    return redirect()->route('zamowienia.index', ['automat_id' => $request->get('automat_id')])
-        ->with('success', 'Zamówienie zostało zapisane i mail wysłany.');
-}
 
     public function archiwum()
     {
