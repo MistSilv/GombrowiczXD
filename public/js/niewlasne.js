@@ -1,7 +1,7 @@
 window._produkty = JSON.parse(document.getElementById('produkty-data').textContent);
 
 let index = 0;
-
+//dodaje do tabeli tej na dole dynamicznej
 function aktualizujDostepneProdukty() {
     const uzyteProdukty = new Set();
     document.querySelectorAll('#produkty-lista tbody tr').forEach(tr => {
@@ -121,7 +121,6 @@ document.querySelectorAll('.product-name').forEach(el => {
 });
 
 // --- WYSZUKIWARKA PRODUKTÓW DO DODANIA ---
-
 const searchInput = document.getElementById('product-search');
 const suggestionsList = document.getElementById('product-suggestions');
 

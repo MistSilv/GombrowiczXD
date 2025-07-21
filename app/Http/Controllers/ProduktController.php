@@ -107,9 +107,6 @@ class ProduktController extends Controller
             ->values();
     }
 
-
-
-
     public function formularzNoweZamowienie()
     {
         $deficyty = $this->buildDeficyty();

@@ -20,10 +20,12 @@ class DeficytyTabela extends Component
     protected $paginationTheme = 'tailwind';
     protected $updatesQueryString = ['page'];
 
-    public function updatedMaxStan()
+
+    public function updatedMaxStan($value)
     {
-        $this->resetPage();
-    }
+        if($value === '' || $value === null) {
+            $this->maxStan = null;
+    }$this->resetPage();}
 
     public function updatedFilterNazwa()
     {
@@ -51,7 +53,7 @@ class DeficytyTabela extends Component
             $naStanie = $zamowienia - $wsady;
 
             // Nie pokazuj produktów, których stan wynosi dokładnie 0
-            if ($naStanie === 0) {
+            if ($zamowienia === 0 && $wsady === 0) {
                 return false;
             }
 
