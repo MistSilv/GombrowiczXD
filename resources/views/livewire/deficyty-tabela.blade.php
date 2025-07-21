@@ -12,6 +12,10 @@
                    class="px-3 py-2 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                    placeholder="Wpisz nazwę produktu">
         </div>
+        <div class="flex items-center mb-4">
+            <input type="checkbox" id="showEmpty" wire:click="$toggle('showEmpty')" class="mr-2">
+            <label for="showEmpty" class="text-white font-semibold">Pokaż produkty bez wsadów i zamówień</label>
+        </div>
     </div>
 
     <div class="p-4 bg-white rounded shadow-md overflow-x-auto mb-6">
