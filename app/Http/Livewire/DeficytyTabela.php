@@ -18,7 +18,6 @@ class DeficytyTabela extends Component
     public $page = 1;
 
     protected $paginationTheme = 'tailwind';
-
     protected $updatesQueryString = ['page'];
 
     public function updatedMaxStan()
@@ -51,16 +50,17 @@ class DeficytyTabela extends Component
             $zamowienia = $produkt->zamowienia->sum('pivot.ilosc');
             $naStanie = $zamowienia - $wsady;
 
-            // Tylko produkty, których naStanie ≠ 0
+            // Nie pokazuj produktów, których stan wynosi dokładnie 0
             if ($naStanie === 0) {
                 return false;
             }
 
-            // Jeśli filtr maxStan ustawiony, uwzględnij go
+            // Jeśli ustawiono maxStan, filtruj
             if ($this->maxStan !== null && $naStanie >= $this->maxStan) {
                 return false;
             }
 
+            // Przechodzi filtr
             return true;
         });
 
@@ -85,5 +85,4 @@ class DeficytyTabela extends Component
             'deficyty' => $paginator,
         ]);
     }
-
 }

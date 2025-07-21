@@ -97,27 +97,6 @@ function setQuantity(produktId, ilosc) {
     dodajWiersz(produktId, ilosc);
 }
 
-function filtrujDeficyty() {
-    const maxStanInput = document.getElementById('maxStan');
-    const filterNazwaInput = document.getElementById('filterNazwa');
-
-    const maxStan = maxStanInput.value.trim() === '' ? null : parseInt(maxStanInput.value);
-    const filterNazwa = filterNazwaInput.value.trim().toLowerCase();
-
-    document.querySelectorAll('.deficyt-row').forEach(row => {
-        const naStanie = parseInt(row.getAttribute('data-deficyt')) || 0;
-        const nazwa = row.querySelector('.product-name').textContent.toLowerCase();
-
-        const pokazPoStanie = (maxStan === null || naStanie < maxStan);
-        const pokazPoNazwie = (filterNazwa === '' || nazwa.includes(filterNazwa));
-
-        if (pokazPoStanie && pokazPoNazwie) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
 
 // Usuwanie wiersza
 document.addEventListener('click', function (e) {
@@ -205,9 +184,7 @@ document.addEventListener('click', (e) => {
 // Obsługa filtrów deficytów
 window.addEventListener('DOMContentLoaded', () => {
     aktualizujDostepneProdukty();
-    filtrujDeficyty();
-    document.getElementById('maxStan').addEventListener('input', filtrujDeficyty);
-    document.getElementById('filterNazwa').addEventListener('input', filtrujDeficyty);
+
 });
 
 document.addEventListener('livewire:load', function () {
