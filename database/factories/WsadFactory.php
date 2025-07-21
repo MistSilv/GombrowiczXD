@@ -10,6 +10,8 @@ use App\Models\Automat;
  */
 class WsadFactory extends Factory
 {
+    protected $model = \App\Models\Wsad::class;
+
     public function definition(): array
     {
         $data = $this->faker->dateTimeBetween('2025-01-01', '2025-06-30');

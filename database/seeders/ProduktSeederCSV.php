@@ -4,17 +4,13 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Produkt;
-use App\Models\EanCode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProduktSeederCSV extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Ścieżka względna do pliku CSV w katalogu database/data
         $csvPath = database_path('data/produkty.csv');
 
         if (!file_exists($csvPath)) {
@@ -25,6 +21,7 @@ class ProduktSeederCSV extends Seeder
         $handle = fopen($csvPath, 'r');
         $header = fgetcsv($handle, 1000, ';');
 
+        // Usuń BOM jeśli występuje
         if (isset($header[0])) {
             $header[0] = preg_replace('/^\x{FEFF}/u', '', $header[0]);
         }
@@ -33,37 +30,48 @@ class ProduktSeederCSV extends Seeder
 
         while (($row = fgetcsv($handle, 1000, ';')) !== false) {
             $data = array_combine($header, $row);
-
-            $id = $data['id'] ?? null;  // Zostawiamy, ale nie używamy
+            $id = $data['id'] ?? null;
 
             if (!isset($groupedProdukty[$id])) {
                 $groupedProdukty[$id] = [
                     'tw_nazwa' => $data['tw_nazwa'],
-                    'tw_idabaco' => $data['tw_idabaco'],
+                    'tw_idabaco' => $data['tw_idabaco'] ?: null,
                     'is_wlasny' => false,
                     'ean_kody' => [],
                 ];
             }
 
-            if (!in_array($data['ean_kody'], $groupedProdukty[$id]['ean_kody'])) {
+            if (!empty($data['ean_kody']) && !in_array($data['ean_kody'], $groupedProdukty[$id]['ean_kody'])) {
                 $groupedProdukty[$id]['ean_kody'][] = $data['ean_kody'];
             }
         }
 
         fclose($handle);
 
-        foreach ($groupedProdukty as $id => $produktData) {
-            $eanKody = $produktData['ean_kody'];
-            unset($produktData['ean_kody']);
+        DB::transaction(function () use ($groupedProdukty) {
+            foreach ($groupedProdukty as $produktData) {
+                $eanKody = $produktData['ean_kody'];
+                unset($produktData['ean_kody']);
 
-            // Tworzymy nowy produkt bez ręcznego id - Laravel wygeneruje ID automatycznie
-            $produkt = Produkt::create($produktData);
+                $produkt = \App\Models\Produkt::create($produktData);
 
-            // Dodajemy kody EAN
-            foreach ($eanKody as $kod) {
-                $produkt->eanCodes()->firstOrCreate(['kod_ean' => $kod]);
+                $now = now();
+                $eanInsert = [];
+
+                foreach ($eanKody as $ean) {
+                    $eanInsert[] = [
+                        'produkt_id' => $produkt->id,
+                        'kod_ean' => (string) $ean,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                if (!empty($eanInsert)) {
+                    DB::table('ean_codes')->insert($eanInsert);
+                }
             }
-        }
+        });
 
         $this->command->info("Zaimportowano " . count($groupedProdukty) . " produktów z CSV.");
     }

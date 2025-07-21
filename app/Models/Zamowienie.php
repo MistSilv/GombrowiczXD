@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Zamowienie extends Model
 {
+    use HasFactory;
+    
     protected $table = 'zamowienia';
 
     protected $fillable = ['data_realizacji', 'automat_id']; // pola, które można masowo przypisywać

@@ -1,3 +1,4 @@
+
 <?php
 
 namespace Database\Seeders;
@@ -33,4 +34,5 @@ class WsadSeeder extends Seeder
         });
     }
 
-}
+} 
+

@@ -37,5 +37,12 @@ class UserSeeder extends Seeder
             'password' => Hash::make('1234567890'),
             'role' => 'produkcja',
         ]);
+
+        User::create([
+            'name' => 'Przemo',
+            'email' => 'przemo@69.com',
+            'password' => Hash::make('123456789'),
+            'role' => 'serwis',
+        ]);
     }
 }

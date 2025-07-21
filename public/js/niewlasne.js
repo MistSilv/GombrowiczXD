@@ -85,7 +85,6 @@ function setQuantity(produktId, ilosc) {
         if (parseInt(row.getAttribute('data-produkt-id')) === produktId) {
             const input = row.querySelector('input[type="number"]');
             if(input) {
-                input.value = ilosc;
                 input.focus();
                 input.select();
                 input.scrollIntoView({ behavior: 'smooth', block: 'center' });
