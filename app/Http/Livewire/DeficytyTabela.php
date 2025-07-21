@@ -9,24 +9,22 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class DeficytyTabela extends Component
 {
-    use WithPagination {
-        gotoPage as protected parentGotoPage;
-    }
+    use WithPagination;
 
     public $maxStan = null;
     public $filterNazwa = '';
-    public $page = 1;
     public $showEmpty = false;
 
     protected $paginationTheme = 'tailwind';
     protected $updatesQueryString = ['page'];
 
-
     public function updatedMaxStan($value)
     {
-        if($value === '' || $value === null) {
+        if ($value === '' || $value === null) {
             $this->maxStan = null;
-    }$this->resetPage();}
+        }
+        $this->resetPage();
+    }
 
     public function updatedFilterNazwa()
     {
@@ -36,12 +34,6 @@ class DeficytyTabela extends Component
     public function updatedShowEmpty()
     {
         $this->resetPage();
-    }
-
-    public function gotoPage($page)
-    {
-        $this->page = $page;
-        $this->parentGotoPage($page);
     }
 
     public function render()
@@ -58,30 +50,26 @@ class DeficytyTabela extends Component
             $zamowienia = $produkt->zamowienia->sum('pivot.ilosc');
             $naStanie = $zamowienia - $wsady;
 
-            // Nie pokazuj produktów, których stan wynosi dokładnie 0
             if (!$this->showEmpty && $zamowienia === 0 && $wsady === 0) {
                 return false;
             }
 
-            // Jeśli ustawiono maxStan, filtruj
             if ($this->maxStan !== null && $naStanie >= $this->maxStan) {
                 return false;
             }
 
-            // Przechodzi filtr
             return true;
         });
 
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 25;
-        $page = $this->page;
-
-        $items = $produkty->slice(($page - 1) * $perPage, $perPage)->values();
+        $items = $produkty->forPage($currentPage, $perPage)->values();
 
         $paginator = new LengthAwarePaginator(
             $items,
             $produkty->count(),
             $perPage,
-            $page,
+            $currentPage,
             [
                 'path' => request()->url(),
                 'query' => request()->query(),
