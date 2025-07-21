@@ -47,8 +47,21 @@ class DeficytyTabela extends Component
         }
 
         $produkty = $query->get()->filter(function ($produkt) {
-            $naStanie = $produkt->wsady->sum('pivot.ilosc') - $produkt->zamowienia->sum('pivot.ilosc');
-            return $this->maxStan === null || $naStanie < $this->maxStan;
+            $wsady = $produkt->wsady->sum('pivot.ilosc');
+            $zamowienia = $produkt->zamowienia->sum('pivot.ilosc');
+            $naStanie = $zamowienia - $wsady;
+
+            // Tylko produkty, których naStanie ≠ 0
+            if ($naStanie === 0) {
+                return false;
+            }
+
+            // Jeśli filtr maxStan ustawiony, uwzględnij go
+            if ($this->maxStan !== null && $naStanie >= $this->maxStan) {
+                return false;
+            }
+
+            return true;
         });
 
         $perPage = 25;
@@ -72,4 +85,5 @@ class DeficytyTabela extends Component
             'deficyty' => $paginator,
         ]);
     }
+
 }
