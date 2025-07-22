@@ -3,6 +3,15 @@
     @livewire('deficyty-tabela')
 
     {{-- Formularz zamówień --}}
+    <div class="flex flex-col flex-1">
+            <label for="WyslijMail" class="text-white font-semibold mb-1">Pobór z sklepu</label>
+            
+            <label class="relative inline-flex items-center cursor-pointer mb-4">
+                <input type="checkbox" id="WyslijMail"   class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-purple-600 transition duration-300"></div>
+                <div class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-300 peer-checked:translate-x-full"></div>
+            </label>
+    </div>
     <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
         @csrf
         <input type="hidden" name="zamowienieId" value="{{ $zamowienieId ?? '' }}">
@@ -40,7 +49,7 @@
             class="mt-6 flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 max-w-xl mx-auto sm:mx-0">
             <button type="submit"
                 class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition duration-300 w-full sm:w-auto"
-                onclick="if(confirm('Czy na pewno chcesz zapisać i wysłać email?')) { document.getElementById('wyslijEmail').value = '1'; return true; } return false;">
+                onclick="return handleEmailSend();">
                 <i class="fas fa-paper-plane mr-2"></i>Zapisz i wyślij email
             </button>
 

@@ -22,15 +22,14 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
 
     public function collection()
     {
-        $this->zamowienie->load(['produkty' => function($query) {
-            $query->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-                  ->select('produkty.id', 'tw_nazwa', 'ean_codes.kod_ean as ean');
-        }]);
+        $this->zamowienie->load(['produkty.eanCodes']);
 
         $mapped = $this->zamowienie->produkty->map(function ($produkt) {
+            $eanList = $produkt->eanCodes->pluck('kod_ean')->filter()->unique()->implode(', ');
+
             return [
                 'Produkt' => mb_convert_encoding($produkt->tw_nazwa ?? '', 'UTF-8', 'UTF-8'),
-                'Kod EAN' => $produkt->ean ? (string)$produkt->ean : 'Brak kodu',
+                'Kod EAN' => $eanList ?: 'Brak kodu',
                 'Ilość'   => $produkt->pivot->ilosc,
             ];
         })->toArray();
@@ -46,7 +45,7 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
     public function columnFormats(): array
     {
         return [
-            'B' => NumberFormat::FORMAT_NUMBER, // Liczba bez zer po przecinku
+            'B' => NumberFormat::FORMAT_TEXT, // EAN
         ];
     }
 
@@ -56,22 +55,12 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $sheet->getColumnDimension('A')->setWidth(30);
-                $sheet->getColumnDimension('B')->setWidth(20);
-                $sheet->getColumnDimension('C')->setWidth(10);
+                $sheet->getColumnDimension('A')->setWidth(30); // Produkt
+                $sheet->getColumnDimension('B')->setWidth(40); // EAN
+                $sheet->getColumnDimension('C')->setWidth(10); // Ilość
 
                 $count = $this->zamowienie->produkty->count();
                 $rowCount = $count + 1;
-
-                $sheet->getStyle('B2:B' . $rowCount)
-                      ->getNumberFormat()
-                      ->setFormatCode(NumberFormat::FORMAT_NUMBER);
-
-                $sheet->setCellValue('B' . ($rowCount + 1), 'Suma:');
-                $sheet->getStyle('B' . ($rowCount + 1))->getFont()->setBold(true);
-
-                $sheet->setCellValue('C' . ($rowCount + 1), "=SUM(C2:C{$rowCount})");
-                $sheet->getStyle('C' . ($rowCount + 1))->getFont()->setBold(true);
 
                 $sheet->getStyle('A1:C1')->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -80,6 +69,12 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
                         'color' => ['rgb' => '4F81BD'],
                     ],
                 ]);
+
+                $sheet->setCellValue('B' . ($rowCount + 1), 'Suma:');
+                $sheet->getStyle('B' . ($rowCount + 1))->getFont()->setBold(true);
+
+                $sheet->setCellValue('C' . ($rowCount + 1), "=SUM(C2:C{$rowCount})");
+                $sheet->getStyle('C' . ($rowCount + 1))->getFont()->setBold(true);
             },
         ];
     }
