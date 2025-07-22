@@ -194,5 +194,21 @@ document.addEventListener('livewire:load', function () {
     });
 });
 
+function handleEmailSend() {
+    const checkbox = document.getElementById('WyslijMail');
+    const wyslijEmailInput = document.getElementById('wyslijEmail');
 
+    if (checkbox && checkbox.checked) {
+        // Switch włączony => NIE wysyłamy maila
+        wyslijEmailInput.value = '0';
+        return confirm('Czy na pewno chcesz zapisać i wysłać email? Sklep');
+    } else {
+        // Switch wyłączony => wysyłamy maila
+        if (confirm('Czy na pewno chcesz zapisać i wysłać email? Import')) {
+            wyslijEmailInput.value = '1';
+            return true;
+        }
+        return false;
+    }
+}
 
