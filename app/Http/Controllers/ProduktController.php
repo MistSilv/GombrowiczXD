@@ -185,7 +185,7 @@ class ProduktController extends Controller
         if ($wyslijEmail) {
             return $this->wyslijEmailZamowienia($zamowienieId, 'importowanie');
         } else {
-            return $this->wyslijEmailZamowienia($zamowienieId, 'magazynier');
+            return $this->wyslijEmailZamowienia($zamowienieId, 'sklep');
         }
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
@@ -209,13 +209,13 @@ class ProduktController extends Controller
 
         $tytul = 'Nowe zamówienie produktów';
 
-        if ($odbiorca === 'magazynier') {
-            $tytulyMagazyniera = [
+        if ($odbiorca === 'sklep') {
+            $tytulySklep = [
                 'Pobór ze sklepu',
                 
             ];
 
-            $tytul = $tytulyMagazyniera[array_rand($tytulyMagazyniera)];
+            $tytul = $tytulySklep[array_rand($tytulySklep)];
         }
 
         Mail::to($emailOdbiorca)->queue(

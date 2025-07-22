@@ -17,7 +17,7 @@ return [
     'default' => env('MAIL_MAILER', 'log'),
     'importowanie' => env('IMPORTOWNIE_EMAIL', 'domyslny@email.com'),
     'produkcja' => env('PRODUKCJA_EMAIL', 'domyslny@email.com'),
-    'magazynier' => env('MAGAZYNIER_EMAIL', 'domyslny@email.com'),
+    'sklep' => env('SKLEP_EMAIL', 'domyslny@email.com'),
 
 
     /*
