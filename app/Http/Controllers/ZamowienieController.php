@@ -89,7 +89,7 @@ class ZamowienieController extends Controller
         }
 
         $message = "📦 **Nowe zamówienie #{$zamowienie->id}**\n";
-        $message .= "Automat ID: {$zamowienie->automat_id}\n";
+        $message .= "Automat ID: {$zamowienie->automat->nazwa}\n";
         $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d')}\n\n";
         $message .= "**Produkty:**\n";
 
