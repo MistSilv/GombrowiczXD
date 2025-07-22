@@ -80,7 +80,7 @@ class ZamowienieController extends Controller
         ]);
 
         $zamowienie = Zamowienie::create([
-            'data_realizacji' => now()->addDay(),
+            'data_realizacji' => now(),
             'automat_id' => $request->get('automat_id'),
         ]);
 
@@ -88,24 +88,57 @@ class ZamowienieController extends Controller
             $zamowienie->produkty()->attach($pozycja['produkt_id'], ['ilosc' => $pozycja['ilosc']]);
         }
 
-        $message = "📦 **Nowe zamówienie #{$zamowienie->id}**\n";
-        $message .= "Automat ID: {$zamowienie->automat->nazwa}\n";
-        $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d')}\n\n";
-        $message .= "**Produkty:**\n";
+        $zamowienie->load('produkty', 'automat');
 
+        $produktyText = '';
         foreach ($zamowienie->produkty as $produkt) {
-            $message .= "- {$produkt->tw_nazwa} x {$produkt->pivot->ilosc}\n";
+            $produktyText .= "• **{$produkt->tw_nazwa}** — `{$produkt->pivot->ilosc}` szt.\n";
         }
 
-        // Wyślij na Discorda
-        $webhookUrl = config('services.discord.webhook_url'); 
+        $webhookUrl = config('services.discord.webhook_url');
 
         Http::post($webhookUrl, [
-            'content' => $message
+            'embeds' => [[
+                'title' => "📦 Nowe zamówienie #{$zamowienie->id}",
+                'description' => "**🧊 Automat:** {$zamowienie->automat->nazwa}\n
+                **📅 Realizacja:** {$zamowienie->data_realizacji->format('Y-m-d')}\n\n
+                🧾 **Produkty:**\n{$produktyText}",
+                'color' => hexdec('2C2F33'),
+                'footer' => [
+                    'text' => '🛒 Zamówienia',
+                ],
+                'timestamp' => now()->toIso8601String(),
+            ]]
         ]);
 
+    //     $message = "📦 *Nowe zamówienie #{$zamowienie->id}*\n";
+    //     $message .= "Automat: {$zamowienie->automat->nazwa}\n";
+    //     $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d H:i')}\n\n";
+    //     $message .= "*Produkty:*\n";
+
+    //     foreach ($zamowienie->produkty as $produkt) {
+    //         $message .= "• {$produkt->tw_nazwa} x {$produkt->pivot->ilosc}\n";
+    //     }
+
+    //     $keyboard = [
+    //         'inline_keyboard' => [
+    //             [
+    //                 ['text' => '⚙️ Realizacja', 'callback_data' => "realizacja_{$zamowienie->id}"],
+    //                 ['text' => '⏹️ Zakończono', 'callback_data' => "zakonczono_{$zamowienie->id}"]
+    //             ]
+    //         ]
+    //     ];
+
+    // Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage", [
+    //     'chat_id' => config('services.telegram.chat_id'),
+    //     'text' => $message,
+    //     'parse_mode' => 'Markdown',
+    //     'reply_markup' => json_encode($keyboard)
+    // ]);
+
+
         return redirect()->route('zamowienia.index', ['automat_id' => $request->get('automat_id')])
-            ->with('success', 'Zamówienie zostało zapisane i powiadomienie wysłane na Discord.');
+            ->with('success', 'Zamówienie zostało zapisane i wysłane na Discord.');
     }
 
     public function archiwum()
