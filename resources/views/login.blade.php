@@ -18,7 +18,7 @@
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form method="POST" action="{{ url('/login') }}">
+                <form method="POST" action="{{ route('login.post') }}">
                     @csrf
                     <div>
                         <label for="email" class="block text-sm font-medium leading-5 text-gray-200">Email address</label>
