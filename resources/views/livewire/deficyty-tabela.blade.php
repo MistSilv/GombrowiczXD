@@ -13,6 +13,13 @@
                    placeholder="Wpisz nazwę produktu">
         </div>
         <div class="flex flex-col flex-1">
+            <label class="text-white font-semibold mb-1">Filtruj po kodzie EAN:</label>
+            <input id="filterEan" type="text" wire:keydown.debounce.300ms="$set('filterEan', $event.target.value)"
+                class="px-3 py-2 mb-4 rounded border border-gray-300 w-full sm:w-64 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Wpisz kod EAN">
+        </div>
+
+        <div class="flex flex-col flex-1">
             <label for="showEmpty" class="text-white font-semibold mb-1">Pokaż wszystko</label>
             
             <label class="relative inline-flex items-center cursor-pointer mb-4">

@@ -277,17 +277,22 @@ class ProduktController extends Controller
 
         $q_normalized = str_replace(' ', '', strtolower($q));
 
-        $results = Produkt::select('id', 'tw_nazwa', 'tw_idabaco', 'is_wlasny')
-            ->get()
-            ->filter(function ($produkt) use ($q_normalized) {
-                $name_normalized = str_replace(' ', '', strtolower($produkt->tw_nazwa));
-                return str_contains($name_normalized, $q_normalized);
-            })
-            ->take(20)
-            ->values();
+        $produkty = Produkt::select('produkty.id', 'produkty.tw_nazwa', 'produkty.tw_idabaco', 'produkty.is_wlasny')
+            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+            ->addSelect('ean_codes.kod_ean')
+            ->get();
+
+        $results = $produkty->filter(function ($produkt) use ($q_normalized) {
+            $name_normalized = str_replace(' ', '', strtolower($produkt->tw_nazwa));
+            $ean_normalized = strtolower($produkt->kod_ean ?? '');
+
+            return str_contains($name_normalized, $q_normalized)
+                || str_contains($ean_normalized, $q_normalized);
+        })->take(20)->values();
 
         return response()->json($results);
     }
+
 
 
     
