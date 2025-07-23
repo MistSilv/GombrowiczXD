@@ -13,6 +13,7 @@ class DeficytyTabela extends Component
 
     public $maxStan = null;
     public $filterNazwa = '';
+    public $filterEan = '';
     public $showEmpty = false;
 
     protected $paginationTheme = 'tailwind';
@@ -31,6 +32,11 @@ class DeficytyTabela extends Component
         $this->resetPage();
     }
 
+    public function updatedFilterEan()
+    {
+        $this->resetPage();
+    }
+
     public function updatedShowEmpty()
     {
         $this->resetPage();
@@ -38,11 +44,17 @@ class DeficytyTabela extends Component
 
     public function render()
     {
-        $query = Produkt::with(['wsady', 'zamowienia'])
+        $query = Produkt::with(['wsady', 'zamowienia', 'eanCodes'])
             ->where('is_wlasny', false);
 
         if (!empty($this->filterNazwa)) {
             $query->where('tw_nazwa', 'like', '%' . $this->filterNazwa . '%');
+        }
+
+        if (!empty($this->filterEan)) {
+            $query->whereHas('eanCodes', function ($q) {
+                $q->where('kod_ean', 'like', '%' . $this->filterEan . '%');
+            });
         }
 
         $produkty = $query->get()->filter(function ($produkt) {
