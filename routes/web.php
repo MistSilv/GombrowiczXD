@@ -76,4 +76,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wiadomosc', [App\Http\Controllers\WiadomoscController::class, 'create'])->name('wiadomosc.create');
     Route::post('/wiadomosc', [App\Http\Controllers\WiadomoscController::class, 'store'])->name('wiadomosc.store');
 
+    Route::post('/produkty/niewlasne/nowy', [ProduktController::class, 'storeNiewlasny'])->name('produkty.store.niewlasny');
+    Route::get('/produkty/niewlasne/nowy', [ProduktController::class, 'createNiewlasny'])->name('produkty.create.niewlasny');
+
 });
