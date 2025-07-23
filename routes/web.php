@@ -6,6 +6,7 @@ use App\Http\Controllers\{
     StrataController,
     ExportController,
     RegisterController,
+    WiadomoscController,
     Auth\ForgotPasswordController,
     Auth\ResetPasswordController,
     LoginController,
@@ -39,7 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
     Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
     Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
-    Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierzZamowienieCsv'])->name('zamowienia.csv');
+    Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierszZamowienieCsv'])->name('zamowienia.csv');
     Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
 
     Route::get('/straty/archiwum', [StrataController::class, 'archiwum'])->name('straty.archiwum');
@@ -73,8 +74,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/produkty/wlasne/nowy', [ProduktController::class, 'createWlasny'])->name('produkty.create.wlasny');
     Route::post('/produkty/wlasne/nowy', [ProduktController::class, 'storeWlasny'])->name('produkty.store.wlasny');
 
-    Route::get('/wiadomosc', [App\Http\Controllers\WiadomoscController::class, 'create'])->name('wiadomosc.create');
-    Route::post('/wiadomosc', [App\Http\Controllers\WiadomoscController::class, 'store'])->name('wiadomosc.store');
+    Route::get('/wiadomosc', [WiadomoscController::class, 'create'])->name('wiadomosc.create');
+    Route::post('/wiadomosc', [WiadomoscController::class, 'store'])->name('wiadomosc.store');
 
     Route::post('/produkty/niewlasne/nowy', [ProduktController::class, 'storeNiewlasny'])->name('produkty.store.niewlasny');
     Route::get('/produkty/niewlasne/nowy', [ProduktController::class, 'createNiewlasny'])->name('produkty.create.niewlasny');
