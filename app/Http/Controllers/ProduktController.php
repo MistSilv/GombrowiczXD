@@ -252,6 +252,11 @@ class ProduktController extends Controller
     {
         return view('produkty.create_wlasny');
     }
+    public function createNiewlasny()
+    {
+        return view('produkty.create_wlasny');
+    }
+
 
     public function storeWlasny(Request $request)
     {
@@ -266,6 +271,31 @@ class ProduktController extends Controller
 
         return redirect()->route('produkty.create.wlasny')->with('success', 'Produkt został dodany.');
     }
+
+    public function storeNiewlasny(Request $request)
+    {
+        $validated = $request->validate([
+            'tw_nazwa' => 'required|string|max:255',
+            'tw_idabaco' => 'nullable|string|max:255',
+            'ean_codes' => 'nullable|string|max:255', // <- jako string, nie array
+        ]);
+
+        $produkt = Produkt::create([
+            'tw_nazwa' => $validated['tw_nazwa'],
+            'tw_idabaco' => $validated['tw_idabaco'] ?? null,
+            'is_wlasny' => false,
+        ]);
+
+        if (!empty($validated['ean_codes'])) {
+            DB::table('ean_codes')->insert([
+                'produkt_id' => $produkt->id,
+                'kod_ean' => $validated['ean_codes'],
+            ]);
+        }
+
+        return redirect()->route('produkty.create.niewlasny')->with('success', 'Produkt został dodany.');
+    }
+
 
     public function search(Request $request)
     {
