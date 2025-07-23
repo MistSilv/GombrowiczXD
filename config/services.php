@@ -37,6 +37,7 @@ return [
 
     'discord' => [
     'webhook_url' => env('DISCORD_WEBHOOK_URL'),
+    'wiadomosci_webhook' => env('DISCORD_WEBHOOK_WIADOMOSCI_URL'),
     ],
 
     'telegram' => [
