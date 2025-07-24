@@ -106,7 +106,7 @@ document.addEventListener('click', function (e) {
 });
 
 // Dodawanie pustego wiersza na kliknięcie przycisku
-document.getElementById('dodaj-produkt').addEventListener('click', () => dodajWiersz());
+//document.getElementById('dodaj-produkt').addEventListener('click', () => dodajWiersz());
 
 // Dodaj produkt do zamówienia po kliknięciu nazwy z tabeli deficytów
 document.querySelectorAll('.product-name').forEach(el => {
@@ -212,3 +212,112 @@ function handleEmailSend() {
     }
 }
 
+function handleEanSearch() {
+    const eanInput = document.getElementById('product-search-ean');
+    const decodedText = eanInput.value.trim();
+    if (!decodedText) {
+        alert('Wpisz kod EAN/PLU');
+        return;
+    }
+
+    //$('#scan-result').text(`Szukam produktu o EAN: ${decodedText}`);
+
+    const token = $('meta[name="csrf-token"]').attr('content');
+
+    fetch('/api/check-ean', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({ kod_ean: decodedText })
+    })
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw err });
+            return res.json();
+        })
+        .then(data => {
+            const qty = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
+            if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                setQuantity(data.produkt.id, parseInt(qty));
+                //$('#scan-result').text(`Dodano: ${data.produkt.tw_nazwa} (EAN: ${decodedText})`);
+            } else {
+                alert("Nieprawidłowa ilość.");
+            }
+        })
+        .catch(err => {
+            alert(err.message || 'Błąd przy sprawdzaniu kodu.');
+            $('#scan-result').text('');
+        });
+
+    eanInput.value = '';
+}
+
+document.getElementById('dodaj-ean').addEventListener('click', handleEanSearch);
+
+
+
+// --- EAN Scanner ---
+const scanner = new Html5Qrcode("reader");
+let isScanning = false;
+
+function onScanSuccess(decodedText) {
+
+    console.log("Zeskanowano:", decodedText);
+
+    scanner.stop().then(() => {
+        isScanning = false;
+        $('#reader').hide();
+        $('#scan-result').text(`Zeskanowano: ${decodedText}`);
+
+        const token = $('meta[name="csrf-token"]').attr('content');
+
+        fetch('/api/check-ean', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ kod_ean: decodedText })
+        })
+            .then(res => {
+                if (!res.ok) return res.json().then(err => { throw err });
+                return res.json();
+            })
+            .then(data => {
+                const qty = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
+                if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                    setQuantity(data.produkt.id, parseInt(qty));
+
+                } else {
+                    alert("Nieprawidłowa ilość.");
+                }
+            })
+            .catch(err => alert(err.message || 'Błąd przy sprawdzaniu kodu.'));
+    });
+}
+
+$('#start-scan').on('click', () => {
+    if (isScanning) return;
+
+    Html5Qrcode.getCameras()
+        .then(devices => {
+            if (devices.length) {
+                $('#reader').show();
+                scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: 250 },
+                    onScanSuccess
+                ).then(() => {
+                    isScanning = true;
+                }).catch(err => {
+                    alert("Błąd startu skanera: " + err);
+                });
+            } else {
+                alert("Brak kamer.");
+            }
+        })
+        .catch(err => alert("Błąd pobierania kamer: " + err));
+});

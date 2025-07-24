@@ -33,17 +33,57 @@
         </div>
 
         {{-- Wyszukiwarka produktów do dodania --}}
-        <div class="mt-4">
-            <label for="product-search" class="text-black font-semibold mb-1 block">Wyszukaj produkt do dodania:</label>
-            <input type="text" id="product-search" placeholder="Wpisz nazwę produktu..."
-                class="px-3 py-2 rounded border border-gray-300 w-full sm:w-96 text-black focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
-            <ul id="product-suggestions" class="bg-white border border-gray-300 rounded max-h-48 overflow-y-auto mt-1 hidden z-50 absolute w-96"></ul>
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-4 max-w-[700px]">
+            <div class="flex-1 mb-4 sm:mb-0">
+                <label for="product-search" class="text-white font-semibold mb-1 block">
+                    Wyszukaj produkt do dodania:
+                </label>
+                <input
+                    type="text"
+                    id="product-search"
+                    placeholder="Wpisz nazwę produktu..."
+                    class="px-3 py-2 rounded border border-gray-300 w-full text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autocomplete="off">
+                <ul id="product-suggestions" class="bg-white border border-gray-300 rounded max-h-48 overflow-y-auto mt-1 hidden z-50 absolute w-full"></ul>
+            </div>
+
+            <div class="flex-1 relative"> <!-- DODANO relative -->
+                <label for="product-search-ean" class="text-white font-semibold mb-1 block">
+                    Wyszukaj produkt do dodania po ean:
+                </label>
+                <input
+                    type="number"
+                    id="product-search-ean"
+                    placeholder="Wpisz EAN/PLU..."
+                    class="px-3 py-2 rounded border border-gray-300 w-full text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autocomplete="off"
+                    maxlength="13">
+                <ul id="product-suggestions" class="bg-white border border-gray-300 rounded max-h-48 overflow-y-auto mt-1 hidden z-50 absolute w-full"></ul>
+
+                <button
+                    type="button"
+                    id="dodaj-ean"
+                    class="absolute top-full left-0 mt-2 px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition"
+                >
+                    Wyszukaj EAN
+                </button>
+            </div>
         </div>
 
-        <button type="button" id="dodaj-produkt"
-            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition w-full sm:w-auto">
-            + Dodaj produkt
-        </button>
+
+        {{-- Skanowanie kodu EAN --}}
+
+
+        <div class="mb-6">
+            <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
+            
+            <button type="button" id="start-scan" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                Rozpocznij skanowanie
+            </button>
+
+            <div id="reader" style="width: 300px; display: none;"></div>
+            <div id="scan-result" class="mt-2 text-white"></div>
+        </div>
 
         <div
             class="mt-6 flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 max-w-xl mx-auto sm:mx-0">
@@ -60,6 +100,10 @@
         </div>
     </form>
 
+    
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="application/json" id="produkty-data">@json($produkty)</script>
     <script src="{{ asset('js/niewlasne.js') }}"></script>
 </x-layout>
