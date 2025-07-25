@@ -61,7 +61,7 @@
         </div>
 
         <div class="d-flex justify-center mt-4">
-            {{ $straty->links() }}
+            {{ $straty->links('pagination::simple-tailwind') }}
         </div>
     </div>
     
