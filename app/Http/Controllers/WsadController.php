@@ -33,7 +33,9 @@ class WsadController extends Controller
 
         $wsadProdukty = collect();
         if ($automat) {
-            $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest()->first();
+            $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest('data_wsadu')->first();
+
+
             if ($ostatniWsad) {
                 $wsadProdukty = $ostatniWsad->produkty()->withPivot('ilosc')->get();
             }
@@ -55,7 +57,7 @@ class WsadController extends Controller
         // Zawsze ustawiamy kolekcję, nawet pustą
         $wsadProdukty = collect();
         if ($automat) {
-            $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest()->first();
+            $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest('data_wsadu')->first();
             if ($ostatniWsad) {
                 $wsadProdukty = $ostatniWsad->produkty()->withPivot('ilosc')->get();
             }
@@ -104,7 +106,7 @@ class WsadController extends Controller
         $produktId = $request->route('produkt_id');
         $automatId = $request->route('automat_id');
 
-        $ostatniWsad = Wsad::where('automat_id', $automatId)->latest()->first();
+        $ostatniWsad = Wsad::where('automat_id', $automatId)->latest('data_wsadu')->first();
 
         if (!$ostatniWsad) {
             return redirect()->back()->withErrors('Nie znaleziono wsadu dla tego automatu.');
