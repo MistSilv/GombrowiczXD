@@ -1,6 +1,8 @@
 <!-- strona do wyświetlania aktualnych zamówień -->
 <x-layout>
     <div class="container">
+
+        <<h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
         @auth
             @if(!auth()->user()->isSerwis())
                <div class="mb-6 flex flex-wrap gap-2">
@@ -12,8 +14,6 @@
                 </div>
             @endif
         @endauth
-
-        <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista zamówień</h1>
 
         <div class="overflow-x-auto rounded-lg border border-gray-700">
             <table class="min-w-full divide-y divide-gray-700">

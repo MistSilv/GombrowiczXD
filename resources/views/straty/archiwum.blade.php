@@ -1,11 +1,13 @@
 <!-- strona do wyświetlania zgłoszonych strat -->
 <x-layout>
-<div class="container mx-auto px-4 py-6">
-    <div class="mb-6 flex flex-wrap gap-2">
-        <a href="{{ route('straty.index') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
-    </div>
-        <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista strat</h1>
+    <div class="container mx-auto px-4 py-6">
 
+        <h1 class="text-2xl font-bold mb-4 text-white">Lista strat</h1>
+
+        <div class="mb-6 flex flex-wrap gap-2">
+            <a href="{{ route('straty.index') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
+        </div>
+            
         <form method="GET" action="{{ route('straty.archiwum') }}" class="flex flex-wrap items-center gap-4 bg-gray-800 p-4 rounded mt-6">
             <div>
                 <label for="min_date" class="block text-white text-sm mb-1">Data od:</label>
@@ -27,7 +29,7 @@
             </div>
         </form>
 
-        <div class="overflow-x-auto rounded-lg border border-gray-700">
+        <div class="overflow-x-auto rounded-lg border border-gray-700 mt-6" >
             <table class="min-w-full divide-y divide-gray-700">
                 <thead class="bg-gray-800 text-white">
                     <tr>
@@ -44,8 +46,8 @@
                                 <td class="py-2 px-4 text-sm">{{ $strata->opis ?? '—' }}</td>
                                 <td class="py-2 px-4">
                                     <a href="{{ route('straty.show', $strata) }}"
-                                     class="inline-block bg-inherit hover:bg-blue-700 text-white trxt-xl px-3 py-1 rounded aria-label="Szczegóły straty">
-                                     👁️
+                                    class="inline-block bg-inherit hover:bg-blue-700 text-white trxt-xl px-3 py-1 rounded aria-label="Szczegóły straty">
+                                    👁️
                                     </a>
                         </tr>
                         @empty
@@ -61,4 +63,6 @@
         <div class="d-flex justify-center mt-4">
             {{ $straty->links() }}
         </div>
+    </div>
+    
 </x-layout>

@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use App\Http\Livewire\DeficytyTabela;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        Paginator::useTailwind();
         $this->loadViewsFrom(resource_path('views/emails'), 'mail');
         Livewire::component('deficyty-tabela', DeficytyTabela::class);
     }

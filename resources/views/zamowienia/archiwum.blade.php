@@ -1,9 +1,10 @@
 <!-- strona do archiwum zamówień -->
 <x-layout>
     <div class="container">
+        
         <h1 class="text-2xl font-bold mb-4 text-white">Archiwum zamówień</h1>
         
-        <a href="{{ route('zamowienia.index') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">← Wróć do aktualnych</a>
+        <a href="{{ route('zamowienia.index') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded"> Wróć do aktualnych</a>
 
         <form method="GET" action="{{ route('zamowienia.archiwum') }}" class="flex flex-wrap items-center gap-4 bg-gray-800 p-4 rounded mt-6">
             <div>

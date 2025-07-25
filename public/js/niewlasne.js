@@ -81,20 +81,29 @@ function dodajWiersz(produktId = '', ilosc = '') {
 
 function setQuantity(produktId, ilosc) {
     const rows = document.querySelectorAll('#produkty-lista tbody tr');
+    let found = false;
+
     for (const row of rows) {
         if (parseInt(row.getAttribute('data-produkt-id')) === produktId) {
             const input = row.querySelector('input[type="number"]');
-            if(input) {
+            if (input) {
+                // Dodajemy ilość do istniejącej wartości
+                const currentValue = parseInt(input.value) || 0;
+                input.value = currentValue + ilosc;
+
                 input.focus();
                 input.select();
                 input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                found = true;
             }
-            return;
+            break;
         }
     }
-    // jeśli nie znaleziono, dodaj nowy wiersz i ustaw ilość
-    dodajWiersz(produktId, ilosc);
+    if (!found) {
+        dodajWiersz(produktId, ilosc);
+    }
 }
+
 
 
 // Usuwanie wiersza

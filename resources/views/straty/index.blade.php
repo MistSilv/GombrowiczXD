@@ -1,7 +1,9 @@
 <!-- strona do wyświetlania zgłoszonych strat -->
 <x-layout>
     <div class="container mx-auto px-4 py-6 ">
-            <div class="mb-6 flex flex-wrap gap-2">
+
+        <h1 class="text-2xl font-bold mb-4 text-white">Lista strat</h1>
+        <div class="mb-6 flex flex-wrap gap-2">
                 <a href="{{ route('straty.archiwum') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
             <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie dnia
@@ -15,9 +17,9 @@
             <a href="{{ route('straty.podsumowanie.rok') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie roku
             </a>
-            </div>
+        </div>
   
-        <h1 class="my-4 text-white text-2xl font-semibold text-center">Lista strat</h1>
+        
 
         <div class="overflow-x-auto rounded-lg border border-gray-700">
             <table class="min-w-full divide-y divide-gray-700">

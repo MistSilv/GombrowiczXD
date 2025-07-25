@@ -155,8 +155,6 @@ class ProduktController extends Controller
                 'data_zamowienia' => now(),
                 'data_realizacji' => null,
                 'automat_id' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         }
 
