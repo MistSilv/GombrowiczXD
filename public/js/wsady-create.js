@@ -33,7 +33,7 @@ $(document).ready(function () {
                         $('<li>')
                             .text(p.tw_nazwa)
                             .attr('data-id', p.id)
-                            .addClass('cursor-pointer px-2 py-1 hover:bg-gray-300')
+                            .addClass('cursor-pointer px-4 py-2 hover:bg-gray-600 text-white')
                             .appendTo($globalSuggestions);
                     });
                     $globalSuggestions.show();
@@ -69,7 +69,7 @@ $(document).ready(function () {
         }
     }
 
-    // --- Add product row ---
+    // // --- Add product row ---
     function addProductRow(productId = null, productName = '', qty = 1) {
         // If product already exists, increment quantity
         if (productId) {
@@ -88,32 +88,46 @@ $(document).ready(function () {
         }
 
         const $newItem = $(`
-            <div class="flex items-center gap-2 mb-2 produkt-item">
-                <input
-                    type="text"
-                    name="produkty[${index}][tw_nazwa]"
-                    class="form-input w-full autocomplete-input text-black"
-                    placeholder="Wpisz nazwę produktu"
-                    required
-                    autocomplete="off"
-                    value="${productName}"
-                >
-                <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${productId ?? ''}">
-                <input
-                    type="number"
-                    name="produkty[${index}][ilosc]"
-                    min="1" max="3000"
-                    class="form-input w-24 text-black"
-                    placeholder="Ilość"
-                    required
-                    value="${qty}"
-                >
-                <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+            <div class="produkt-item mb-4">
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                    <div class="w-full sm:w-auto flex-grow">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nazwa produktu</label>
+                        <input
+                            type="text"
+                            name="produkty[${index}][tw_nazwa]"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                            placeholder="Wpisz nazwę produktu"
+                            required
+                            autocomplete="off"
+                            value="${productName}">
+                        <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${productId ?? ''}">
+                    </div>
+                    
+                    <div class="flex items-end gap-3 w-full sm:w-auto">
+                        <div class="flex-1 min-w-[6rem]">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Ilość</label>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    name="produkty[${index}][ilosc]"
+                                    min="1" max="3000"
+                                    class="flex-1 px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                    placeholder="Ilość"
+                                    required
+                                    value="${qty}">
+                                    
+                                <button type="button" class="h-[42px] px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors remove-item flex items-center justify-center">
+                                    Usuń
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `);
 
         $productContainer.append($newItem);
-        attachRowAutocomplete($newItem.find('.autocomplete-input'));
+        attachRowAutocomplete($newItem.find('input[type="text"]'));
         focusQuantityField($newItem);
         index++;
     }
@@ -133,7 +147,7 @@ $(document).ready(function () {
     // --- Autocomplete inside rows ---
     function attachRowAutocomplete($input) {
         let timer = null;
-        const $localSuggestions = $('<ul class="absolute z-10 bg-white text-black max-h-40 overflow-auto border w-full" style="display:none;"></ul>');
+        const $localSuggestions = $('<ul class="absolute z-10 bg-gray-700 text-white max-h-60 overflow-auto border border-gray-600 rounded-lg w-full mt-1 shadow-lg" style="display:none;"></ul>');
         $input.after($localSuggestions);
 
         $input.on('input', function () {
@@ -157,7 +171,7 @@ $(document).ready(function () {
                     $('<li>')
                         .text(p.tw_nazwa)
                         .attr('data-id', p.id)
-                        .addClass('cursor-pointer px-2 py-1 hover:bg-gray-300')
+                        .addClass('cursor-pointer px-4 py-2 hover:bg-gray-600')
                         .appendTo($localSuggestions);
                 });
                 $localSuggestions.show();
@@ -184,7 +198,7 @@ $(document).ready(function () {
     }
 
     // Attach autocomplete to existing inputs on load
-    $productContainer.find('.autocomplete-input').each(function () {
+    $productContainer.find('input[type="text"]').each(function () {
         attachRowAutocomplete($(this));
     });
 

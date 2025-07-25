@@ -2,17 +2,17 @@
 <x-layout>
     <div class="container mx-auto px-4 py-6 ">
             <div class="mb-6 flex flex-wrap gap-2">
-                <a href="{{ route('straty.archiwum') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
-            <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('straty.archiwum') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
+            <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie dnia
             </a>
-            <a href="{{ route('straty.podsumowanie.tydzien') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('straty.podsumowanie.tydzien') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie tygodnia
             </a>
-            <a href="{{ route('straty.podsumowanie.miesiac') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('straty.podsumowanie.miesiac') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie miesiąca
             </a>
-            <a href="{{ route('straty.podsumowanie.rok') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('straty.podsumowanie.rok') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie roku
             </a>
             </div>

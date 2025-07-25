@@ -4,11 +4,11 @@
         @auth
             @if(!auth()->user()->isSerwis())
                <div class="mb-6 flex flex-wrap gap-2">
-                <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
-                <a href="{{ route('zamowienia.podsumowanie.dzien', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
-                <a href="{{ route('zamowienia.podsumowanie.tydzien', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
-                <a href="{{ route('zamowienia.podsumowanie.miesiac', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
-                <a href="{{ route('zamowienia.podsumowanie.rok', ['automat_id' => request('automat_id')]) }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
+                <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
+                <a href="{{ route('zamowienia.podsumowanie.dzien', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
+                <a href="{{ route('zamowienia.podsumowanie.tydzien', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
+                <a href="{{ route('zamowienia.podsumowanie.miesiac', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
+                <a href="{{ route('zamowienia.podsumowanie.rok', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
                 </div>
             @endif
         @endauth

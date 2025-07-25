@@ -24,36 +24,35 @@
 <!-- Skrypt do obsługi instalacji PWA -->
 @vite('resources/js/app.js')
 
-<div class="mt-9 text-center flex flex-col gap-4 sm:flex-row sm:justify-center sm:gap-6">
+<div class="mt-9 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 flex-wrap">
     @auth
-        @if(auth()->user()->isAdmin()) <!-- jeśli użytkownik jest administratorem -->
+        @if(auth()->user()->isAdmin())
             <a href="{{ route('register') }}"
-               class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                create a new account <!-- link do rejestracji nowego użytkownika -->
+               class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
+                Dodaj użytkownika
             </a>
         @endif
     @endauth
 
     <a href="{{ route('produkty.zamowienie.formularz') }}"
-        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+       class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
         Nowe zamówienie
     </a>
+
     <a href="{{ route('produkty.create.wlasny') }}"
-        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            ➕ Dodaj produkt własny
+       class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
+        ➕ Dodaj produkt własny
     </a>
+
     <a href="{{ route('capybara.show') }}"
-        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            🐹 Zobacz Kapibarę
+       class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
+        🐹 Zobacz Kapibarę
     </a>
 
     <a href="{{ route('wiadomosc.create') }}"
-        class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+       class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
         ➕ Skargi, Uwagi, Pytania
     </a>
-
-
-
 </div>
-    </div>
+
 </x-layout>

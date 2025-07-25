@@ -72,28 +72,38 @@ $(document).ready(function () {
             if (found) return;
         }
 
-        const $newItem = $(` 
-            <div class="flex items-center gap-2 mb-2 produkt-item">
-                <input
-                    type="text"
-                    name="produkty[${index}][tw_nazwa]"
-                    class="form-input w-full autocomplete-input text-black"
-                    placeholder="Wpisz nazwę produktu"
-                    required
-                    autocomplete="off"
-                    value="${nazwaProduktu}"
-                >
-                <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${produktId ?? ''}">
-                <input
-                    type="number"
-                    name="produkty[${index}][ilosc]"
-                    min="1" max="3000"
-                    class="form-input w-24 text-black"
-                    placeholder="Ilość"
-                    required
-                    value="${ilosc}"
-                >
-                <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+        const $newItem = $(`
+            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end produkt-item">
+                <div class="w-full sm:w-auto flex-grow">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Nazwa produktu</label>
+                    <input
+                        type="text"
+                        name="produkty[${index}][tw_nazwa]"
+                        class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:border-transparent autocomplete-input"
+                        placeholder="Wpisz nazwę produktu"
+                        required
+                        autocomplete="off"
+                        value="${nazwaProduktu}">
+                    <input type="hidden" name="produkty[${index}][produkt_id]" class="produkt-id-hidden" value="${produktId ?? ''}">
+                </div>
+
+                <div class="flex items-end gap-2">
+                    <div class="w-24">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Ilość</label>
+                        <input
+                            type="number"
+                            name="produkty[${index}][ilosc]"
+                            min="1" max="3000"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                            placeholder="Ilość"
+                            required
+                            value="${ilosc}">
+                    </div>
+
+                    <button type="button" class="h-[42px] px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors remove-item flex items-center justify-center">
+                        Usuń
+                    </button>
+                </div>
             </div>
         `);
 
@@ -101,6 +111,7 @@ $(document).ready(function () {
         attachAutocomplete($newItem.find('.autocomplete-input'));
         index++;
     }
+
 
     // Obsługa przycisku dodawania
     $('#dodaj-produkt').on('click', function () {

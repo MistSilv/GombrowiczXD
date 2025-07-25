@@ -20,7 +20,7 @@
                 <tr class="hover:bg-gray-700 text-white text-center">
                     <td class="py-2 px-4 text-sm">{{ $wsad->id }}</td>
                     <td class="py-2 px-4 text-sm">{{ $wsad->automat->nazwa ?? 'Brak automatu' }}</td>
-                    <td class="py-2 px-4 text-sm">{{ $wsad->created_at->format('Y-m-d H:i') }}</td>
+                    <td class="py-2 px-4 text-sm">{{ $wsad->data_wsadu->format('Y-m-d H:i') }}</td>
                     <td class="py-2 px-4">
                         <a href="{{ route('wsady.show', $wsad->id) }}" 
                            class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl px-3 py-1 rounded" 

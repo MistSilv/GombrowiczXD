@@ -28,6 +28,6 @@ class RegisterController extends Controller
             'role' => $validated['role'],
         ]); // Tworzenie nowego użytkownika
 
-        return redirect()->route('login')->with('success', 'Dodano Użytkownika');
+        return redirect()->route('welcome')->with('success', 'Dodano Użytkownika');
     }
 }

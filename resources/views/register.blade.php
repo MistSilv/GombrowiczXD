@@ -14,7 +14,11 @@
     <title>Rejestracja</title>
 </head>
 <body class="mx-auto py-6 px-4 bg-black">
-    <div class="max-w-md mx-auto mt-4 bg-gray-900 p-8 rounded shadow">
+     <a href="{{ url('/welcome') }}" class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                🏠 Strona główna
+            </a>
+
+    <div class="max-w-md mx-auto mt-6 bg-gray-900 p-8 rounded shadow">
     <h2 class="text-2xl font-bold mb-6 text-white text-center">Rejestracja użytkownika</h2>
     <form method="POST" action="{{ route('register') }}"> <!-- formularz rejestracji -->
         <!-- zabezpieczenie CSRF -->
@@ -67,7 +71,7 @@
         </div>
 
         <button type="submit"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition">
+            class="w-full bg-rose-950 hover:bg-red-900 text-white font-semibold py-2 px-4 rounded transition">
             Zarejestruj
         </button>
     </form>

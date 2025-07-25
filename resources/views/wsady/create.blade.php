@@ -1,72 +1,85 @@
 <x-layout>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <div class="max-w-3xl mx-auto p-4">
-        <h1 class="text-xl font-semibold mb-4 text-white">
-            Nowe dodanie produktów dla: {{ $automat ? $automat->nazwa : '---' }}
+    <div class="max-w-3xl mx-auto p-6 bg-gray-900 rounded-2xl shadow-lg">
+        <h1 class="text-2xl font-bold mb-6 text-white">
+            Nowe dodanie produktów dla: <span class="text-rose-400">{{ $automat ? $automat->nazwa : '---' }}</span>
         </h1>
 
-        <div class="mb-6">
-            <h2 class="text-white font-bold mb-2">Skanuj kod EAN</h2>
+        <div class="mb-8 bg-gray-700 p-4 rounded-lg">
+            <h2 class="text-lg font-semibold mb-4 text-white">Skanuj kod EAN</h2>
             
-            <button id="start-scan" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                Rozpocznij skanowanie
-            </button>
+            <div class="flex flex-col sm:flex-row gap-4 items-start">
+                <button id="start-scan" class="px-4 py-2 rounded-lg bg-rose-950 hover:bg-red-900 text-white font-semibold transition-colors">
+                    Rozpocznij skanowanie
+                </button>
 
-            <div id="reader" style="width: 300px; display: none;"></div>
-            <div id="scan-result" class="mt-2 text-white"></div>
+                <div id="reader" class="w-full sm:w-64 mx-auto sm:mx-0" style="display: none;"></div>
+            </div>
+            <div id="scan-result" class="mt-3 text-green-400 font-medium"></div>
         </div>
 
-        <form action="{{ route('wsady.store') }}" method="POST">
-            @csrf
+       <form action="{{ route('wsady.store') }}" method="POST" class="space-y-6">
+        @csrf
 
-            @if($automat)
-                <input type="hidden" name="automat_id" value="{{ $automat->id }}">
-            @endif
+        @if($automat)
+            <input type="hidden" name="automat_id" value="{{ $automat->id }}">
+        @endif
 
-            <div id="produkty-lista">
-                <div class="flex items-center gap-2 mb-2 produkt-item">
+        <div class="space-y-4" id="produkty-lista">
+            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end produkt-item">
+                <div class="w-full sm:w-auto flex-grow">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Nazwa produktu</label>
                     <input
                         type="text"
                         name="produkty[0][tw_nazwa]"
-                        class="form-input w-full autocomplete-input text-black"
+                        class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                         placeholder="Wpisz nazwę produktu"
                         required
-                        autocomplete="off"
-                    >
+                        autocomplete="off">
                     <input type="hidden" name="produkty[0][produkt_id]" class="produkt-id-hidden">
-                    <input
-                        type="number"
-                        name="produkty[0][ilosc]"
-                        min="1" max="3000"
-                        class="form-input w-24 text-black"
-                        placeholder="Ilość"
-                        required
-                        value="1"
-                    >
-                    <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+                </div>
+                
+                <div class="flex items-end gap-2">
+                    <div class="w-24">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Ilość</label>
+                        <input
+                            type="number"
+                            name="produkty[0][ilosc]"
+                            min="1" max="3000"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                            placeholder="Ilość"
+                            required
+                            value="1">
+                    </div>
+                    
+                    <button type="button" class="h-[42px] px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors remove-item flex items-center justify-center">
+                        Usuń
+                    </button>
                 </div>
             </div>
+        </div>
 
-             <button type="button" id="dodaj-produkt" class="mt-2 mb-4 bg-blue-500 text-white px-3 py-1 rounded">
-                + Dodaj produkt
-            </button>
-            
-            <button
-                type="submit"
-                onclick="return confirm('Czy na pewno chcesz dodać wsad?')"
-                class="px-4 py-2 rounded bg-green-700 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2"
-            >
-                Dodaj wsad
-            </button>
-
-            <div class="mt-6 flex flex-col md:flex-row md:items-center">
-                @if($automat)
-                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                        Wprowadź zamówienie
-                    </a>
-                @endif
+            <div class="flex flex-wrap gap-4">
+                <button type="button" id="dodaj-produkt" class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors flex items-center gap-1">
+                    ✚ Dodaj produkt
+                </button>
+                
+                <button
+                    type="submit"
+                    onclick="return confirm('Czy na pewno chcesz dodać wsad?')"
+                    class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg transition-colors">
+                    Dodaj wsad
+                </button>
             </div>
+
+            @if($automat)
+                <div class="pt-6 border-t border-gray-700">
+                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
+                       📋 Przejdź do bułek i innych
+                    </a>
+                </div>
+            @endif
         </form>
     </div>
 

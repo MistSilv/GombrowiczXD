@@ -1,12 +1,12 @@
 <x-layout>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <div class="max-w-3xl mx-auto p-4">
-        <h1 class="text-xl font-semibold mb-4 text-white">
-            Nowe zamówienie produkcyjne dla: {{ $automat ? $automat->nazwa : '---' }}
+    <div class="max-w-3xl mx-auto p-6 bg-gray-900 rounded-xl shadow-lg">
+        <h1 class="text-2xl font-bold mb-6 text-white">
+            Nowe zamówienie produkcyjne dla: <span class="text-blue-400">{{ $automat ? $automat->nazwa : '---' }}</span>
         </h1>
 
-        <form action="{{ route('zamowienia.store') }}" method="POST">
+        <form action="{{ route('zamowienia.store') }}" method="POST" class="space-y-6">
             @csrf
 
             @if($automat)
@@ -14,57 +14,77 @@
             @endif
 
             <!-- Lista produktów -->
-            <div id="produkty-lista">
-                <div class="flex items-center gap-2 mb-2 produkt-item">
-                    <input
-                        type="text"
-                        name="produkty[0][tw_nazwa]"
-                        class="form-input w-full autocomplete-input text-black"
-                        placeholder="Wpisz nazwę produktu"
-                        required
-                        autocomplete="off"
-                    >
-                    <input type="hidden" name="produkty[0][produkt_id]" class="produkt-id-hidden">
-                    <input
-                        type="number"
-                        name="produkty[0][ilosc]"
-                        min="1" max="3000"
-                        class="form-input w-24 text-black"
-                        placeholder="Ilość"
-                        required
-                        value="1"
-                    >
-                    <button type="button" class="bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition remove-item">✕</button>
+            <div class="space-y-4" id="produkty-lista">
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end produkt-item">
+                    <div class="w-full sm:w-auto flex-grow">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nazwa produktu</label>
+                        <input
+                            type="text"
+                            name="produkty[0][tw_nazwa]"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:border-transparent autocomplete-input"
+                            placeholder="Wpisz nazwę produktu"
+                            required
+                            autocomplete="off">
+                        <input type="hidden" name="produkty[0][produkt_id]" class="produkt-id-hidden">
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <div class="w-24">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Ilość</label>
+                            <input
+                                type="number"
+                                name="produkty[0][ilosc]"
+                                min="1" max="3000"
+                                class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                placeholder="Ilość"
+                                required
+                                value="1">
+                        </div>
+
+                        <button type="button"
+                                class="h-[42px] px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors remove-item flex items-center justify-center">
+                            Usuń
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Przyciski -->
-             <button type="button" id="dodaj-produkt" class="mt-2 mb-4 bg-blue-500 text-white px-3 py-1 rounded">
-                + Dodaj produkt
-            </button>
+            <!-- Dodaj produkt -->
+            <div>
+                <button type="button" id="dodaj-produkt" class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors flex items-center gap-1">
+                    + Dodaj produkt
+                </button>
+            </div>
 
-            <div class="mt-4">
+            <!-- Złóż zamówienie -->
+            <div>
                 <button 
                     type="submit" 
                     onclick="return confirm('Czy na pewno chcesz potwierdzić zamówienie?')"
-                    class="bg-green-600 text-white px-4 py-2 rounded">
+                    class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg transition-colors">
                         Złóż zamówienie
                 </button>
             </div>
 
-            <div class="mt-6 flex flex-col md:flex-row md:items-center">
+            <!-- Dodatkowe linki -->
+            <div class="pt-4 border-t border-gray-700 flex flex-col md:flex-row md:items-center gap-3">
                 @if($automat)
-                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" 
+                    class="inline-flex max-w-max px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
                         Wprowadź straty
                     </a>
+
                     @auth
-                    @if(!auth()->user()->isProdukcja())
-                        <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
-                            Lista zamówień tego automatu
-                        </a>
-                    @endif 
+                        @if(!auth()->user()->isProdukcja())
+                            <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" 
+                            class="inline-flex max-w-max px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
+                                Lista zamówień tego automatu
+                            </a>
+                        @endif
                     @endauth
-                    <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}" class="px-4 py-2 rounded bg-slate-800 hover:bg-red-900 text-white font-semibold transition ml-2 mt-2">
+
+                    <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}" 
+                    class="inline-flex max-w-max px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
                         Powrót
                     </a>
                 @endif
@@ -73,7 +93,6 @@
     </div>
 
     <script>
-        // Tylko produkty is_wlasny = true
         window._produkty = @json($produkty->filter(fn($p) => $p->is_wlasny));
     </script>
 
