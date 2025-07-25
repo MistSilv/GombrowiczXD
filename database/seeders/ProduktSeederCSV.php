@@ -61,9 +61,7 @@ class ProduktSeederCSV extends Seeder
                 foreach ($eanKody as $ean) {
                     $eanInsert[] = [
                         'produkt_id' => $produkt->id,
-                        'kod_ean' => (string) $ean,
-                        'created_at' => $now,
-                        'updated_at' => $now,
+                        'kod_ean' => (string) $ean
                     ];
                 }
 

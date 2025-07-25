@@ -8,6 +8,9 @@ class Strata extends Model
 {
     protected $table = 'straty';
 
+    public $timestamps = false;
+
+
     protected $fillable = [
         'automat_id',
         'data_straty',

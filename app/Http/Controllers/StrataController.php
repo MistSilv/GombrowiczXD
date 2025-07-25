@@ -30,14 +30,31 @@ class StrataController extends Controller
     /**
      * Archiwum strat (wszystkie)
      */
-    public function archiwum()
+    public function archiwum(Request $request)
     {
-        $straty = Strata::with('automat')
-            ->orderByDesc('data_straty')
-            ->paginate(20);
+        $query = Strata::with('automat');
+
+        $minRaw = $request->min_date;
+        $maxRaw = $request->max_date;
+
+        if ($request->filled('min_date') && $request->filled('max_date')) {
+            $minDate = $minRaw . ' 00:00:00';
+            $maxDate = $maxRaw . ' 23:59:59';
+            $query->whereBetween('data_straty', [$minDate, $maxDate]);
+        } else {
+            if ($request->filled('min_date')) {
+                $query->where('data_straty', '>=', $minRaw . ' 00:00:00');
+            }
+            if ($request->filled('max_date')) {
+                $query->where('data_straty', '<=', $maxRaw . ' 23:59:59');
+            }
+        }
+
+        $straty = $query->orderBy('data_straty', 'desc')->paginate(20)->withQueryString();
 
         return view('straty.archiwum', compact('straty'));
     }
+
 
     /**
      * Formularz tworzenia nowej straty

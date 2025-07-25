@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -48,14 +49,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('produkt_id')->constrained('produkty')->onDelete('cascade');
             $table->string('kod_ean', 13);
-            $table->timestamps();
+
         });
 
         Schema::create('automats', function (Blueprint $table) {
             $table->id();
             $table->string('nazwa');
             $table->string('lokalizacja');
-            $table->timestamps();
+
         });
 
         Schema::create('zamowienia', function (Blueprint $table) {
@@ -64,7 +65,6 @@ return new class extends Migration
             $table->date('data_realizacji')->nullable();
             $table->unsignedBigInteger('automat_id')->nullable();
             $table->foreign('automat_id')->references('id')->on('automats')->onDelete('cascade');
-            $table->timestamps();
         });
 
         Schema::create('produkt_zamowienie', function (Blueprint $table) {
@@ -77,9 +77,8 @@ return new class extends Migration
         Schema::create('straty', function (Blueprint $table) {
             $table->id();
             $table->foreignId('automat_id')->constrained('automats')->onDelete('cascade');
-            $table->date('data_straty')->default(now());
+            $table->date('data_straty')->default(DB::raw('CAST(GETDATE() AS DATE)'));
             $table->text('opis')->nullable();
-            $table->timestamps();
         });
 
         Schema::create('produkt_strata', function (Blueprint $table) {
@@ -94,7 +93,6 @@ return new class extends Migration
             $table->id();
             $table->timestamp('data_wsadu')->useCurrent();
             $table->foreignId('automat_id')->constrained('automats')->onDelete('cascade');
-            $table->timestamps();
         });
 
         Schema::create('produkt_wsad', function (Blueprint $table) {

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Wsad extends Model
 {
     use HasFactory;
+    
 
     protected $fillable = [
         'data_wsadu',
@@ -23,6 +24,8 @@ class Wsad extends Model
         return $this->belongsToMany(Produkt::class, 'produkt_wsad', 'wsad_id', 'produkt_id')
                     ->withPivot('ilosc');
     }
+
+    public $timestamps = false;
 
     protected $table = 'wsady';
 

@@ -18,8 +18,6 @@ class WsadFactory extends Factory
 
         return [
             'data_wsadu' => $data,
-            'created_at' => $data,
-            'updated_at' => $data,
             'automat_id' => Automat::inRandomOrder()->first()?->id, // zapobiega błędowi przy pustej bazie
         ];
     }

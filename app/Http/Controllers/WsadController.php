@@ -16,8 +16,8 @@ class WsadController extends Controller
         $automat = $automatId ? Automat::findOrFail($automatId) : null;
 
         $query = Wsad::with(['automat', 'produkty'])
-        ->whereYear('created_at', now()->year)
-        ->whereMonth('created_at', now()->month);
+        ->whereYear('data_wsadu', now()->year)
+        ->whereMonth('data_wsadu', now()->month);
 
         if ($automat) {
             $query->where('automat_id', $automat->id);
@@ -25,7 +25,7 @@ class WsadController extends Controller
 
         $query->getQuery()->orders = null;
 
-        $query = $query->orderBy('created_at', 'desc');
+        $query = $query->orderBy('data_wsadu', 'desc');
 
         $wsady = $query->paginate(20);
 
@@ -125,9 +125,28 @@ class WsadController extends Controller
 
     public function archiwum(Request $request)
     {
-        $wsady = Wsad::with(['automat', 'produkty'])->orderBy('created_at', 'desc')->paginate(30);
+        $query = Wsad::with(['automat', 'produkty']);
+
+        $minRaw = $request->min_date;
+        $maxRaw = $request->max_date;
+
+        if ($request->filled('min_date') && $request->filled('max_date')) {
+            $minDate = $minRaw . ' 00:00:00';
+            $maxDate = $maxRaw . ' 23:59:59';
+            $query->whereBetween('data_wsadu', [$minDate, $maxDate]);
+        } else {
+            if ($request->filled('min_date')) {
+                $query->where('data_wsadu', '>=', $minRaw . ' 00:00:00');
+            }
+            if ($request->filled('max_date')) {
+                $query->where('data_wsadu', '<=', $maxRaw . ' 23:59:59');
+            }
+        }
+
+        $wsady = $query->orderBy('data_wsadu', 'desc')->paginate(30)->withQueryString();
 
         return view('wsady.archiwum', compact('wsady'));
     }
+
 
 }

@@ -141,11 +141,34 @@ class ZamowienieController extends Controller
             ->with('success', 'Zamówienie zostało zapisane i wysłane na Discord.');
     }
 
-    public function archiwum()
+
+    public function archiwum(Request $request)
     {
-        $zamowienia = Zamowienie::orderByDesc('data_zamowienia')->paginate(20); // Pobierz zamówienia z bazy danych, posortowane malejąco według daty zamówienia
+        $query = Zamowienie::query();
+
+        $minRaw = $request->min_date;
+        $maxRaw = $request->max_date;
+
+        if ($request->filled('min_date') && $request->filled('max_date')) {
+            $minDate = $minRaw . ' 00:00:00';
+            $maxDate = $maxRaw . ' 23:59:59';
+            $query->whereBetween('data_zamowienia', [$minDate, $maxDate]);
+        } else {
+            if ($request->filled('min_date')) {
+                $query->where('data_zamowienia', '>=', $minRaw . ' 00:00:00');
+            }
+            if ($request->filled('max_date')) {
+                $query->where('data_zamowienia', '<=', $maxRaw . ' 23:59:59');
+            }
+        }
+
+        $zamowienia = $query->orderByDesc('data_zamowienia')->paginate(20)->withQueryString();
+
         return view('zamowienia.archiwum', compact('zamowienia'));
     }
+
+
+
 
 
     /**
@@ -298,16 +321,18 @@ class ZamowienieController extends Controller
 
     //testowe rzeczy tutaj potem się zakomentuuje inacznej
     public function pobierzZamowienieXlsx($id)
-{
-    $zamowienie = Zamowienie::with('produkty')->findOrFail($id);
+    {
+        $zamowienie = Zamowienie::with('produkty')->findOrFail($id);
 
-    return Excel::download(new ZamowienieExport($zamowienie), "zamowienie_{$id}.xlsx");
-}
+        return Excel::download(new ZamowienieExport($zamowienie), "zamowienie_{$id}.xlsx");
+    }
 
-public function pobierzZamowienieCsv($id)
-{
-    $zamowienie = Zamowienie::with('produkty')->findOrFail($id);
+    public function pobierzZamowienieCsv($id)
+    {
+        $zamowienie = Zamowienie::with('produkty')->findOrFail($id);
 
-    return Excel::download(new ZamowienieExport($zamowienie), "zamowienie_{$id}.csv", \Maatwebsite\Excel\Excel::CSV);
-}
+        return Excel::download(new ZamowienieExport($zamowienie), "zamowienie_{$id}.csv", \Maatwebsite\Excel\Excel::CSV);
+    }
+
+
 }

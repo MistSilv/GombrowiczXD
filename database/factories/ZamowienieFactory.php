@@ -18,9 +18,7 @@ class ZamowienieFactory extends Factory
         return [
             'data_zamowienia' => $dataZamowienia,
             'data_realizacji' => $dataRealizacji,
-            'automat_id' => Automat::inRandomOrder()->first()?->id,
-            'created_at' => $dataZamowienia,
-            'updated_at' => $dataZamowienia,
+            'automat_id' => Automat::inRandomOrder()->first()?->id
         ];
     }
 }

@@ -90,7 +90,7 @@ class EmulatorOperacjiSeeder extends Seeder
                     $batch = min($doWsadu, rand(200, 1000));
 
                     $wsad = Wsad::factory()->create([
-                        'data_wsadu' => $dataBatch,
+                        'data_wsadu' => $dataBatch->copy()->setTime(rand(6, 20), rand(0, 59), rand(0, 59)),
                         'automat_id' => $automaty->random()->id,
                     ]);
 

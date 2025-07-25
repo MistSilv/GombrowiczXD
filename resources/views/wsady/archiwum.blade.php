@@ -5,6 +5,27 @@
     </div>
     <h1 class="my-4 text-white text-2xl font-semibold text-center">Archiwum wsadów</h1>
 
+    <form method="GET" action="{{ route('wsady.archiwum') }}" class="flex flex-wrap items-center gap-4 bg-gray-800 p-4 rounded mt-6">
+        <div>
+            <label for="min_date" class="block text-white text-sm mb-1">Data od:</label>
+            <input type="date" name="min_date" id="min_date" value="{{ request('min_date') }}"
+                class="rounded px-3 py-2 bg-gray-700 text-white border border-gray-600">
+        </div>
+
+        <div>
+            <label for="max_date" class="block text-white text-sm mb-1">Data do:</label>
+            <input type="date" name="max_date" id="max_date" value="{{ request('max_date') }}"
+                class="rounded px-3 py-2 bg-gray-700 text-white border border-gray-600">
+        </div>
+
+        <div class="self-end">
+            <button type="submit"
+                class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
+                🔍 Szukaj
+            </button>
+        </div>
+    </form>
+
     <div class="overflow-x-auto rounded-lg border border-gray-700">
         <table class="min-w-full divide-y divide-gray-700">
             <thead class="bg-gray-800">
@@ -20,7 +41,7 @@
                 <tr class="hover:bg-gray-700 text-white text-center">
                     <td class="py-2 px-4 text-sm">{{ $wsad->id }}</td>
                     <td class="py-2 px-4 text-sm">{{ $wsad->automat->nazwa ?? 'Brak automatu' }}</td>
-                    <td class="py-2 px-4 text-sm">{{ $wsad->created_at->format('Y-m-d H:i') }}</td>
+                    <td class="py-2 px-4 text-sm">{{ $wsad->data_wsadu->format('Y-m-d H:i') }}</td>
                     <td class="py-2 px-4">
                         <a href="{{ route('wsady.show', $wsad->id) }}" 
                            class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl px-3 py-1 rounded">👁️</a>
