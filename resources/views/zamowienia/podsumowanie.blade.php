@@ -1,53 +1,65 @@
-<!-- strona do podsumowania zamówień -->
 <x-layout>
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4 text-white">Podsumowanie zamówień ({{ $typ }})</h1>
-        <p class="mb-6">Okres: <strong>{{ $okres }}</strong></p>
+    <div class="container mx-auto px-4 py-6 text-white max-w-4xl bg-gray-900/70 rounded-xl">
+        <h1 class="text-3xl font-extrabold text-center text-purple-300 mb-2">
+            Podsumowanie zamówień ({{ $typ }})
+        </h1>
+        <p class="text-center text-sm text-gray-400 mb-6">
+            Okres: <strong class="text-white">{{ $okres }}</strong>
+        </p>
 
         @if($produkty->isEmpty())
-            <p>Brak zamówień w tym okresie.</p>
+            <p class="text-center text-gray-400 italic">Brak zamówień w tym okresie.</p>
         @else
             @php
-            // mapowanie zakresu
                 $zakresMap = [
                     'Dzień' => 'dzien',
                     'Tydzień' => 'tydzien',
                     'Miesiąc' => 'miesiac',
-                    'Rok' => 'rok', 
+                    'Rok' => 'rok',
                 ];
-                $zakresSlug = $zakresMap[$typ] ?? 'dzien'; // domyślnie 'dzien' jeśli nie znaleziono w mapie
-                $dateForUrl = \Illuminate\Support\Str::before($okres, ' do'); // dla tygodnia obetnij zakres
+                $zakresSlug = $zakresMap[$typ] ?? 'dzien';
+                $dateForUrl = \Illuminate\Support\Str::before($okres, ' do');
             @endphp
 
-            <div class="mb-4 flex gap-3">
-               <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
-                class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
-                    Eksportuj do Excel (.xlsx) <!--import do Excela-->
+            <!-- Przyciski eksportu -->
+            <div class="mb-6 flex flex-wrap justify-center gap-4">
+                <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
+                   class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                    📊 Eksportuj do Excel (.xlsx)
                 </a>
                 <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
-                class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
-                    Eksportuj do CSV <!--import do CSV-->
+                   class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                    📄 Eksportuj do CSV
                 </a>
             </div>
 
-            <table class="min-w-full bg-white border border-gray-300">
-                <thead>
-                    <tr>
-                        <th class="py-2 px-4 border-b">Produkt</th>
-                        <th class="py-2 px-4 border-b">Łączna ilość</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($produkty as $produkt)
+            <!-- Tabela z produktami -->
+            <div class="overflow-x-auto bg-gray-900/50 border border-gray-700 rounded-lg shadow">
+                <table class="min-w-full text-sm text-white divide-y divide-gray-700">
+                    <thead class="bg-gray-800 text-gray-300 uppercase text-xs">
                         <tr>
-                            <td class="border-b px-4 py-2">{{ $produkt->tw_nazwa }}</td>
-                            <td class="border-b px-4 py-2">{{ $produkt->suma }}</td>
+                            <th class="px-4 py-3 text-left">Produkt</th>
+                            <th class="px-4 py-3 text-left">Łączna ilość</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        @foreach ($produkty as $produkt)
+                            <tr class="hover:bg-gray-800/60 transition duration-150">
+                                <td class="px-4 py-2">{{ $produkt->tw_nazwa }}</td>
+                                <td class="px-4 py-2 font-semibold text-purple-400">{{ $produkt->suma }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         @endif
 
-        <a href="{{ route('zamowienia.index', ['automat_id' => request('automat_id')]) }}" class="text-blue-500 hover:underline mt-6 inline-block">← Wróć do listy zamówień</a>
+        <!-- Powrót jako przycisk -->
+        <div class="mt-8 text-center">
+            <a href="{{ route('zamowienia.index', ['automat_id' => request('automat_id')]) }}"
+               class="inline-block px-6 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg shadow transition duration-200">
+                ← Powrót do listy zamówień
+            </a>
+        </div>
     </div>
 </x-layout>

@@ -1,54 +1,65 @@
-<!-- strona do podsumowania strat -->
 <x-layout>
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4 text-white">Podsumowanie strat ({{ $typ }})</h1>
-        <p class="mb-6 text-white">Okres: <strong>{{ $okres }}</strong></p>
+    <div class="container mx-auto px-4 py-6 text-white max-w-4xl bg-gray-900/70 rounded-xl">
+        <h1 class="text-3xl font-extrabold text-center text-rose-300 mb-6">
+            Podsumowanie strat ({{ $typ }})
+        </h1>
+        <p class="text-center text-gray-400 mb-8">Okres: <strong>{{ $okres }}</strong></p>
 
-        @if($produkty->isEmpty())
-            <p class="text-white">Brak strat w tym okresie.</p>
+        @if ($produkty->isEmpty())
+            <div class="bg-gray-900/60 rounded-xl shadow-md p-6 text-center text-gray-400">
+                Brak strat w tym okresie.
+            </div>
         @else
             @php
-                $zakresMap = [ // mapowanie zakresu
+                $zakresMap = [
                     'Dzień' => 'dzien',
                     'Tydzień' => 'tydzien',
                     'Miesiąc' => 'miesiac',
                     'Rok' => 'rok',
                 ];
-                $zakresSlug = $zakresMap[$typ] ?? 'dzien'; // domyślnie 'dzien' jeśli nie znaleziono w mapie
-                $dateForUrl = \Illuminate\Support\Str::before($okres, ' do'); // np. "2025-06-01"
+                $zakresSlug = $zakresMap[$typ] ?? 'dzien';
+                $dateForUrl = \Illuminate\Support\Str::before($okres, ' do');
             @endphp
 
-            
-
-            <div class="mb-4 flex gap-3">
+            <!-- Eksport przyciski -->
+            <div class="mb-6 flex flex-wrap justify-center gap-4">
                 <a href="{{ route('export.straty', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl]) }}"
-                class="bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded">
-                    Eksportuj do Excel (.xlsx) <!--import do Excela-->
+                   class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
+                    Eksportuj do Excel (.xlsx)
                 </a>
                 <a href="{{ route('export.straty', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl]) }}"
-                class="bg-blue-500 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded">
-                    Eksportuj do CSV <!--import do CSV-->
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
+                    Eksportuj do CSV
                 </a>
             </div>
 
-            <table class="min-w-full bg-white border border-gray-300">
-                <thead>
-                    <tr>
-                        <th class="py-2 px-4 border-b">Produkt</th>
-                        <th class="py-2 px-4 border-b">Łączna strata (szt.)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($produkty as $produkt)
+            <!-- Tabela strat -->
+            <div class="bg-gray-900/60 rounded-xl shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-700 text-sm">
+                    <thead class="bg-gray-800 text-purple-200">
                         <tr>
-                            <td class="border-b px-4 py-2">{{ $produkt->tw_nazwa }}</td>
-                            <td class="border-b px-4 py-2">{{ $produkt->suma }}</td>
+                            <th class="px-6 py-3 text-left uppercase tracking-wider font-semibold">Produkt</th>
+                            <th class="px-6 py-3 text-left uppercase tracking-wider font-semibold">Łączna strata (szt.)</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        @foreach ($produkty as $produkt)
+                            <tr class="hover:bg-gray-800/70 transition">
+                                <td class="px-6 py-3">{{ $produkt->tw_nazwa }}</td>
+                                <td class="px-6 py-3 text-rose-400 font-semibold">{{ $produkt->suma }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         @endif
 
-        <a href="{{ route('straty.index') }}" class="text-blue-500 hover:underline mt-6 inline-block">← Wróć do listy strat</a>
+        <!-- Powrót -->
+        <div class="mt-8 text-center">
+            <a href="{{ route('straty.index') }}"
+               class="inline-block px-6 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg shadow transition duration-200">
+                ← Wróć do listy strat
+            </a>
+        </div>
     </div>
 </x-layout>
