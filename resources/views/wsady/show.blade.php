@@ -1,39 +1,60 @@
 <x-layout>
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="my-4 text-white text-3xl font-semibold text-center">Szczegóły wsadu #{{ $wsad->id }}</h1>
+    <div class="container mx-auto px-4 py-6 text-white max-w-3xl bg-gray-900/70 rounded-xl">
+        <h1 class="text-3xl font-extrabold text-center text-purple-300 mb-8">
+            Szczegóły wsadu #{{ $wsad->id }}
+        </h1>
 
-        <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-            <h5 class="text-xl font-semibold text-white mb-4 border-b border-gray-600 pb-2">Informacje podstawowe</h5>
-            <p class="text-white mb-2"><strong>Automat:</strong> {{ $wsad->automat->nazwa ?? 'Brak danych' }}</p>
-            <p class="text-white"><strong>Data wsadu:</strong> {{ $wsad->data_wsadu ? $wsad->data_wsadu->format('Y-m-d H:i') : 'Brak danych' }}</p>
-        </div>
-
-        <div class="bg-gray-800 rounded-lg shadow-md p-6">
-            <h5 class="text-xl font-semibold text-white mb-4 border-b border-gray-600 pb-2">Lista produktów</h5>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-white uppercase tracking-wider">Produkt</th>
-                            <th class="px-4 py-2 text-left text-white uppercase tracking-wider">Ilość</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        @foreach($wsad->produkty as $produkt)
-                            <tr class="hover:bg-gray-700">
-                                <td class="px-4 py-2 text-white">{{ $produkt->tw_nazwa }}</td>
-                                <td class="px-4 py-2 text-white">{{ $produkt->pivot->ilosc }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <!-- Informacje o wsadzie -->
+        <div class="bg-gray-900/70 rounded-xl shadow-lg p-5 sm:p-6 mb-6 space-y-3 border border-gray-700">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-400 font-semibold">Automat:</span>
+                <span class="text-base font-medium">
+                    {{ $wsad->automat->nazwa ?? 'Brak danych' }}
+                </span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-400 font-semibold">Data wsadu:</span>
+                <span class="text-base font-medium">
+                    {{ $wsad->data_wsadu ? $wsad->data_wsadu->format('Y-m-d H:i') : 'Brak danych' }}
+                </span>
             </div>
         </div>
 
-        <div class="mt-6 text-center">
-            <a href="{{ route('wsady.index') }}" 
-               class="text-blue-500 hover:underline mt-6 inline-block">
-                ← Wróć do listy wsadów
+        <!-- Lista produktów -->
+        <div class="bg-gray-900/70 rounded-xl shadow-lg p-5 sm:p-6 border border-gray-700">
+            <h2 class="text-xl sm:text-2xl font-semibold text-purple-200 mb-4">
+                Lista produktów
+            </h2>
+
+            @if($wsad->produkty->isEmpty())
+                <p class="text-gray-400 italic">Brak produktów.</p>
+            @else
+                <div class="overflow-x-auto rounded-md">
+                    <table class="min-w-full text-sm divide-y divide-gray-700 border border-gray-700">
+                        <thead class="bg-gray-800 text-gray-300 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Produkt</th>
+                                <th class="px-4 py-2 text-left">Ilość</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            @foreach($wsad->produkty as $produkt)
+                                <tr class="hover:bg-gray-800/50 transition duration-200">
+                                    <td class="px-4 py-2 text-white">{{ $produkt->tw_nazwa }}</td>
+                                    <td class="px-4 py-2 text-white">{{ $produkt->pivot->ilosc }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+
+        <!-- Powrót jako przycisk -->
+        <div class="mt-8 text-center">
+            <a href="{{ route('wsady.index') }}"
+               class="inline-block px-6 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg shadow transition duration-200">
+                ← Powrót do listy wsadów
             </a>
         </div>
     </div>
