@@ -32,7 +32,7 @@
                 <p class="text-gray-400 italic">Brak produktów.</p>
             @else
                 <ul class="space-y-3">
-                    @foreach ($strata->produkty as $produkt)
+                    @foreach($produkty as $produkt)
                         <li class="bg-gray-800/50 border border-gray-700 rounded-md px-4 py-2 flex justify-between items-center">
                             <span class="text-white">{{ $produkt->tw_nazwa }}</span>
                             <span class="font-semibold text-purple-400">{{ $produkt->pivot->ilosc }} szt.</span>
@@ -40,6 +40,9 @@
                     @endforeach
                 </ul>
             @endif
+        </div>
+        <div class="mt-6 text-center">
+            {{ $produkty->links('pagination::simple-tailwind') }}
         </div>
 
         <!-- Powrót jako przycisk -->

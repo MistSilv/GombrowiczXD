@@ -85,10 +85,7 @@
                     <div id="reader" class="mt-3 hidden"></div>
                     <div id="scan-result" class="mt-2 text-white text-sm"></div>
                 </div>
-            </form>
-
-            <!-- Przyciski -->
-        <div class="flex flex-col sm:flex-row justify-center gap-3 pt-4">
+                <div class="flex flex-col sm:flex-row justify-center gap-3 pt-4">
             <button 
                 type="submit"
                 class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0">
@@ -100,6 +97,11 @@
                 Powrót
             </a>
         </div>
+            </form>
+            
+
+            <!-- Przyciski -->
+        
         </div>
     </div>
 

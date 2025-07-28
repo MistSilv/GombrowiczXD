@@ -38,7 +38,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700">
-                            @foreach($wsad->produkty as $produkt)
+                            @foreach($produkty as $produkt)
                                 <tr class="hover:bg-gray-800/50 transition duration-200">
                                     <td class="px-4 py-2 text-white">{{ $produkt->tw_nazwa }}</td>
                                     <td class="px-4 py-2 text-white">{{ $produkt->pivot->ilosc }}</td>
@@ -46,6 +46,9 @@
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="mt-6 text-center">
+                            {{ $produkty->links('pagination::simple-tailwind') }}
+                    </div>
                 </div>
             @endif
         </div>

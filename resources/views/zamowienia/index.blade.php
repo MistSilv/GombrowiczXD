@@ -43,6 +43,9 @@
                         </tr>
                     @endforelse
                 </tbody>
+                <div class="mt-4">
+                    {{ $zamowienia->links('pagination::simple-tailwind') }}
+                </div>
             </table>
         </div>
 </x-layout>

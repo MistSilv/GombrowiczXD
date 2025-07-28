@@ -33,40 +33,10 @@
             >{{ old('opis') }}</textarea>
         </div>
 
-        <h2 class="text-xl font-semibold mb-2 text-white">Produkty</h2>
+      <h2 class="text-xl font-semibold mb-2 text-white">Produkty</h2>
         <div id="produkty-list" class="space-y-4 mb-4">
-            <div class="produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative">
-                <input
-                    type="text"
-                    name="produkty[0][tw_nazwa]"
-                    required
-                    placeholder="Wpisz nazwę produktu"
-                    autocomplete="off"
-                    class="form-input w-full text-white bg-gray-800 border border-gray-700 rounded px-3 py-2 autocomplete-input"
-                    value="{{ old('produkty.0.tw_nazwa') ?? '' }}"
-                />
-                <input
-                    type="hidden"
-                    name="produkty[0][produkt_id]"
-                    class="produkt-id-hidden"
-                    value="{{ old('produkty.0.produkt_id') ?? '' }}"
-                />
-                <input
-                    type="number"
-                    name="produkty[0][ilosc]"
-                    min="1"
-                    max="100"
-                    value="{{ old('produkty.0.ilosc', 1) }}"
-                    required
-                    class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
-                >
-                <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
-                    X
-                </button>
-            </div>
             @if(old('produkty'))
                 @foreach(old('produkty') as $i => $produkt)
-                    @continue($i === 0)
                     <div class="produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative">
                         <input
                             type="text"
@@ -92,7 +62,7 @@
                             required
                             class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
                         >
-                        <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
+                        <button type="button" class="remove-produkt bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
                             X
                         </button>
                     </div>
