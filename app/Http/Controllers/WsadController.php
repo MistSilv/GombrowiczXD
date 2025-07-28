@@ -94,9 +94,12 @@ class WsadController extends Controller
 
     public function show($id)
     {
-        $wsad = Wsad::with(['automat', 'produkty'])->findOrFail($id);
+        $wsad = Wsad::with('automat')->findOrFail($id);
 
-        return view('wsady.show', compact('wsad'));
+        // Paginacja produktów w relacji many-to-many
+        $produkty = $wsad->produkty()->paginate(10)->withQueryString();
+
+        return view('wsady.show', compact('wsad', 'produkty'));
     }
 
 

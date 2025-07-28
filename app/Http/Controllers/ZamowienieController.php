@@ -37,7 +37,7 @@ class ZamowienieController extends Controller
             $query->where('automat_id', $request->automat_id);
         } // Sprawdź, czy automat_id jest w żądaniu i dodaj warunek
 
-        $zamowienia = $query->orderByDesc('data_zamowienia')->get(); // Pobierz zamówienia z bazy danych, posortowane malejąco według daty zamówienia
+        $zamowienia = $query->orderByDesc('data_zamowienia')->paginate(20)->withQueryString();
 
         return view('zamowienia.index', compact('zamowienia'));
     }
@@ -174,12 +174,16 @@ class ZamowienieController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Zamowienie $zamowienie)
+   public function show(Zamowienie $zamowienie)
     {
-        $zamowienie->load(['produkty', 'automat']); 
+        $zamowienie->load('automat');
 
-        return view('zamowienia.show', compact('zamowienie'));
+        // Paginacja produktów
+        $produkty = $zamowienie->produkty()->paginate(10)->withQueryString();
+
+        return view('zamowienia.show', compact('zamowienie', 'produkty'));
     }
+
 
 
 

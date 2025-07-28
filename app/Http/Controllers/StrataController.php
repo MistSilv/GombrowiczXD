@@ -104,9 +104,13 @@ class StrataController extends Controller
      */
     public function show(Strata $strata)
     {
-        $strata->load('produkty', 'automat');
-        return view('straty.show', compact('strata'));
+        $strata->load('automat');
+
+        $produkty = $strata->produkty()->paginate(10)->withQueryString();
+
+        return view('straty.show', compact('strata', 'produkty'));
     }
+
 
     /**
      * Endpoint API do wyszukiwania produktów po nazwie (dla autocomplete)

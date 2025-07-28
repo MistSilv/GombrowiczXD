@@ -43,7 +43,7 @@
 
     @if($wsady instanceof \Illuminate\Pagination\LengthAwarePaginator)
         <div class="d-flex justify-content-center mt-4">
-            {{ $wsady->links() }}
+            {{ $wsady->links('pagination::simple-tailwind') }}
         </div>
     @endif
 </div>

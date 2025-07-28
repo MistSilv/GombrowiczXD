@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const $productContainer = document.getElementById('produkty-list');
     const produkty = window._produkty || [];
 
-    let index = $productContainer.children.length || 1;
+    let index = 0; // Start from 0, we'll increment before first use
     let debounceTimer;
 
     // --- Focus helper ---
@@ -77,8 +77,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        index++; // Increment index before creating new row
+        
         const row = document.createElement('div');
-        row.className = 'produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative';
+        row.className = 'produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative mb-2';
         row.innerHTML = `
             <input
                 type="text"
@@ -100,15 +102,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 required
                 class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
             >
-            <button type="button" class="remove-produkty bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
+            <button type="button" class="remove-produkt bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
                 X
             </button>
         `;
 
         $productContainer.appendChild(row);
-        attachRowAutocomplete(row.querySelector('.autocomplete-input'));
+        if (!productId) {
+            attachRowAutocomplete(row.querySelector('.autocomplete-input'));
+        }
         focusQuantity(row);
-        index++;
     }
 
     // --- Attach autocomplete for row input ---
@@ -149,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     li.addEventListener('click', () => {
                         input.value = p.tw_nazwa;
                         input.nextElementSibling.value = p.id;
+                        input.readOnly = true;
                         suggestions.style.display = 'none';
                         suggestions.innerHTML = '';
                         focusQuantity(input.closest('.produkt-row'));
@@ -167,18 +171,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Attach autocomplete to existing rows
-    document.querySelectorAll('.autocomplete-input').forEach(input => attachRowAutocomplete(input));
-
-    // Add new product button
-    document.getElementById('add-produkt').addEventListener('click', () => {
-        addProductRow();
-    });
-
     // Remove product
     $productContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-produkty')) {
+        if (e.target.classList.contains('remove-produkt')) {
             e.target.closest('.produkt-row').remove();
+            
+            // If no products left, focus on search input
+            if ($productContainer.children.length === 0) {
+                $globalSearchInput.focus();
+            }
         }
     });
+
+    // Focus on search input when page loads
+    $globalSearchInput.focus();
 });
