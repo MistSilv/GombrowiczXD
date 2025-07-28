@@ -181,9 +181,9 @@ class ProduktController extends Controller
         }
 
         if ($wyslijEmail) {
-            return $this->wyslijEmailZamowienia($zamowienieId, 'importowanie');
-        } else {
             return $this->wyslijEmailZamowienia($zamowienieId, 'sklep');
+        } else {
+            return $this->wyslijEmailZamowienia($zamowienieId, 'importowanie');
         }
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])

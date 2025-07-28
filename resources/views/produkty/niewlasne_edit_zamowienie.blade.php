@@ -90,7 +90,8 @@
                 <div class="flex flex-col sm:flex-row justify-center gap-3 pt-4">
                     <button 
                         type="submit"
-                        class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0">
+                        class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0"
+                        onclick="return confirm('Czy na pewno chcesz dodać zamówienie?')">
                         Zapisz i wyślij
                     </button>
                     <a 
@@ -100,9 +101,6 @@
                     </a>
                 </div>
             </form>
-
-            
-        
         </div>
     </div>
 
