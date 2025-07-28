@@ -4,7 +4,7 @@
         <h1 class="text-2xl font-bold mb-4 text-white">Archiwum wsadów</h1>
 
         <div class="mb-6 flex flex-wrap gap-2">
-            <a href="{{ route('wsady.index')}} " class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
+            <a href="{{ route('wsady.index')}} " class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
         </div>
 
         <form method="GET" action="{{ route('wsady.archiwum') }}" class="flex flex-wrap items-center gap-4 bg-gray-800 p-4 rounded mt-6">

@@ -5,7 +5,7 @@
     
 
     <div class="mb-6 flex flex-wrap gap-2">
-        <a href="{{ route('wsady.archiwum') }}" class="bg-slate-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
+        <a href="{{ route('wsady.archiwum') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
     </div>
     
     <div class="overflow-x-auto rounded-lg border border-gray-700">
