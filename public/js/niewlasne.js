@@ -116,7 +116,7 @@ document.addEventListener('click', function (e) {
 
 // Dodawanie pustego wiersza na kliknięcie przycisku
 //document.getElementById('dodaj-produkt').addEventListener('click', () => dodajWiersz());
-
+/*
 // Dodaj produkt do zamówienia po kliknięciu nazwy z tabeli deficytów
 document.querySelectorAll('.product-name').forEach(el => {
     el.addEventListener('click', () => {
@@ -127,7 +127,17 @@ document.querySelectorAll('.product-name').forEach(el => {
         }
     });
 });
+*/
 
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('product-name')) {
+        const nazwa = e.target.textContent.trim();
+        const produkt = window._produkty.find(p => p.tw_nazwa === nazwa);
+        if (produkt) {
+            setQuantity(produkt.id, 1);
+        }
+    }
+});
 // --- WYSZUKIWARKA PRODUKTÓW DO DODANIA ---
 const searchInput = document.getElementById('product-search');
 const suggestionsList = document.getElementById('product-suggestions');
