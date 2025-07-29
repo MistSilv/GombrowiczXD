@@ -58,6 +58,13 @@
 
             <!-- Złóż zamówienie -->
             <div>
+                <div
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Data realizacji zamówienia:</label>
+                    <select name="data_realizacji" required class="w-full px-3 py-2 mb-2 rounded-lg border border-gray-600 bg-gray-700 text-white ">
+                        <option value="dzisiaj" selected>Na dzisiaj</option>
+                        <option value="jutro">Na jutro</option>
+                    </select>
+                </div>
                 <button 
                     type="submit" 
                     onclick="return confirm('Czy na pewno chcesz potwierdzić zamówienie?')"

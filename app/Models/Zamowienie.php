@@ -16,7 +16,7 @@ class Zamowienie extends Model
     public $timestamps = false;
 
     protected $casts = [
-        'data_realizacji' => 'datetime',
+        'data_realizacji' => 'string',
     ];
 
     public function produkty()

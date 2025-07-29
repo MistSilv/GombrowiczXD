@@ -37,7 +37,7 @@ class TelegramController extends Controller
             $message = "📦 *Zamówienie #{$zamowienie->id}*\n";
             $message .= "Status: {$status}\n";
             $message .= "Automat: {$zamowienie->automat->nazwa}\n";
-            $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d H:i')}\n\n";
+            $message .= "Data realizacji: {$zamowienie->data_realizacji}\n\n";
             $message .= "*Produkty:*\n";
 
             foreach ($zamowienie->produkty as $produkt) {

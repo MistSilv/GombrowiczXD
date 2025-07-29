@@ -62,7 +62,7 @@ return new class extends Migration
         Schema::create('zamowienia', function (Blueprint $table) {
             $table->id();
             $table->timestamp('data_zamowienia')->useCurrent();
-            $table->date('data_realizacji')->nullable();
+            $table->string('data_realizacji')->nullable();
             $table->unsignedBigInteger('automat_id')->nullable();
             $table->foreign('automat_id')->references('id')->on('automats')->onDelete('cascade');
         });

@@ -77,10 +77,11 @@ class ZamowienieController extends Controller
             'produkty.*.produkt_id' => 'required|exists:produkty,id',
             'produkty.*.ilosc' => 'required|integer|min:1|max:3000',
             'automat_id' => 'required|exists:automats,id',
+            'data_realizacji' => 'required|in:dzisiaj,jutro',
         ]);
 
         $zamowienie = Zamowienie::create([
-            'data_realizacji' => now(),
+            'data_realizacji' => $request->input('data_realizacji'), // zapisujesz string "dzisiaj" lub "jutro"
             'automat_id' => $request->get('automat_id'),
         ]);
 
@@ -114,7 +115,7 @@ class ZamowienieController extends Controller
         $message = "📦 *Nowe zamówienie #{$zamowienie->id}*\n";
         $message .= "Status: 🔴 Oczekujące\n"; 
         $message .= "Automat: {$zamowienie->automat->nazwa}\n";
-        $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d H:i')}\n\n";
+        $message .= "Data realizacji: {$zamowienie->data_realizacji}\n\n";
         $message .= "*Produkty:*\n";
 
         foreach ($zamowienie->produkty as $produkt) {
