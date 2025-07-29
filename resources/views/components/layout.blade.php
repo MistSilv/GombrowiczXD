@@ -56,7 +56,7 @@
                     </button>
                 </form>
             </div>
-            <button class="burger-btn md:hidden focus:outline-none">
+            <button class="burger-btn md:hidden focus:outline-none text-white">
                 <span></span>
                 <span></span>
                 <span></span>
