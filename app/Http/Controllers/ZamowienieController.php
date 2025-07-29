@@ -95,46 +95,47 @@ class ZamowienieController extends Controller
             $produktyText .= "• **{$produkt->tw_nazwa}** — `{$produkt->pivot->ilosc}` szt.\n";
         }
 
-        $webhookUrl = config('services.discord.webhook_url');
+        // $webhookUrl = config('services.discord.webhook_url');
 
-        Http::post($webhookUrl, [
-            'embeds' => [[
-                'title' => "📦 Nowe zamówienie #{$zamowienie->id}",
-                'description' => "**🧊 Automat:** {$zamowienie->automat->nazwa}\n
-                **📅 Realizacja:** {$zamowienie->data_realizacji->format('Y-m-d')}\n\n
-                🧾 **Produkty:**\n{$produktyText}",
-                'color' => hexdec('2C2F33'),
-                'footer' => [
-                    'text' => '🛒 Zamówienia',
-                ],
-                'timestamp' => now()->toIso8601String(),
-            ]]
-        ]);
+        // Http::post($webhookUrl, [
+        //     'embeds' => [[
+        //         'title' => "📦 Nowe zamówienie #{$zamowienie->id}",
+        //         'description' => "**🧊 Automat:** {$zamowienie->automat->nazwa}\n
+        //         **📅 Realizacja:** {$zamowienie->data_realizacji->format('Y-m-d')}\n\n
+        //         🧾 **Produkty:**\n{$produktyText}",
+        //         'color' => hexdec('2C2F33'),
+        //         'footer' => [
+        //             'text' => '🛒 Zamówienia',
+        //         ],
+        //         'timestamp' => now()->toIso8601String(),
+        //     ]]
+        // ]);
 
-    //     $message = "📦 *Nowe zamówienie #{$zamowienie->id}*\n";
-    //     $message .= "Automat: {$zamowienie->automat->nazwa}\n";
-    //     $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d H:i')}\n\n";
-    //     $message .= "*Produkty:*\n";
+        $message = "📦 *Nowe zamówienie #{$zamowienie->id}*\n";
+        $message .= "Status: 🔴 Oczekujące\n"; 
+        $message .= "Automat: {$zamowienie->automat->nazwa}\n";
+        $message .= "Data realizacji: {$zamowienie->data_realizacji->format('Y-m-d H:i')}\n\n";
+        $message .= "*Produkty:*\n";
 
-    //     foreach ($zamowienie->produkty as $produkt) {
-    //         $message .= "• {$produkt->tw_nazwa} x {$produkt->pivot->ilosc}\n";
-    //     }
+        foreach ($zamowienie->produkty as $produkt) {
+            $message .= "• {$produkt->tw_nazwa} x {$produkt->pivot->ilosc}\n";
+        }
 
-    //     $keyboard = [
-    //         'inline_keyboard' => [
-    //             [
-    //                 ['text' => '⚙️ Realizacja', 'callback_data' => "realizacja_{$zamowienie->id}"],
-    //                 ['text' => '⏹️ Zakończono', 'callback_data' => "zakonczono_{$zamowienie->id}"]
-    //             ]
-    //         ]
-    //     ];
+        $keyboard = [
+            'inline_keyboard' => [
+                [
+                    ['text' => '⚙️ Realizacja', 'callback_data' => "realizacja_{$zamowienie->id}"],
+                    ['text' => '⏹️ Zakończono', 'callback_data' => "zakonczono_{$zamowienie->id}"]
+                ]
+            ]
+        ];
 
-    // Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage", [
-    //     'chat_id' => config('services.telegram.chat_id'),
-    //     'text' => $message,
-    //     'parse_mode' => 'Markdown',
-    //     'reply_markup' => json_encode($keyboard)
-    // ]);
+    Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage", [
+        'chat_id' => config('services.telegram.chat_id'),
+        'text' => $message,
+        'parse_mode' => 'Markdown',
+        'reply_markup' => json_encode($keyboard)
+    ]);
 
 
         return redirect()->route('zamowienia.index', ['automat_id' => $request->get('automat_id')])
@@ -210,117 +211,6 @@ class ZamowienieController extends Controller
     {
         //
     }
-
-    // Podsumowanie dnia
-   public function podsumowanieDnia($date = null)
-    {
-        $date = $date ? Carbon::parse($date) : Carbon::today(); // Użyj Carbon do parsowania daty lub ustaw dzisiejszą datę
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->whereDate('zamowienia.data_zamowienia', $date); // Filtruj po dacie zamówienia
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id')); // Sprawdź, czy automat_id jest w żądaniu i dodaj warunek
-        }
-
-        $produkty = $query
-            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_zamowienie.ilosc) as suma'))
-            ->groupBy('produkty.tw_nazwa')
-            ->get(); // Pobierz produkty z sumą ilości zamówień
-
-        return view('zamowienia.podsumowanie', [
-            'produkty' => $produkty,
-            'okres' => $date->format('Y-m-d'),
-            'typ' => 'Dzień', // Typ podsumowania
-        ]);
-    }
-
-    // Podsumowanie tygodnia
-   public function podsumowanieTygodnia($date = null)
-    {
-        $date = $date ? Carbon::parse($date) : Carbon::today(); // Użyj Carbon do parsowania daty lub ustaw dzisiejszą datę
-        $start = $date->copy()->startOfWeek(); // Początek tygodnia
-        $end = $date->copy()->endOfWeek(); // Koniec tygodnia
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]); // Filtruj po zakresie dat zamówienia
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id')); // Sprawdź, czy automat_id jest w żądaniu i dodaj warunek
-        }
-
-        $produkty = $query
-            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_zamowienie.ilosc) as suma'))
-            ->groupBy('produkty.tw_nazwa')
-            ->get(); // Pobierz produkty z sumą ilości zamówień
-
-        return view('zamowienia.podsumowanie', [
-            'produkty' => $produkty,
-            'okres' => $start->format('Y-m-d') . ' do ' . $end->format('Y-m-d'),
-            'typ' => 'Tydzień', // Typ podsumowania
-        ]);
-    }
-
-    // Podsumowanie miesiąca
-    public function podsumowanieMiesiaca($month = null)
-    {
-        $date = $month ? Carbon::parse($month) : Carbon::today(); // Użyj Carbon do parsowania miesiąca lub ustaw dzisiejszą datę
-        $start = $date->copy()->startOfMonth(); // Początek miesiąca
-        $end = $date->copy()->endOfMonth(); // Koniec miesiąca
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]); // Filtruj po zakresie dat zamówienia
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id')); // Sprawdź, czy automat_id jest w żądaniu i dodaj warunek
-        }
-
-        $produkty = $query
-            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_zamowienie.ilosc) as suma'))
-            ->groupBy('produkty.tw_nazwa')
-            ->get(); // Pobierz produkty z sumą ilości zamówień
-
-        return view('zamowienia.podsumowanie', [
-            'produkty' => $produkty,
-            'okres' => $start->format('Y-m'),
-            'typ' => 'Miesiąc', // Typ podsumowania
-        ]);
-    }
-
-    // Podsumowanie roku
-    public function podsumowanieRoku($year = null)
-    {
-        $date = $year ? Carbon::parse($year . '-01-01') : Carbon::today(); // Użyj Carbon do parsowania roku lub ustaw dzisiejszą datę
-        $start = $date->copy()->startOfYear(); // Początek roku
-        $end = $date->copy()->endOfYear(); // Koniec roku
-
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end]); // Filtruj po zakresie dat zamówienia
-
-        if (request()->filled('automat_id')) {
-            $query->where('zamowienia.automat_id', request('automat_id')); // Sprawdź, czy automat_id jest w żądaniu i dodaj warunek
-        }
-
-        $produkty = $query
-            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_zamowienie.ilosc) as suma'))
-            ->groupBy('produkty.tw_nazwa')
-            ->get(); // Pobierz produkty z sumą ilości zamówień
-
-        return view('zamowienia.podsumowanie', [
-            'produkty' => $produkty,
-            'okres' => $start->format('Y'),
-            'typ' => 'Rok', // Typ podsumowania
-        ]);
-    }
-
 
 
     //testowe rzeczy tutaj potem się zakomentuuje inacznej

@@ -15,6 +15,10 @@ class Zamowienie extends Model
 
     public $timestamps = false;
 
+    protected $casts = [
+        'data_realizacji' => 'datetime',
+    ];
+
     public function produkty()
     {
         return $this->belongsToMany(Produkt::class, 'produkt_zamowienie')

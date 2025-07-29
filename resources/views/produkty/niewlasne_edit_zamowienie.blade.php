@@ -5,16 +5,6 @@
 
             <!-- Formularz zamówień -->
         <div class="bg-gray-900 rounded-lg shadow-md p-3 sm:p-4 mb-6 text-sm">
-            <!-- Przełącznik poboru ze sklepu -->
-            <div class="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm rounded-md p-2">
-                <label for="WyslijMail" class="text-white font-semibold">Pobór ze sklepu</label>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="WyslijMail" class="sr-only peer">
-                    <div class="w-10 h-5 bg-gray-300 rounded-full peer-checked:bg-purple-600 transition duration-300"></div>
-                    <div class="absolute left-1 top-1 bg-white w-3.5 h-3.5 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
-                </label>
-            </div>
-
             <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
                 @csrf
                 <input type="hidden" name="zamowienieId" value="{{ $zamowienieId ?? '' }}">

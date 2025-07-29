@@ -7,22 +7,22 @@
             <a href="{{ route('wsady.index')}} " class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
         </div>
 
-        <form method="GET" action="{{ route('wsady.archiwum') }}" class="flex flex-wrap items-center gap-4 bg-gray-800 p-4 rounded mt-6">
-            <div>
+        <form method="GET" action="{{ route('wsady.archiwum') }}" class="flex flex-wrap md:flex-nowrap items-end gap-4 bg-gray-800 p-4 rounded mt-6">
+            <div class="flex-1 min-w-[150px]">
                 <label for="min_date" class="block text-white text-sm mb-1">Data od:</label>
                 <input type="date" name="min_date" id="min_date" value="{{ request('min_date') }}"
-                    class="rounded px-3 py-2 bg-gray-700 text-white border border-gray-600">
+                    class="w-full rounded px-3 py-2 bg-gray-700 text-white border border-gray-600">
+            </div>
+
+            <div class="flex-1 min-w-[150px]">
+                <label for="max_date" class="block text-white text-sm mb-1">Data do:</label>
+                <input type="date" name="max_date" id="max_date" value="{{ request('max_date') }}"
+                    class="w-full rounded px-3 py-2 bg-gray-700 text-white border border-gray-600">
             </div>
 
             <div>
-                <label for="max_date" class="block text-white text-sm mb-1">Data do:</label>
-                <input type="date" name="max_date" id="max_date" value="{{ request('max_date') }}"
-                    class="rounded px-3 py-2 bg-gray-700 text-white border border-gray-600">
-            </div>
-
-            <div class="self-end">
                 <button type="submit"
-                    class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
+                    class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded whitespace-nowrap">
                     🔍 Szukaj
                 </button>
             </div>
@@ -33,14 +33,14 @@
 
             <a href="{{ route('export.unified.range', ['typ' => 'wsady', 'zakres'=>'zakres', 'format' => 'xlsx', 'od' => $od, 'do' => $do]) }}"
                 id="export-wsad-xlsx"
-                class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
-                📊 Eksportuj wsad do Excel (.xlsx)
+                class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-5 py-2 rounded shadow whitespace-nowrap">
+                📊 Excel (.xlsx)
             </a>
 
             <a href="{{ route('export.unified.range', ['typ' => 'wsady', 'zakres'=>'zakres', 'format' => 'csv', 'od' => $od, 'do' => $do]) }}"
                 id="export-wsad-csv"
-                class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
-                📄 Eksportuj wsad do CSV
+                class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-5 py-2 rounded shadow whitespace-nowrap">
+                📄 CSV
             </a>
 
         </form>
