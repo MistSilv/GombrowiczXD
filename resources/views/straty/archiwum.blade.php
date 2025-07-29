@@ -27,6 +27,22 @@
                     🔍 Szukaj
                 </button>
             </div>
+            @php
+                $od = request('min_date') ?: now()->subMonth()->toDateString();
+                $do = request('max_date') ?: now()->toDateString();
+            @endphp
+
+            <a href="{{ route('export.unified.range', ['typ' => 'straty', 'zakres'=>'zakres', 'format' => 'xlsx', 'od' => $od, 'do' => $do]) }}"
+                id="export-wsad-xlsx"
+                class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                📊 Eksportuj wsad do Excel (.xlsx)
+            </a>
+
+            <a href="{{ route('export.unified.range', ['typ' => 'straty', 'zakres'=>'zakres', 'format' => 'csv', 'od' => $od, 'do' => $do]) }}"
+                id="export-wsad-csv"
+                class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                📄 Eksportuj wsad do CSV
+            </a>
         </form>
 
         <div class="overflow-x-auto rounded-lg border border-gray-700 mt-6" >

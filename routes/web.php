@@ -13,6 +13,7 @@ use App\Http\Controllers\{
     WsadController,
     ProduktController
 };
+use App\Models\Wsad;
 
 Route::redirect('/', '/login'); // dynamiczne przekierowanie na login
 
@@ -49,14 +50,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/straty/podsumowanie/miesiac/{month?}', [StrataController::class, 'podsumowanieMiesiaca'])->name('straty.podsumowanie.miesiac');
     Route::get('/straty/podsumowanie/rok/{year?}', [StrataController::class, 'podsumowanieRoku'])->name('straty.podsumowanie.rok');
 
+    Route::get('/wsady/podsumowanie/dzien/{date?}', [WsadController::class, 'podsumowanieDnia'])->name('wsady.podsumowanie.dzien');
+    Route::get('/wsady/podsumowanie/tydzien/{date?}', [WsadController::class, 'podsumowanieTygodnia'])->name('wsady.podsumowanie.tydzien');
+    Route::get('/wsady/podsumowanie/miesiac/{month?}', [WsadController::class, 'podsumowanieMiesiaca'])->name('wsady.podsumowanie.miesiac');
+    Route::get('/wsady/podsumowanie/rok/{year?}', [WsadController::class, 'podsumowanieRoku'])->name('wsady.podsumowanie.rok');
+
+
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
     Route::post('/register', [RegisterController::class, 'store']);
 
     Route::resource('straty', StrataController::class, ['parameters' => ['straty' => 'strata']])->only(['index', 'create', 'store', 'show']);
 
-    Route::get('/export/zamowienia/{zakres}/{date?}/{format?}', [ExportController::class, 'exportZamowienia'])->name('export.zamowienia');
-    Route::get('/export/straty/{zakres}/{date?}/{format?}', [ExportController::class, 'exportStraty'])->name('export.straty');
+
+    Route::get('/export/{typ}/{zakres}/{od?}/{format?}', [ExportController::class, 'unifiedExport'])->where(['typ' => 'zamowienia|straty|wsady', 'zakres' => 'dzien|tydzien|miesiac|rok'])->name('export.unified.day');
+    Route::get('/export/{typ}/{zakres}/{format}/{od}/{do}', [ExportController::class, 'unifiedExport'])->where(['typ' => 'zamowienia|straty|wsady', 'zakres' => 'zakres'])->name('export.unified.range');
     Route::get('/export/zamowienie/{zamowienie_id}/{format}', [ExportController::class, 'exportPojedynczeZamowienie'])->name('export.zamowienie');
+
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 

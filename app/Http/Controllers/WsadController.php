@@ -7,6 +7,9 @@ use App\Models\Produkt;
 use App\Models\ProduktWsad;
 use App\Models\Automat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 
 class WsadController extends Controller
 {
@@ -154,4 +157,85 @@ class WsadController extends Controller
     }
 
 
+    public function podsumowanieDnia($date = null)
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::today();
+
+        $produkty = DB::table('produkt_wsad')
+            ->join('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
+            ->whereDate('wsady.data_wsadu', $date)
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_wsad.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('wsady.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $date->format('Y-m-d'),
+            'typ' => 'Dzień',
+        ]);
+    }
+
+    public function podsumowanieTygodnia($date = null)
+    {
+        $date = $date ? Carbon::parse($date) : Carbon::today();
+        $start = $date->copy()->startOfWeek();
+        $end = $date->copy()->endOfWeek();
+
+        $produkty = DB::table('produkt_wsad')
+            ->join('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
+            ->whereBetween('wsady.data_wsadu', [$start, $end])
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_wsad.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('wsady.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $start->format('Y-m-d') . ' do ' . $end->format('Y-m-d'),
+            'typ' => 'Tydzień',
+        ]);
+    }
+
+    public function podsumowanieMiesiaca($month = null)
+    {
+        $date = $month ? Carbon::parse($month) : Carbon::today();
+        $start = $date->copy()->startOfMonth();
+        $end = $date->copy()->endOfMonth();
+
+        $produkty = DB::table('produkt_wsad')
+            ->join('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
+            ->whereBetween('wsady.data_wsadu', [$start, $end])
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_wsad.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('wsady.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $start->format('Y-m'),
+            'typ' => 'Miesiąc',
+        ]);
+    }
+
+    public function podsumowanieRoku($year = null)
+    {
+        $date = $year ? Carbon::parse($year . '-01-01') : Carbon::today();
+        $start = $date->copy()->startOfYear();
+        $end = $date->copy()->endOfYear();
+
+        $produkty = DB::table('produkt_wsad')
+            ->join('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
+            ->whereBetween('wsady.data_wsadu', [$start, $end])
+            ->select('produkty.tw_nazwa', DB::raw('SUM(produkt_wsad.ilosc) as suma'))
+            ->groupBy('produkty.tw_nazwa')
+            ->get();
+
+        return view('wsady.podsumowanie', [
+            'produkty' => $produkty,
+            'okres' => $start->format('Y'),
+            'typ' => 'Rok',
+        ]);
+    }
 }

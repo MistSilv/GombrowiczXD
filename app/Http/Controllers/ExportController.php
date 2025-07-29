@@ -18,39 +18,41 @@ use Illuminate\Support\Facades\Log;
 
 
 class ExportController extends Controller
-{
-    //główny kontroler eksportu danych
-    public function exportZamowienia($zakres, $date = null, $format = 'xlsx')
     {
-        $date = $date ? Carbon::parse($date) : Carbon::today();
+        //główny kontroler eksportu danych
+    public function unifiedExport(string $typ, string $zakres, string $format = 'xlsx', ?string $od = null, ?string $do = null)
+    {
+        //dd(func_get_args());
+        $mapaTypow = [
+            'zamowienia' => [$this, 'pobierzDaneZamowien'],
+            'straty'     => [$this, 'pobierzDaneStrat'],
+            'wsady'      => [$this, 'pobierzDaneWsad'],
+        ];
+
+        if (!isset($mapaTypow[$typ])) {
+            abort(404, "Nieobsługiwany typ eksportu: $typ");
+        }
+
+        $odDate = $od ? Carbon::parse($od) : Carbon::today();
+        $doDate = $do ? Carbon::parse($do) : null;
+
+        $czyZakres = $zakres === 'zakres';
 
         return $this->eksportMacierz(
-            'zamowienia',
+            $typ,
             $zakres,
-            $date,
-            $format,
-            [$this, 'pobierzDaneZamowien']
-        ); // Eksportuje zamówienia w zależności od zakresu i formatu
+            $odDate,
+            $format ?? 'xlsx',
+            $mapaTypow[$typ],
+            $czyZakres ? $odDate : null,
+            $czyZakres ? $doDate : null
+        );
     }
 
-    //główny kontroler eksportu strat
-    public function exportStraty($zakres, $date = null, $format = 'xlsx')
-    {
-        $date = $date ? Carbon::parse($date) : Carbon::today();
-
-        return $this->eksportMacierz(
-            'straty',
-            $zakres,
-            $date,
-            $format,
-            [$this, 'pobierzDaneStrat']
-        ); // Eksportuje straty w zależności od zakresu i formatu
-    }
 
     //wszystkie eksporty danych zamówień i strat są realizowane przez tę funkcję
-    private function eksportMacierz($typ, $zakres, Carbon $date, $format, callable $daneCallback)
+    private function eksportMacierz($typ, $zakres, Carbon $date, $format, callable $daneCallback, ?Carbon $od = null, ?Carbon $do = null)
     {
-        // Ustal zakres i etykiety kolumn
         if ($zakres === 'rok') {
             $start = $date->copy()->startOfYear();
             $end = $date->copy()->endOfYear();
@@ -61,12 +63,12 @@ class ExportController extends Controller
                 $iter->addMonth();
             }
             $etykiety = $okresy->map(fn($m) => $m->format('m-Y'));
-        } else {
+
+        } elseif (in_array($zakres, ['dzien', 'tydzien', 'miesiac'])) {
             $start = match ($zakres) {
                 'dzien'   => $date->copy()->startOfDay(),
                 'tydzien' => $date->copy()->startOfWeek(),
                 'miesiac' => $date->copy()->startOfMonth(),
-                default   => abort(404),
             };
             $end = match ($zakres) {
                 'dzien'   => $date->copy()->endOfDay(),
@@ -80,17 +82,35 @@ class ExportController extends Controller
                 $iter->addDay();
             }
             $etykiety = $okresy->map(fn($d) => $d->format('d-m'));
+
+        } elseif ($zakres === 'zakres') {
+            // Jeśli $od lub $do nie zostały podane, ustaw domyślne wartości (np. na $date)
+            $start = $od ? $od->copy()->startOfDay() : $date->copy()->startOfDay();
+            $end = $do ? $do->copy()->endOfDay() : $date->copy()->endOfDay();
+
+            $okresy = collect();
+            $iter = $start->copy();
+            while ($iter <= $end) {
+                $okresy->push($iter->copy());
+                $iter->addDay();
+            }
+            $etykiety = $okresy->map(fn($d) => $d->format('d-m'));
+
+        } else {
+            abort(404);
         }
 
         $dane = call_user_func($daneCallback, $start, $end, $zakres);
         $produkty = $dane->groupBy('produkt_id');
 
-        $filename = "{$typ}_{$zakres}_{$start->format('Y_m_d')}.{$format}";
+        $filename = "{$typ}_{$zakres}_{$start->format('Y_m_d')}_do_{$end->format('Y_m_d')}.{$format}";
 
         return $format === 'csv'
             ? $this->generujCsv($produkty, $okresy, $etykiety, $zakres)
             : $this->generujXlsx($produkty, $okresy, $etykiety, $filename, $zakres);
     }
+
+
 
     //pobiera dane zamówień 
     private function pobierzDaneZamowien($start, $end, $zakres)
@@ -130,9 +150,9 @@ class ExportController extends Controller
     //pobiera dane strat
     private function pobierzDaneStrat($start, $end, $zakres)
     {
-        $query = DB::table('produkty_straty')
-            ->join('straty', 'produkty_straty.strata_id', '=', 'straty.id')
-            ->join('produkty', 'produkty_straty.produkt_id', '=', 'produkty.id')
+        $query = DB::table('produkt_strata')
+            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
+            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
             ->whereBetween('straty.data_straty', [$start, $end]);
 
@@ -142,7 +162,7 @@ class ExportController extends Controller
                 'produkty.tw_nazwa',
                 DB::raw('MIN(ean_codes.kod_ean) as ean'),
                 DB::raw('MONTH(straty.data_straty) as miesiac'),
-                DB::raw('SUM(produkty_straty.ilosc) as ilosc')
+                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
             )
             ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(straty.data_straty)'));
         } else {
@@ -151,13 +171,48 @@ class ExportController extends Controller
                 'produkty.tw_nazwa',
                 DB::raw('MIN(ean_codes.kod_ean) as ean'),
                 DB::raw('CAST(straty.data_straty AS DATE) as dzien'),
-                DB::raw('SUM(produkty_straty.ilosc) as ilosc')
+                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
             )
             ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(straty.data_straty AS DATE)'));
         }
 
         return $query->get();
     }
+
+    private function pobierzDaneWsad($start, $end, $zakres)
+    {
+        $query = DB::table('produkt_wsad')
+            ->join('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
+            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
+            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+            ->whereBetween('wsady.data_wsadu', [$start, $end])
+            ->when(request('automat_id'), fn($q) => $q->where('wsady.automat_id', request('automat_id')));
+
+        if ($zakres === 'rok') {
+            $query->select(
+                'produkty.id as produkt_id',
+                'produkty.tw_nazwa',
+                DB::raw('MIN(ean_codes.kod_ean) as ean'),
+                DB::raw('MONTH(wsady.data_wsadu) as miesiac'),
+                DB::raw('wsady.automat_id'),
+                DB::raw('SUM(produkt_wsad.ilosc) as ilosc')
+            )
+            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(wsady.data_wsadu)'), 'wsady.automat_id');
+        } else {
+            $query->select(
+                'produkty.id as produkt_id',
+                'produkty.tw_nazwa',
+                DB::raw('MIN(ean_codes.kod_ean) as ean'),
+                DB::raw('CAST(wsady.data_wsadu AS DATE) as dzien'),
+                DB::raw('wsady.automat_id'),
+                DB::raw('SUM(produkt_wsad.ilosc) as ilosc')
+            )
+            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(wsady.data_wsadu AS DATE)'), 'wsady.automat_id');
+        }
+
+        return $query->get();
+    }
+
 
     //generuje eksport do CSV
     private function generujCsv($produkty, $okresy, $etykiety, $zakres)

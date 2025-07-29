@@ -23,12 +23,23 @@
 
             <!-- Przyciski eksportu -->
             <div class="mb-6 flex flex-wrap justify-center gap-4">
-                <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'xlsx', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
-                   class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                <a href="{{ route('export.unified', [
+                        'typ' => 'zamowienia',
+                        'zakres' => $zakresSlug,
+                        'od' => $dateForUrl,
+                        'format' => 'xlsx',
+                    ]) }}"
+                class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
                     📊 Eksportuj do Excel (.xlsx)
                 </a>
-                <a href="{{ route('export.zamowienia', ['zakres' => $zakresSlug, 'format' => 'csv', 'date' => $dateForUrl, 'automat_id' => request('automat_id')]) }}"
-                   class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+
+                <a href="{{ route('export.unified', [
+                        'typ' => 'zamowienia',
+                        'zakres' => $zakresSlug,
+                        'od' => $dateForUrl,
+                        'format' => 'csv',
+                    ]) }}"
+                class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
                     📄 Eksportuj do CSV
                 </a>
             </div>

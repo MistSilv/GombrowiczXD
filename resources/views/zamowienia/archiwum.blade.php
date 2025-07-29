@@ -24,7 +24,26 @@
                     🔍 Szukaj
                 </button>
             </div>
+            @php
+                $od = request('min_date') ?: now()->subMonth()->toDateString();
+                $do = request('max_date') ?: now()->toDateString();
+            @endphp
+
+            <a href="{{ route('export.unified.range', ['typ' => 'zamowienia', 'zakres'=>'zakres', 'format' => 'xlsx', 'od' => $od, 'do' => $do]) }}"
+                id="export-wsad-xlsx"
+                class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                📊 Eksportuj wsad do Excel (.xlsx)
+            </a>
+
+            <a href="{{ route('export.unified.range', ['typ' => 'zamowienia', 'zakres'=>'zakres', 'format' => 'csv', 'od' => $od, 'do' => $do]) }}"
+                id="export-wsad-csv"
+                class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-2 rounded-lg shadow transition duration-200">
+                📄 Eksportuj wsad do CSV
+            </a>
         </form>
+        
+
+
 
         <div class="overflow-x-auto rounded-lg border border-gray-700 mt-6">
             <table class="min-w-full divide-y divide-gray-700">
@@ -56,4 +75,30 @@
         <div class="d-flex justify-content-center mt-4">
             {{ $zamowienia->links('pagination::simple-tailwind') }}
         </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const exportXlsx = document.getElementById('export-xlsx');
+        const exportCsv = document.getElementById('export-csv');
+        const minDate = document.getElementById('min_date');
+        const maxDate = document.getElementById('max_date');
+
+        function updateLinks() {
+            const od = minDate.value || '{{ now()->subMonth()->toDateString() }}';
+            const doDate = maxDate.value || '{{ now()->toDateString() }}';
+
+            // Zbuduj URL według wzoru:
+            const baseUrl = "{{ url('/export/zamowienia/zakres') }}";
+            exportXlsx.href = `${baseUrl}/xlsx/${od}/${doDate}`;
+            exportCsv.href = `${baseUrl}/csv/${od}/${doDate}`;
+        }
+
+        minDate.addEventListener('change', updateLinks);
+        maxDate.addEventListener('change', updateLinks);
+
+        updateLinks(); // na start
+    });
+
+
+    </script>
+
 </x-layout>

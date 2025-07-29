@@ -4,17 +4,17 @@
 
         <h1 class="text-2xl font-bold mb-4 text-white">Lista strat</h1>
         <div class="mb-6 flex flex-wrap gap-2">
-                <a href="{{ route('straty.archiwum') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
-            <a href="{{ route('straty.podsumowanie.dzien') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('straty.archiwum') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
+            <a href="{{ route('export.unified.day', ['typ' => 'straty', 'zakres' => 'dzien']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie dnia
             </a>
-            <a href="{{ route('straty.podsumowanie.tydzien') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('export.unified.day', ['typ' => 'straty', 'zakres' => 'tydzien']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie tygodnia
             </a>
-            <a href="{{ route('straty.podsumowanie.miesiac') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('export.unified.day', ['typ' => 'straty', 'zakres' => 'miesiac']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie miesiąca
             </a>
-            <a href="{{ route('straty.podsumowanie.rok') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('export.unified.day', ['typ' => 'straty', 'zakres' => 'rok']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
                 Podsumowanie roku
             </a>
         </div>

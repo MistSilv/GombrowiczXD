@@ -2,18 +2,38 @@
 <x-layout>
     <div class="container">
 
-        <<h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
+        <h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
+        <h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
         @auth
             @if(!auth()->user()->isSerwis())
-               <div class="mb-6 flex flex-wrap gap-2">
-                <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Archiwum zamówień</a>
-                <a href="{{ route('zamowienia.podsumowanie.dzien', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie dnia</a>
-                <a href="{{ route('zamowienia.podsumowanie.tydzien', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie tygodnia</a>
-                <a href="{{ route('zamowienia.podsumowanie.miesiac', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie miesiąca</a>
-                <a href="{{ route('zamowienia.podsumowanie.rok', ['automat_id' => request('automat_id')]) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Podsumowanie roku</a>
+                <div class="mb-6 flex flex-wrap gap-2">
+                    <!-- Archiwum zamówień - zakładam, że masz odrębną trasę -->
+                    <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}"
+                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                        Archiwum zamówień
+                    </a>
+
+                    <!-- Podsumowania eksportów -->
+                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'dzien', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                        Podsumowanie dnia
+                    </a>
+                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'tydzien', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                        Podsumowanie tygodnia
+                    </a>
+                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'miesiac', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                        Podsumowanie miesiąca
+                    </a>
+                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'rok', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                        Podsumowanie roku
+                    </a>
                 </div>
             @endif
         @endauth
+
 
         <div class="overflow-x-auto rounded-lg border border-gray-700">
             <table class="min-w-full divide-y divide-gray-700">
