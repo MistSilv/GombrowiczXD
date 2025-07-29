@@ -36,31 +36,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zamowienia/produkcja/nowe', [ZamowienieController::class, 'createProdukcja'])->name('zamowienia.produkcja.create');
     Route::get('/zamowienia/archiwum', [ZamowienieController::class, 'archiwum'])->name('zamowienia.archiwum');
     Route::get('/zamowienia/{zamowienie}', [ZamowienieController::class, 'show'])->name('zamowienia.show');
-    Route::get('/zamowienia/podsumowanie/dzien/{date?}', [ZamowienieController::class, 'podsumowanieDnia'])->name('zamowienia.podsumowanie.dzien');
-    Route::get('/zamowienia/podsumowanie/tydzien/{date?}', [ZamowienieController::class, 'podsumowanieTygodnia'])->name('zamowienia.podsumowanie.tydzien');
-    Route::get('/zamowienia/podsumowanie/miesiac/{month?}', [ZamowienieController::class, 'podsumowanieMiesiaca'])->name('zamowienia.podsumowanie.miesiac');
-    Route::get('/zamowienia/podsumowanie/rok/{year?}', [ZamowienieController::class, 'podsumowanieRoku'])->name('zamowienia.podsumowanie.rok');
     Route::get('/zamowienia/{id}/xlsx', [ZamowienieController::class, 'pobierzZamowienieXlsx'])->name('zamowienia.xlsx');
     Route::get('/zamowienia/{id}/csv', [ZamowienieController::class, 'pobierszZamowienieCsv'])->name('zamowienia.csv');
     Route::post('/zamowienie/zloz', [ZamowienieController::class, 'store'])->name('zloz.zamowienie');
 
     Route::get('/straty/archiwum', [StrataController::class, 'archiwum'])->name('straty.archiwum');
-    Route::get('/straty/podsumowanie/dzien/{date?}', [StrataController::class, 'podsumowanieDnia'])->name('straty.podsumowanie.dzien');
-    Route::get('/straty/podsumowanie/tydzien/{date?}', [StrataController::class, 'podsumowanieTygodnia'])->name('straty.podsumowanie.tydzien');
-    Route::get('/straty/podsumowanie/miesiac/{month?}', [StrataController::class, 'podsumowanieMiesiaca'])->name('straty.podsumowanie.miesiac');
-    Route::get('/straty/podsumowanie/rok/{year?}', [StrataController::class, 'podsumowanieRoku'])->name('straty.podsumowanie.rok');
-
-    Route::get('/wsady/podsumowanie/dzien/{date?}', [WsadController::class, 'podsumowanieDnia'])->name('wsady.podsumowanie.dzien');
-    Route::get('/wsady/podsumowanie/tydzien/{date?}', [WsadController::class, 'podsumowanieTygodnia'])->name('wsady.podsumowanie.tydzien');
-    Route::get('/wsady/podsumowanie/miesiac/{month?}', [WsadController::class, 'podsumowanieMiesiaca'])->name('wsady.podsumowanie.miesiac');
-    Route::get('/wsady/podsumowanie/rok/{year?}', [WsadController::class, 'podsumowanieRoku'])->name('wsady.podsumowanie.rok');
-
 
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
     Route::post('/register', [RegisterController::class, 'store']);
 
     Route::resource('straty', StrataController::class, ['parameters' => ['straty' => 'strata']])->only(['index', 'create', 'store', 'show']);
-
 
     Route::get('/export/{typ}/{zakres}/{od?}/{format?}', [ExportController::class, 'unifiedExport'])->where(['typ' => 'zamowienia|straty|wsady', 'zakres' => 'dzien|tydzien|miesiac|rok'])->name('export.unified.day');
     Route::get('/export/{typ}/{zakres}/{format}/{od}/{do}', [ExportController::class, 'unifiedExport'])->where(['typ' => 'zamowienia|straty|wsady', 'zakres' => 'zakres'])->name('export.unified.range');

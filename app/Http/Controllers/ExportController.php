@@ -23,11 +23,20 @@ class ExportController extends Controller
     public function unifiedExport(string $typ, string $zakres, string $format = 'xlsx', ?string $od = null, ?string $do = null)
     {
         //dd(func_get_args());
+        /*
         $mapaTypow = [
             'zamowienia' => [$this, 'pobierzDaneZamowien'],
             'straty'     => [$this, 'pobierzDaneStrat'],
             'wsady'      => [$this, 'pobierzDaneWsad'],
         ];
+        */
+
+        $mapaTypow = [
+            'zamowienia' => fn($start, $end, $zakres) => $this->pobierzDaneOgolnie('zamowienia', $start, $end, $zakres),
+            'straty'     => fn($start, $end, $zakres) => $this->pobierzDaneOgolnie('straty', $start, $end, $zakres),
+            'wsady'      => fn($start, $end, $zakres) => $this->pobierzDaneOgolnie('wsady', $start, $end, $zakres),
+        ];
+
 
         if (!isset($mapaTypow[$typ])) {
             abort(404, "Nieobsługiwany typ eksportu: $typ");
@@ -113,105 +122,89 @@ class ExportController extends Controller
 
 
     //pobiera dane zamówień 
-    private function pobierzDaneZamowien($start, $end, $zakres)
+    private function pobierzDaneOgolnie(string $typ, $start, $end, $zakres)
     {
-        $query = DB::table('produkt_zamowienie')
-            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
-            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
+        $mapa = [
+            'zamowienia' => [
+                'main' => 'zamowienia',
+                'pivot' => 'produkt_zamowienie',
+                'foreign_key' => 'zamowienie_id',
+                'date' => 'data_zamowienia',
+                'automat' => true
+            ],
+            'straty' => [
+                'main' => 'straty',
+                'pivot' => 'produkt_strata',
+                'foreign_key' => 'strata_id',
+                'date' => 'data_straty',
+                'automat' => false
+            ],
+            'wsady' => [
+                'main' => 'wsady',
+                'pivot' => 'produkt_wsad',
+                'foreign_key' => 'wsad_id',
+                'date' => 'data_wsadu',
+                'automat' => true
+            ],
+        ];
+
+        if (!isset($mapa[$typ])) {
+            abort(404, "Nieobsługiwany typ danych: $typ");
+        }
+
+        $cfg = $mapa[$typ];
+
+        $query = DB::table($cfg['pivot'])
+            ->join($cfg['main'], "{$cfg['pivot']}.{$cfg['foreign_key']}", '=', "{$cfg['main']}.id")
+            ->join('produkty', "{$cfg['pivot']}.produkt_id", '=', 'produkty.id')
             ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('zamowienia.data_zamowienia', [$start, $end])
-            ->when(request('automat_id'), fn($q) => $q->where('zamowienia.automat_id', request('automat_id')));
+            ->whereBetween("{$cfg['main']}.{$cfg['date']}", [$start, $end]);
+
+        if ($cfg['automat']) {
+            $query->when(request('automat_id'), fn($q) => $q->where("{$cfg['main']}.automat_id", request('automat_id')));
+        }
 
         if ($zakres === 'rok') {
             $query->select(
                 'produkty.id as produkt_id',
                 'produkty.tw_nazwa',
                 DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('MONTH(zamowienia.data_zamowienia) as miesiac'),
-                DB::raw('zamowienia.automat_id'),
-                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(zamowienia.data_zamowienia)'), 'zamowienia.automat_id');
+                DB::raw("MONTH({$cfg['main']}.{$cfg['date']}) as miesiac"),
+                $cfg['automat'] ? DB::raw("{$cfg['main']}.automat_id") : DB::raw("NULL as automat_id"),
+                DB::raw("SUM({$cfg['pivot']}.ilosc) as ilosc")
+            )->groupBy(
+                'produkty.id',
+                'produkty.tw_nazwa',
+                DB::raw("MONTH({$cfg['main']}.{$cfg['date']})")
+            );
+
+            if ($cfg['automat']) {
+                $query->groupBy(DB::raw("{$cfg['main']}.automat_id"));
+            }
+
         } else {
             $query->select(
                 'produkty.id as produkt_id',
                 'produkty.tw_nazwa',
                 DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(zamowienia.data_zamowienia AS DATE) as dzien'),
-                DB::raw('zamowienia.automat_id'),
-                DB::raw('SUM(produkt_zamowienie.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(zamowienia.data_zamowienia AS DATE)'), 'zamowienia.automat_id');
+                DB::raw("CAST({$cfg['main']}.{$cfg['date']} AS DATE) as dzien"),
+                $cfg['automat'] ? DB::raw("{$cfg['main']}.automat_id") : DB::raw("NULL as automat_id"),
+                DB::raw("SUM({$cfg['pivot']}.ilosc) as ilosc")
+            )->groupBy(
+                'produkty.id',
+                'produkty.tw_nazwa',
+                DB::raw("CAST({$cfg['main']}.{$cfg['date']} AS DATE)")
+            );
+
+            if ($cfg['automat']) {
+                $query->groupBy(DB::raw("{$cfg['main']}.automat_id"));
+            }
         }
 
         return $query->get();
     }
 
-    //pobiera dane strat
-    private function pobierzDaneStrat($start, $end, $zakres)
-    {
-        $query = DB::table('produkt_strata')
-            ->join('straty', 'produkt_strata.strata_id', '=', 'straty.id')
-            ->join('produkty', 'produkt_strata.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('straty.data_straty', [$start, $end]);
 
-        if ($zakres === 'rok') {
-            $query->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('MONTH(straty.data_straty) as miesiac'),
-                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(straty.data_straty)'));
-        } else {
-            $query->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(straty.data_straty AS DATE) as dzien'),
-                DB::raw('SUM(produkt_strata.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(straty.data_straty AS DATE)'));
-        }
-
-        return $query->get();
-    }
-
-    private function pobierzDaneWsad($start, $end, $zakres)
-    {
-        $query = DB::table('produkt_wsad')
-            ->join('wsady', 'produkt_wsad.wsad_id', '=', 'wsady.id')
-            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
-            ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-            ->whereBetween('wsady.data_wsadu', [$start, $end])
-            ->when(request('automat_id'), fn($q) => $q->where('wsady.automat_id', request('automat_id')));
-
-        if ($zakres === 'rok') {
-            $query->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('MONTH(wsady.data_wsadu) as miesiac'),
-                DB::raw('wsady.automat_id'),
-                DB::raw('SUM(produkt_wsad.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('MONTH(wsady.data_wsadu)'), 'wsady.automat_id');
-        } else {
-            $query->select(
-                'produkty.id as produkt_id',
-                'produkty.tw_nazwa',
-                DB::raw('MIN(ean_codes.kod_ean) as ean'),
-                DB::raw('CAST(wsady.data_wsadu AS DATE) as dzien'),
-                DB::raw('wsady.automat_id'),
-                DB::raw('SUM(produkt_wsad.ilosc) as ilosc')
-            )
-            ->groupBy('produkty.id', 'produkty.tw_nazwa', DB::raw('CAST(wsady.data_wsadu AS DATE)'), 'wsady.automat_id');
-        }
-
-        return $query->get();
-    }
 
 
     //generuje eksport do CSV

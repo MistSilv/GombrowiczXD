@@ -3,7 +3,6 @@
     <div class="container">
 
         <h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
-        <h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
         @auth
             @if(!auth()->user()->isSerwis())
                 <div class="mb-6 flex flex-wrap gap-2">
