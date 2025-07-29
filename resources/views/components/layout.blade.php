@@ -64,7 +64,7 @@
         </div>
         @endauth
     </nav>
-    <div class="mobile-menu md:hidden flex-col bg-gray-900 p-4 space-y-2">
+    <div class="mobile-menu md:hidden flex-col bg-inherited p-4 space-y-2">
         @auth
             @if(!auth()->user()->isSerwis())
                 <a href="{{ route('zamowienia.index') }}"
