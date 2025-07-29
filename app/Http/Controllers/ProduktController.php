@@ -148,13 +148,15 @@ class ProduktController extends Controller
     {
         $zamowienieId = $request->input('zamowienieId');
         $ilosci = $request->input('ilosci', []);
-        $wyslijEmail = (int) $request->input('wyslij_email', 0);
+        $wyslijEmail = $request->input('wyslij_email', false);
 
         if (!$zamowienieId) {
             $zamowienieId = DB::table('zamowienia')->insertGetId([
                 'data_zamowienia' => now(),
                 'data_realizacji' => null,
                 'automat_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
@@ -180,10 +182,9 @@ class ProduktController extends Controller
             }
         }
 
+        // Wysyłka emaila jeśli zaznaczono
         if ($wyslijEmail) {
-            return $this->wyslijEmailZamowienia($zamowienieId, 'sklep');
-        } else {
-            return $this->wyslijEmailZamowienia($zamowienieId, 'importowanie');
+            return $this->wyslijEmailZamowienia($zamowienieId);
         }
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
@@ -193,36 +194,24 @@ class ProduktController extends Controller
     /**
      * Wyślij email z zamówieniem produktów nie-własnych
      */
-    public function wyslijEmailZamowienia($zamowienieId, string $odbiorca)
+    public function wyslijEmailZamowienia($zamowienieId)
     {
+        // Znajdź zamówienie z produktami i ich kodami EAN
         $zamowienie = Zamowienie::with(['produkty' => function($query) {
             $query->select('produkty.id', 'tw_nazwa')
-                ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-                ->addSelect('ean_codes.kod_ean as ean');
+                  ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
+                  ->addSelect('ean_codes.kod_ean as ean');
         }])->findOrFail($zamowienieId);
 
+        // Generuj plik Excel z dodatkową kolumną EAN
         $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
 
-        $emailOdbiorca = config("mail.$odbiorca");
-
-        $tytul = 'Nowe zamówienie produktów';
-
-        if ($odbiorca === 'sklep') {
-            $tytulySklep = [
-                'Pobór ze sklepu',
-                
-            ];
-
-            $tytul = $tytulySklep[array_rand($tytulySklep)];
-        }
-
-        Mail::to($emailOdbiorca)->queue(
-            new ZamowienieMail(base64_encode($xlsxContent), $zamowienie, $tytul)
-        );
+        // Wyślij email
+       Mail::to(config('mail.importowanie'))->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
             ->with('success', 'Ilości zostały zapisane.')
-            ->with('email_sent', "Email został wysłany do: $odbiorca z tytułem: $tytul");
+            ->with('email_sent', 'Email z zamówieniem został wysłany.');
     }
 
 
