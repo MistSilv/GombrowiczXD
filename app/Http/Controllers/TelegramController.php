@@ -14,7 +14,12 @@ class TelegramController extends Controller
         Log::info('Webhook request received', ['data' => $request->all()]);
 
         try {
-            $callback = $request->all()['callback_query'];
+            $callback = $request->input('callback_query');
+
+            if (!$callback) {
+                Log::warning('Brak callback_query w webhooku', ['data' => $request->all()]);
+                return response()->json(['error' => 'Brak callback_query'], 200);
+            }
 
             $data = explode('_', $callback['data']);
             $action = $data[0];
@@ -53,7 +58,7 @@ class TelegramController extends Controller
                 ]
             ];
 
-           $payload = [
+            $payload = [
                 'chat_id' => $callback['message']['chat']['id'],
                 'message_id' => $callback['message']['message_id'],
                 'text' => $message,
@@ -68,15 +73,14 @@ class TelegramController extends Controller
 
             Log::info('Telegram editMessageText response', ['response' => $response->body()]);
 
-
             Http::post("https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/answerCallbackQuery", [
                 'callback_query_id' => $callback['id']
             ]);
 
             return response()->json(['ok' => true]);
         } catch (\Exception $e) {
-            Log::error('Błąd w Telegram webhook: ' . $e->getMessage());
-            return response()->json(['error' => 'Błąd przetwarzania webhooka'], 500);
+            Log::error('Błąd w Telegram webhook', ['exception' => $e]);
+            return response()->json(['error' => 'Błąd przetwarzania webhooka'], 200);
         }
     }
 }
