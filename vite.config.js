@@ -34,7 +34,8 @@ export default defineConfig({
             manifest: {
                 name: 'Gombrowicz',          
                 short_name: 'Gombrowicz',    
-                start_url: '/',      
+                start_url: '/',    
+                description: '',  
                 scope: '/',        
                 display: 'standalone',       
                 background_color: '#000000', 

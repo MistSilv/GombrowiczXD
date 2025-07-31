@@ -16,7 +16,8 @@
     </script>
     <link href="/css/burger.css" rel="stylesheet">
     <script src="/js/burger.js" defer></script>
-    <link rel="manifest" href="/build/manifest.webmanifest">
+    <link rel="manifest" href="/manifest.webmanifest">
+    @vite(['resources/js/app.js', 'resources/css/app.css'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#1e293b">
 </head>
