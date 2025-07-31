@@ -37,7 +37,7 @@
                             type="text"
                             id="product-search"
                             placeholder="Nazwa produktu..."
-                            class="w-full px-3 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 text-gray-800"
+                            class="w-full px-3 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 text-white"
                             autocomplete="off">
                         <ul id="product-suggestions" class="absolute z-50 mt-1 w-full bg-white shadow rounded-md max-h-48 overflow-y-auto hidden border border-gray-200"></ul>
                     </div>
@@ -52,7 +52,7 @@
                                 type="number"
                                 id="product-search-ean"
                                 placeholder="EAN/PLU..."
-                                class="flex-1 px-3 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 text-gray-800"
+                                class="flex-1 px-3 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 text-white"
                                 autocomplete="off"
                                 inputmode="numeric"
                                 maxlength="13">
