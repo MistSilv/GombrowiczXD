@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Log;
 
 
 Route::post('/check-ean', [EanController::class, 'checkEan']); 
+Route::post('/check-ean-firmowe', [EanController::class, 'checkEan1']);
+
 
 Route::get('/produkty/search', [ProduktController::class, 'search'])->name('produkty.search');
 

@@ -70,4 +70,6 @@ class NetworkController extends Controller
 
         return ($ip & $mask) === ($subnet & $mask);
     }
+
+    
 }

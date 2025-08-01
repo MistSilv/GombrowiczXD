@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produkt;
+use App\Models\EanCode;
 use App\Models\Zamowienie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\ZamowienieMail;
 use App\Exports\ZamowienieExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -75,37 +77,38 @@ class ProduktController extends Controller
         $produkty = Produkt::where('is_wlasny', false)->get();
 
         $wsady = DB::table('produkt_wsad')
-            ->join('produkty','produkt_wsad.produkt_id','=','produkty.id')
+            ->join('produkty', 'produkt_wsad.produkt_id', '=', 'produkty.id')
             ->where('produkty.is_wlasny', false)
-            ->select('produkt_wsad.produkt_id', DB::raw('SUM(ilosc) as suma'))
-            ->groupBy('produkt_wsad.produkt_id')
-            ->pluck('suma','produkt_id');
+            ->select('produkty.tw_idabaco', DB::raw('SUM(ilosc) as suma'))
+            ->groupBy('produkty.tw_idabaco')
+            ->pluck('suma', 'tw_idabaco');
 
         $zam = DB::table('produkt_zamowienie')
-            ->join('zamowienia','produkt_zamowienie.zamowienie_id','=','zamowienia.id')
-            ->join('produkty',   'produkt_zamowienie.produkt_id',  '=','produkty.id')
+            ->join('zamowienia', 'produkt_zamowienie.zamowienie_id', '=', 'zamowienia.id')
+            ->join('produkty', 'produkt_zamowienie.produkt_id', '=', 'produkty.id')
             ->whereNull('zamowienia.automat_id')
             ->where('produkty.is_wlasny', false)
-            ->select('produkt_zamowienie.produkt_id', DB::raw('SUM(ilosc) as suma'))
-            ->groupBy('produkt_zamowienie.produkt_id')
-            ->pluck('suma','produkt_id');
+            ->select('produkty.tw_idabaco', DB::raw('SUM(ilosc) as suma'))
+            ->groupBy('produkty.tw_idabaco')
+            ->pluck('suma', 'tw_idabaco');
 
         return $produkty
             ->map(function($p) use ($wsady, $zam) {
-                $wsadyVal = $wsady[$p->id] ?? 0;
-                $zamVal   = $zam[$p->id] ?? 0;
+                $wsadyVal = $wsady[$p->tw_idabaco] ?? 0;
+                $zamVal = $zam[$p->tw_idabaco] ?? 0;
 
                 return (object)[
-                    'id'         => $p->id,
-                    'tw_nazwa'   => $p->tw_nazwa,
-                    'wsady'      => $wsadyVal,
+                    'tw_idabaco' => $p->tw_idabaco,
+                    'tw_nazwa' => $p->tw_nazwa,
+                    'wsady' => $wsadyVal,
                     'zamowienia' => $zamVal,
-                    'na_stanie'  => ($zamVal) - ($wsadyVal),
+                    'na_stanie' => ($zamVal) - ($wsadyVal),
                 ];
             })
             ->filter(fn($item) => $item->na_stanie !== 0)
             ->values();
     }
+
 
     public function formularzNoweZamowienie()
     {
@@ -121,8 +124,10 @@ class ProduktController extends Controller
         ]);
 
         return view('produkty.niewlasne_edit_zamowienie', [
-            'produkty'     => Produkt::where('is_wlasny', false)->get(),
-            'deficyty'     => $paginated,
+            'produkty' => Produkt::where('is_wlasny', false)
+                            ->select('id', 'tw_idabaco', 'tw_nazwa') // Dodajemy tw_idabaco
+                            ->get(),
+            'deficyty' => $paginated,
             'zamowienieId' => null,
         ]);
     }
@@ -134,7 +139,7 @@ class ProduktController extends Controller
                 $join->on('produkty.id', '=', 'produkt_zamowienie.produkt_id')
                     ->where('produkt_zamowienie.zamowienie_id', $zamowienieId);
             })
-            ->select('produkty.id', 'produkty.tw_nazwa', 'produkt_zamowienie.ilosc')
+            ->select('produkty.tw_idabaco', 'produkty.tw_nazwa', 'produkt_zamowienie.ilosc')
             ->where('produkty.is_wlasny', false)
             ->get();
 
@@ -144,52 +149,109 @@ class ProduktController extends Controller
         ]);
     }
 
+    //dd(request()->all());
+
     public function zapiszZamowienie(Request $request)
     {
-        $zamowienieId = $request->input('zamowienieId');
-        $ilosci = $request->input('ilosci', []);
-        $wyslijEmail = $request->input('wyslij_email', false);
+        // Walidacja danych wejściowych
+        $validated = $request->validate([
+            'zamowienieId' => 'nullable|integer',
+            'produkty_json' => 'required|json',
+            'wyslij_email' => 'sometimes|boolean'
+        ]);
 
-        if (!$zamowienieId) {
-            $zamowienieId = DB::table('zamowienia')->insertGetId([
+        // Debugowanie - zapisz odebrane dane
+        Log::debug('Odebrane dane zamówienia:', [
+            'zamowienieId' => $validated['zamowienieId'],
+            'produkty_json' => $validated['produkty_json'],
+            'wyslij_email' => $request->input('wyslij_email', false)
+        ]);
+
+        // Rozpocznij transakcję
+        DB::beginTransaction();
+
+        try {
+            // 1. Utwórz lub zaktualizuj zamówienie
+            $zamowienieId = $validated['zamowienieId'] ?? DB::table('zamowienia')->insertGetId([
                 'data_zamowienia' => now(),
                 'data_realizacji' => null,
-                'automat_id' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'automat_id' => null
+
             ]);
-        }
 
-        foreach ($ilosci as $produktId => $ilosc) {
-            $istnieje = DB::table('produkt_zamowienie')
-                ->where('zamowienie_id', $zamowienieId)
-                ->where('produkt_id', $produktId)
-                ->exists();
+            Log::debug("Zamówienie ID: $zamowienieId");
 
-            if ($istnieje) {
-                DB::table('produkt_zamowienie')
-                    ->where('zamowienie_id', $zamowienieId)
-                    ->where('produkt_id', $produktId)
-                    ->update(['ilosc' => $ilosc]);
-            } else {
-                if ($ilosc > 0) {
-                    DB::table('produkt_zamowienie')->insert([
-                        'zamowienie_id' => $zamowienieId,
-                        'produkt_id' => $produktId,
-                        'ilosc' => $ilosc
-                    ]);
+            // 2. Przetwórz produkty
+            $produkty = json_decode($validated['produkty_json'], true);
+            
+            foreach ($produkty as $produktData) {
+                Log::debug('Przetwarzanie produktu:', $produktData);
+
+                // 2a. Znajdź lub utwórz produkt
+                $produkt = Produkt::firstOrCreate(
+                    ['tw_idabaco' => $produktData['tw_idabaco']],
+                    [
+                        'tw_nazwa' => $produktData['tw_nazwa'],
+                        'is_wlasny' => false
+
+                    ]
+                );
+
+                Log::debug("Produkt ID: {$produkt->id}, czy nowy: " . ($produkt->wasRecentlyCreated ? 'tak' : 'nie'));
+
+                // 2b. Dodaj kody EAN dla nowych produktów
+                if ($produkt->wasRecentlyCreated && !empty($produktData['ean_codes'])) {
+                    foreach ($produktData['ean_codes'] as $kodEan) {
+                        EanCode::firstOrCreate([
+                            'produkt_id' => $produkt->id,
+                            'kod_ean' => $kodEan
+                        ], [
+
+                        ]);
+                        Log::debug("Dodano kod EAN: $kodEan dla produktu ID: {$produkt->id}");
+                    }
                 }
+
+                // 2c. Aktualizuj ilość w zamówieniu
+                DB::table('produkt_zamowienie')->updateOrInsert(
+                    [
+                        'zamowienie_id' => $zamowienieId,
+                        'produkt_id' => $produkt->id
+                    ],
+                    ['ilosc' => $produktData['ilosc']]
+                );
+
+                Log::debug("Zaktualizowano ilość: {$produktData['ilosc']} dla produktu ID: {$produkt->id}");
             }
-        }
 
-        // Wysyłka emaila jeśli zaznaczono
-        if ($wyslijEmail) {
-            return $this->wyslijEmailZamowienia($zamowienieId);
-        }
+            // 3. Zatwierdź transakcję
+            DB::commit();
 
-        return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
-                ->with('success', 'Ilości zostały zapisane.');
+            Log::info("Pomyślnie zapisano zamówienie ID: $zamowienieId");
+
+            // 4. Obsługa e-maila jeśli wymagane
+            if ($request->wyslij_email) {
+                return $this->wyslijEmailZamowienia($zamowienieId);
+            }
+
+            return redirect()->route('zamowienia.show', $zamowienieId)
+                ->with('success', 'Zamówienie zostało zapisane pomyślnie');
+
+        } catch (\Exception $e) {
+            // Wycofaj zmiany w przypadku błędu
+            DB::rollBack();
+            
+            Log::error('Błąd zapisu zamówienia: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_data' => $request->all()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Błąd podczas zapisywania zamówienia: ' . $e->getMessage());
+        }
     }
+
 
     /**
      * Wyślij email z zamówieniem produktów nie-własnych
@@ -270,7 +332,7 @@ class ProduktController extends Controller
         $produkt = Produkt::create([
             'tw_nazwa' => $validated['tw_nazwa'],
             'tw_idabaco' => $validated['tw_idabaco'] ?? null,
-            'is_wlasny' => false,
+            'is_wlasny' => false
         ]);
 
         if (!empty($validated['ean_codes'])) {
