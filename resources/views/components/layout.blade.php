@@ -36,13 +36,9 @@
                         </a>
                     @endif
                 @endauth
-                <a href="{{ route('straty.index') }}"
-                   class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
-                    🗑️ Straty
-                </a>
-                <a href="{{ route('wsady.index') }}"
-                   class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
-                    🛒 wsady
+                <a href="{{ route('produkty.zamowienie.formularz') }}"
+                class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                    🧾 Nowe zamówienie
                 </a>
                 <a href="{{ route('function.page') }}"
                     class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
@@ -74,13 +70,9 @@
                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
                     📦 Zamówienia
                 </a>
-        <a href="{{ route('straty.index') }}"
-           class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
-            🗑️ Straty
-        </a>
-        <a href="{{ route('wsady.index') }}"
-                   class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
-                    🛒 wsady
+          <a href="{{ route('produkty.zamowienie.formularz') }}"
+                class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
+                    🧾 Nowe zamówienie
                 </a>
                  <a href="{{ route('function.page') }}"
                     class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
