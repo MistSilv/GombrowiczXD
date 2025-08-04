@@ -42,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/straty/archiwum', [StrataController::class, 'archiwum'])->name('straty.archiwum');
 
+    Route::get('/automats/create', [AutomatController::class, 'create'])->name('automats.create');
+    Route::post('/automats', [AutomatController::class, 'store'])->name('automats.store');
+
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
     Route::post('/register', [RegisterController::class, 'store']);
 

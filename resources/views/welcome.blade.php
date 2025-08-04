@@ -53,6 +53,11 @@
        class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
         ➕ Skargi, Uwagi, Pytania
     </a>
+    <a href="{{ route('automats.create') }}"
+        class="px-5 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-lg inline-flex items-center justify-center transition">
+        ➕ Dodaj Automat
+    </a>
+
 </div>
 
 </x-layout>
