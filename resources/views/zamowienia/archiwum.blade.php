@@ -81,26 +81,26 @@
         </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-        const exportXlsx = document.getElementById('export-xlsx');
-        const exportCsv = document.getElementById('export-csv');
-        const minDate = document.getElementById('min_date');
-        const maxDate = document.getElementById('max_date');
+            const exportXlsx = document.getElementById('export-xlsx');
+            const exportCsv = document.getElementById('export-csv');
+            const minDate = document.getElementById('min_date');
+            const maxDate = document.getElementById('max_date');
 
-        function updateLinks() {
-            const od = minDate.value || '{{ now()->subMonth()->toDateString() }}';
-            const doDate = maxDate.value || '{{ now()->toDateString() }}';
+            function updateLinks() {
+                const od = minDate.value || '{{ now()->subMonth()->toDateString() }}';
+                const doDate = maxDate.value || '{{ now()->toDateString() }}';
 
-            // Zbuduj URL według wzoru:
-            const baseUrl = "{{ url('/export/zamowienia/zakres') }}";
-            exportXlsx.href = `${baseUrl}/xlsx/${od}/${doDate}`;
-            exportCsv.href = `${baseUrl}/csv/${od}/${doDate}`;
-        }
+                // Zbuduj URL według wzoru:
+                const baseUrl = "{{ url('/export/zamowienia/zakres') }}";
+                exportXlsx.href = `${baseUrl}/xlsx/${od}/${doDate}`;
+                exportCsv.href = `${baseUrl}/csv/${od}/${doDate}`;
+            }
 
-        minDate.addEventListener('change', updateLinks);
-        maxDate.addEventListener('change', updateLinks);
+            minDate.addEventListener('change', updateLinks);
+            maxDate.addEventListener('change', updateLinks);
 
-        updateLinks(); // na start
-    });
+            updateLinks(); // na start
+        });
 
 
     </script>
