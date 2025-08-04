@@ -30,11 +30,11 @@
     transform: rotate(45deg) translate(-5px, -6px) !important;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) { 
     .burger-btn {
         display: block;
     }
-    
+
     .burger-btn span {
         display: block;
         width: 25px;

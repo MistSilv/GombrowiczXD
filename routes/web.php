@@ -77,4 +77,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/produkty/niewlasne/nowy', [ProduktController::class, 'storeNiewlasny'])->name('produkty.store.niewlasny');
     Route::get('/produkty/niewlasne/nowy', [ProduktController::class, 'createNiewlasny'])->name('produkty.create.niewlasny');
 
+    Route::get('/function-page', function () { return view('FunctionPage'); })->name('function.page');
+
 });

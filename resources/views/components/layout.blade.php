@@ -27,7 +27,7 @@
             <a href="{{ url('/welcome') }}" class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
                 🏠 Strona główna
             </a>
-            <div class="hidden md:flex items-center space-x-2">
+            <div class="hidden lg:flex items-center space-x-2">
                 @auth
                     @if(!auth()->user()->isSerwis())
                         <a href="{{ route('zamowienia.index') }}"
@@ -44,11 +44,15 @@
                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
                     🛒 wsady
                 </a>
+                <a href="{{ route('function.page') }}"
+                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                    ⚙️ Panel Funkcji
+                </a>
             </div>
         </div>
         @auth
         <div class="flex items-center space-x-4">
-            <div class="hidden md:block">
+            <div class="hidden lg:block">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
@@ -57,7 +61,7 @@
                     </button>
                 </form>
             </div>
-            <button class="burger-btn md:hidden focus:outline-none text-white">
+            <button class="burger-btn lg:hidden focus:outline-none text-white">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -65,15 +69,11 @@
         </div>
         @endauth
     </nav>
-    <div class="mobile-menu md:hidden flex-col bg-inherited p-4 space-y-2">
-        @auth
-            @if(!auth()->user()->isSerwis())
-                <a href="{{ route('zamowienia.index') }}"
+    <div class="mobile-menu lg:hidden flex-col bg-inherited p-4 space-y-2">
+         <a href="{{ route('zamowienia.index') }}"
                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
                     📦 Zamówienia
                 </a>
-            @endif
-        @endauth
         <a href="{{ route('straty.index') }}"
            class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
             🗑️ Straty
@@ -81,6 +81,10 @@
         <a href="{{ route('wsady.index') }}"
                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
                     🛒 wsady
+                </a>
+                 <a href="{{ route('function.page') }}"
+                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition block text-center">
+                    ⚙️ Panel Funkcji
                 </a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -91,7 +95,7 @@
         </form>
     </div>
 
-    <main class="container mx-auto py-3 px-4">
+    <main class="px-4">
         {{ $slot }}
     </main>
 

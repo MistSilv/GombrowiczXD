@@ -1,8 +1,4 @@
 <x-layout>
-    <x-slot name="title">
-        Dodaj Automat
-    </x-slot>
-
     <div class="max-w-xl mx-auto mt-8">
 
         @if(session('success'))
@@ -29,13 +25,13 @@
                     <div>
                         <label for="nazwa" class="block text-white font-semibold">Nazwa</label>
                         <input type="text" name="nazwa" id="nazwa" value="{{ old('nazwa') }}" required
-                            class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                            class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 transition">
                     </div>
 
                     <div>
                         <label for="lokalizacja" class="block text-white font-semibold">Lokalizacja</label>
                         <input type="text" name="lokalizacja" id="lokalizacja" value="{{ old('lokalizacja') }}" required
-                            class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                            class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 transition">
                     </div>
 
                     <div>
