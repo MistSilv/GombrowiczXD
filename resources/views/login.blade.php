@@ -8,13 +8,15 @@
     <title>Login</title>
 </head>
 <body class="mx-auto py-6 px-4 bg-black">
-    <div class="min-h-screen bg-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 px-6">
+   <body class="mx-auto py-2 px-4 bg-black"> 
+    <div class="min-h-screen bg-black flex flex-col justify-center py-6 sm:px-6 lg:px-8 px-6"> 
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <div class="mx-auto h-12 w-auto text-6xl text-center">🛎</div>
-            <h2 class="mt-6 text-center text-3xl leading-9 font-extrabold text-white">
+            <h2 class="mt-4 text-center text-2xl font-bold text-white"> 
                 Zaloguj się do swojego konta
             </h2>
         </div>
+
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10">
