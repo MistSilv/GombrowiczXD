@@ -49,7 +49,7 @@
 
                     <div class="mt-6">
                         <span class="block w-full rounded-md shadow-sm">
-                            <button type="submit" class="w-full flex justify-center bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                            <button type="submit" class="w-full flex justify-center bg-green-800 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
                                 Zaloguj <!-- przycisk logowania -->
                             </button>
                         </span>

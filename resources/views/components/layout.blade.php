@@ -52,7 +52,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                            class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
+                            class="bg-red-800 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition">
                         🚪 Wyloguj
                     </button>
                 </form>
@@ -81,7 +81,7 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit"
-                    class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition w-full">
+                    class="bg-red-800 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition w-full">
                 🚪 Wyloguj
             </button>
         </form>

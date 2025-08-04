@@ -1,24 +1,35 @@
 <x-layout>
 <div class="container mx-auto px-4 py-6">
 
-    <h1 class="text-2xl font-bold mb-4 text-white">Lista wsadów</h1>
-    
-
-    <div class="mb-6 flex flex-wrap gap-2">
-        <a href="{{ route('wsady.archiwum') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz archiwum</a>
-        <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'dzien']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            Podsumowanie dnia
-        </a>
-        <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'tydzien']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            Podsumowanie tygodnia
-        </a>
-        <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'miesiac']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            Podsumowanie miesiąca
-        </a>
-        <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'rok']) }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-            Podsumowanie roku
-        </a>
-
+   <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-bold mb-4 text-white">Lista wsadów</h1>
+                <a href="{{ route('wsady.archiwum') }}"
+                class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                Archiwum Wsadów
+            </a>
+            </div>
+        <div>
+            <h1 class="text-2xl font-bold mb-4 text-white"">Podsumowanie dla:</h1>
+            <div class="flex flex-wrap gap-2">
+            <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'dzien']) }}"
+                class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                Dnia
+            </a>
+            <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'tydzien']) }}"
+                class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                Tygodnia
+            </a>
+            <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'miesiac']) }}"
+                class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                Miesiąca
+            </a>
+            <a href="{{ route('export.unified.day', ['typ' => 'wsady', 'zakres' => 'rok']) }}"
+                class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                Roku
+            </a>
+            </div>
+        </div>
     </div>
     
     <div class="overflow-x-auto rounded-lg border border-gray-700">

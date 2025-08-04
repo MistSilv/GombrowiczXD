@@ -51,7 +51,7 @@
 
             <!-- Dodaj produkt -->
             <div>
-                <button type="button" id="dodaj-produkt" class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors flex items-center gap-1">
+                <button type="button" id="dodaj-produkt" class="px-4 py-2 bg-green-700 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors flex items-center gap-1">
                     + Dodaj produkt
                 </button>
             </div>
@@ -68,7 +68,7 @@
                 <button 
                     type="submit" 
                     onclick="return confirm('Czy na pewno chcesz potwierdzić zamówienie?')"
-                    class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg transition-colors">
+                    class="px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
                         Złóż zamówienie
                 </button>
             </div>
@@ -77,21 +77,21 @@
             <div class="pt-4 border-t border-gray-700 flex flex-col md:flex-row md:items-center gap-3">
                 @if($automat)
                     <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" 
-                    class="inline-flex max-w-max px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
+                    class="inline-flex max-w-max px-4 py-2 bg-green-900 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
                         Wprowadź straty
                     </a>
 
                     @auth
                         @if(!auth()->user()->isProdukcja())
                             <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" 
-                            class="inline-flex max-w-max px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
+                            class="inline-flex max-w-max px-4 py-2 bg-emerald-900 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-colors">
                                 Lista zamówień tego automatu
                             </a>
                         @endif
                     @endauth
 
                     <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}" 
-                    class="inline-flex max-w-max px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
+                    class="inline-flex max-w-max px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
                         Powrót
                     </a>
                 @endif

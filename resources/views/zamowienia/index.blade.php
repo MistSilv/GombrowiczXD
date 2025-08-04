@@ -1,34 +1,39 @@
 <!-- strona do wyświetlania aktualnych zamówień -->
 <x-layout>
-    <div class="container">
+    <div class="container mx-auto px-4 py-6">
 
-        <h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
+        
         @auth
             @if(!auth()->user()->isSerwis())
-                <div class="mb-6 flex flex-wrap gap-2">
-                    <!-- Archiwum zamówień - zakładam, że masz odrębną trasę -->
-                    <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}"
-                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                        Archiwum zamówień
-                    </a>
-
-                    <!-- Podsumowania eksportów -->
-                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'dzien', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
-                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                        Podsumowanie dnia
-                    </a>
-                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'tydzien', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
-                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                        Podsumowanie tygodnia
-                    </a>
-                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'miesiac', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
-                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                        Podsumowanie miesiąca
-                    </a>
-                    <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'rok', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
-                        class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
-                        Podsumowanie roku
-                    </a>
+                <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div class="flex flex-col">
+                            <h1 class="text-2xl font-bold mb-4 text-white">Lista zamówień</h1>
+                            <a href="{{ route('zamowienia.archiwum', ['automat_id' => request('automat_id')]) }}"
+                            class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                            Archiwum zamówień
+                        </a>
+                        </div>
+                    <div>
+                        <h1 class="text-2xl font-bold mb-4 text-white"">Podsumowanie dla:</h1>
+                        <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'dzien', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                            class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                            Dnia
+                        </a>
+                        <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'tydzien', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                            class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                            Tygodnia
+                        </a>
+                        <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'miesiac', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                            class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                            Miesiąca
+                        </a>
+                        <a href="{{ route('export.unified.day', ['typ' => 'zamowienia', 'zakres' => 'rok', 'od' => null, 'format' => null]) }}?automat_id={{ request('automat_id') }}"
+                            class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded w-max">
+                            Roku
+                        </a>
+                        </div>
+                    </div>
                 </div>
             @endif
         @endauth

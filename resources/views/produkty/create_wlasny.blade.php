@@ -28,7 +28,7 @@
 
                     <input type="hidden" name="is_wlasny" value="1">
 
-                    <button type="submit" class="w-full bg-rose-950 hover:bg-red-900 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                    <button type="submit" class="w-full bg-green-800 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
                         Zapisz produkt własny
                     </button>
                 </form>
@@ -70,7 +70,7 @@
 
                     <input type="hidden" name="is_wlasny" value="0">
 
-                    <button type="submit" class="w-full bg-rose-950 hover:bg-red-900 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                    <button type="submit" class="w-full bg-green-800 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
                         Zapisz produkt niewłasny
                     </button>
                 </form>

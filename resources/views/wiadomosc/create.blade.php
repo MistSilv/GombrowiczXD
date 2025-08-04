@@ -28,7 +28,7 @@
 
             <div class="flex justify-end">
                 <button type="submit"
-                    class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">
+                    class="bg-green-800 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
                      Wyślij
                 </button>
             </div>

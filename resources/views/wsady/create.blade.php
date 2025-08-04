@@ -10,7 +10,7 @@
             <h2 class="text-lg font-semibold mb-4 text-white">Skanuj kod EAN</h2>
             
             <div class="flex flex-col sm:flex-row gap-4 items-start">
-                <button id="start-scan" class="px-4 py-2 rounded-lg bg-rose-950 hover:bg-red-900 text-white font-semibold transition-colors">
+                <button id="start-scan" class="px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-600 text-white font-semibold transition-colors">
                     Rozpocznij skanowanie
                 </button>
 
@@ -61,21 +61,21 @@
         </div>
 
             <div class="flex flex-wrap gap-4">
-                <button type="button" id="dodaj-produkt" class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors flex items-center gap-1">
+                <button type="button" id="dodaj-produkt" class="px-4 py-2 bg-green-700 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors flex items-center gap-1">
                     ✚ Dodaj produkt
                 </button>
                 
                 <button
                     type="submit"
                     onclick="return confirm('Czy na pewno chcesz dodać wsad?')"
-                    class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg transition-colors">
+                    class="px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
                     Dodaj wsad
                 </button>
             </div>
 
             @if($automat)
                 <div class="pt-6 border-t border-gray-700">
-                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-lg transition-colors">
+                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
                        📋 Przejdź do bułek i innych
                     </a>
                 </div>

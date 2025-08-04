@@ -56,7 +56,7 @@
                                 autocomplete="off"
                                 inputmode="numeric"
                                 maxlength="13">
-                            <button type="button" id="dodaj-ean" class="px-3 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-md text-sm">+</button>
+                            <button type="button" id="dodaj-ean" class="px-3 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-md text-sm">+</button>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                     <button 
                         type="button" 
                         id="start-scan" 
-                        class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-semibold rounded-md text-sm">
+                        class="px-4 py-2 bg-blue-800 hover:bg-blue-600 text-white font-semibold rounded-md text-sm">
                         <i class="fas fa-camera mr-1"></i> Rozpocznij
                     </button>
                     <div id="reader" class="mt-3 hidden"></div>
@@ -80,13 +80,13 @@
                 <div class="flex flex-col sm:flex-row justify-center gap-3 pt-4">
                     <button 
                         type="submit"
-                        class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0"
+                        class="px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0"
                         onclick="return confirm('Czy na pewno chcesz dodać zamówienie?')">
                         Zapisz i wyślij
                     </button>
                     <a 
                         href="{{ url('/welcome') }}"
-                        class="px-4 py-2 bg-rose-950 hover:bg-red-900 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0">
+                        class="px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-bold rounded-md w-44 text-sm text-center mx-auto sm:mx-0">
                         Powrót
                     </a>
                 </div>

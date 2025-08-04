@@ -71,7 +71,7 @@
         </div>
 
         <button type="submit"
-            class="w-full bg-rose-950 hover:bg-red-900 text-white font-semibold py-2 px-4 rounded transition">
+            class="w-full bg-green-800 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition">
             Zarejestruj
         </button>
     </form>

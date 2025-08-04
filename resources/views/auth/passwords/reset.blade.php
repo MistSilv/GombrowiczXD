@@ -20,7 +20,7 @@
                     class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
             </div>
             <button type="submit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition">
+                class="w-full bg-green-800 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition">
                 Zmień hasło
             </button>
         </form>

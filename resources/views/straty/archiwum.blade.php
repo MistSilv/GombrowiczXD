@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-bold mb-4 text-white">Lista strat</h1>
 
         <div class="mb-6 flex flex-wrap gap-2">
-            <a href="{{ route('straty.index') }}" class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
+            <a href="{{ route('straty.index') }}" class="bg-emerald-900 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded">Zobacz aktualne</a>
         </div>
             
         <form method="GET" action="{{ route('straty.archiwum') }}" class="flex flex-wrap md:flex-nowrap items-end gap-4 bg-gray-800 p-4 rounded mt-6">
@@ -23,7 +23,7 @@
 
             <div>
                 <button type="submit"
-                    class="bg-rose-950 hover:bg-red-900 text-white font-bold py-2 px-4 rounded whitespace-nowrap">
+                    class="bg-blue-800 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded whitespace-nowrap">
                     🔍 Szukaj
                 </button>
             </div>
@@ -34,13 +34,13 @@
 
             <a href="{{ route('export.unified.range', ['typ' => 'straty', 'zakres'=>'zakres', 'format' => 'xlsx', 'od' => $od, 'do' => $do]) }}"
                 id="export-wsad-xlsx"
-                class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-5 py-2 rounded shadow whitespace-nowrap">
-                📊 Excel (.xlsx)
+                class="bg-lime-900 hover:bg-lime-700 text-white font-semibold px-5 py-2 rounded shadow whitespace-nowrap">
+                📊 Excel
             </a>
 
             <a href="{{ route('export.unified.range', ['typ' => 'straty', 'zakres'=>'zakres', 'format' => 'csv', 'od' => $od, 'do' => $do]) }}"
                 id="export-wsad-csv"
-                class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-5 py-2 rounded shadow whitespace-nowrap">
+                class="bg-lime-900 hover:bg-lime-600 text-white font-semibold px-5 py-2 rounded shadow whitespace-nowrap">
                 📄 CSV
             </a>
         </form>
