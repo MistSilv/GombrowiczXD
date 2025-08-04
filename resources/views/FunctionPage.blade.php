@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="min-h-screen flex items-start justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-4">
+    <div class="min-h-screen flex items-start justify-center bg-black px-4 py-4">
         <div class="w-full max-w-md space-y-4">
             @auth
                 @if(auth()->user()->isAdmin())
