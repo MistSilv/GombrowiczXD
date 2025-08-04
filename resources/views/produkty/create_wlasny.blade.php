@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="flex flex-col items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 space-y-12">
+    <div class="flex flex-col lg:flex-row items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 gap-y-12 lg:gap-x-6">
         <!-- Produkt własny -->
         <div class="w-full max-w-md">
             <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-xl p-6 space-y-6 border border-gray-700">

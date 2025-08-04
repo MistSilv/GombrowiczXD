@@ -23,11 +23,11 @@
 </head>
 <body class="bg-black font-sans min-h-screen">
     <nav class="bg-black text-white shadow-md px-6 py-4 flex justify-between items-center rounded-b-xl">
-        <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-2">
             <a href="{{ url('/welcome') }}" class="bg-rose-950 hover:bg-red-900 text-white font-semibold px-4 py-2 rounded-lg transition">
                 🏠 Strona główna
             </a>
-            <div class="hidden md:flex items-center space-x-6">
+            <div class="hidden md:flex items-center space-x-2">
                 @auth
                     @if(!auth()->user()->isSerwis())
                         <a href="{{ route('zamowienia.index') }}"
