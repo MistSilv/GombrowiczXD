@@ -94,56 +94,6 @@
             </form>
         </div>
     </div>
-    <script>
-        document.getElementById('zamowienieForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const produkty = [];
-        const produktyById = {}; // Mapa produktów dla łatwego wyszukiwania
-        
-        // Stwórz mapę produktów
-        window._produkty.forEach(p => {
-            produktyById[p.id] = p;
-            produktyById[p.tw_idabaco] = p; // Dostęp zarówno po ID jak i tw_idabaco
-        });
-
-        document.querySelectorAll('#produkty-lista tbody tr').forEach(tr => {
-            const produktId = tr.getAttribute('data-produkt-id');
-            const produktAbaco = tr.getAttribute('data-produkt-abaco');
-            const inputIlosc = tr.querySelector('input[type="number"]');
-            const ilosc = inputIlosc ? parseInt(inputIlosc.value) : 0;
-            
-            // Znajdź produkt po ID lub tw_idabaco
-            const produkt = produktyById[produktId] || produktyById[produktAbaco];
-            
-            if (produkt && ilosc > 0) {
-                produkty.push({
-                    tw_idabaco: produkt.tw_idabaco,
-                    tw_nazwa: produkt.tw_nazwa,
-                    ilosc: ilosc,
-                    ean_codes: produkt.ean_codes || []
-                });
-            }
-        });
-        
-        if (produkty.length === 0) {
-            alert('Dodaj przynajmniej jeden produkt przed zapisaniem');
-            return;
-        }
-        
-        // Usuń stare dane jeśli istnieją
-        document.getElementById('produktyJson')?.remove();
-        
-        // Dodaj nowe pole z danymi
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'produkty_json';
-        input.value = JSON.stringify(produkty);
-        this.appendChild(input);
-        
-        this.submit();
-    });
-    </script>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
