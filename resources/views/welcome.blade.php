@@ -15,6 +15,12 @@
         @endforeach     
     </div>
 
+        <!-- Linki do paginacji -->
+    <div class="mt-6 flex justify-center">
+        {{ $automaty->links() }}
+    </div>
+
+
     <!-- Przycisk do instalacji PWA -->
     <button id="installPWA"
     class="fixed bottom-4 right-4 bg-slate-800 hover:bg-red-900 text-white px-4 py-2 mt-3 rounded shadow-lg z-50 hidden">

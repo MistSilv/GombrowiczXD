@@ -8,7 +8,7 @@ class AutomatController extends Controller
 {
     public function index()
     {
-        $automaty = Automat::all();
+        $automaty = Automat::paginate(9);
         return view('welcome', compact('automaty'));
     }
 
