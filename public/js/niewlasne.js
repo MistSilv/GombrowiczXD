@@ -1,5 +1,7 @@
+// Ustawienie zmiennej globalnej wskazującej, czy jesteśmy połączeni z firmowym WiFi
 window.isFirmoweWifi = 0;
 
+// Sprawdzenie typu połączenia sieciowego
 function checkNetworkType() {
     fetch('/api/network/check')
         .then(res => res.json())
@@ -11,9 +13,10 @@ function checkNetworkType() {
 }
 document.addEventListener('DOMContentLoaded', checkNetworkType);
 
-// Products management
+// Zarządzanie produktami
 window._produkty = JSON.parse(document.getElementById('produkty-data').textContent);
 
+// Pobierz zestaw już dodanych produktów (unikalne ID)
 function getUsedProducts() {
     return new Set(
         Array.from(document.querySelectorAll('#produkty-lista tbody tr'))
@@ -22,6 +25,7 @@ function getUsedProducts() {
     );
 }
 
+// Aktualizuj dostępność przycisku dodawania produktu w zależności od tego, co już dodano
 function updateAvailableProducts() {
     const usedProducts = getUsedProducts();
     const addButton = document.getElementById('dodaj-produkt');
@@ -36,6 +40,7 @@ function updateAvailableProducts() {
     return usedProducts;
 }
 
+// Dodaj wiersz z produktem do tabeli
 function addProductRow(productId = '', quantity = '') {
     const usedProducts = updateAvailableProducts();
     if (productId && usedProducts.has(productId)) {
@@ -69,6 +74,7 @@ function addProductRow(productId = '', quantity = '') {
     updateAvailableProducts();
 }
 
+// Zaktualizuj ilość istniejącego produktu
 function updateProductQuantity(productId, quantity) {
     const row = document.querySelector(`#produkty-lista tr[data-produkt-id="${productId}"]`);
     if (!row) {
@@ -85,7 +91,7 @@ function updateProductQuantity(productId, quantity) {
     }
 }
 
-// Event listeners
+// Obsługa kliknięć (usuwanie produktu, kliknięcie na nazwę)
 document.addEventListener('click', e => {
     if (e.target.classList.contains('remove-row')) {
         e.target.closest('tr').remove();
@@ -97,16 +103,18 @@ document.addEventListener('click', e => {
     }
 });
 
-// Product search
+// Wyszukiwanie produktów (autouzupełnianie)
 const searchInput = document.getElementById('product-search');
 const suggestionsList = document.getElementById('product-suggestions');
 
+// Wyświetlanie listy podpowiedzi
 function showSuggestions(matches) {
     suggestionsList.innerHTML = matches.length ? 
         matches.map(p => `<li class="px-3 py-2 hover:bg-blue-100 cursor-pointer" data-produkt-id="${p.id}">${p.tw_nazwa}</li>`).join('') : '';
     suggestionsList.classList.toggle('hidden', !matches.length);
 }
 
+// Obsługa wpisywania w pole wyszukiwania
 searchInput.addEventListener('input', () => {
     const searchTerm = searchInput.value.trim().toLowerCase();
     if (!searchTerm) {
@@ -122,6 +130,7 @@ searchInput.addEventListener('input', () => {
     showSuggestions(matches);
 });
 
+// Kliknięcie na podpowiedź z listy
 suggestionsList.addEventListener('click', e => {
     if (e.target.tagName === 'LI') {
         updateProductQuantity(parseInt(e.target.dataset.produktId), 0);
@@ -130,13 +139,14 @@ suggestionsList.addEventListener('click', e => {
     }
 });
 
+// Ukryj podpowiedzi, jeśli kliknięto poza polem
 document.addEventListener('click', e => {
     if (!searchInput.contains(e.target) && !suggestionsList.contains(e.target)) {
         showSuggestions([]);
     }
 });
 
-// EAN handling
+// Obsługa EAN/PLU – wysyłanie kodu do API i pobieranie produktu
 async function handleEanSearch(ean) {
     try {
         const response = await fetch(window.isFirmoweWifi ? '/api/check-ean-firmowe' : '/api/check-ean', {
@@ -176,6 +186,7 @@ async function handleEanSearch(ean) {
     }
 }
 
+// Obsługa przycisku do ręcznego wprowadzenia EAN
 document.getElementById('dodaj-ean').addEventListener('click', () => {
     const eanInput = document.getElementById('product-search-ean');
     if (!eanInput.value.trim()) {
@@ -186,7 +197,7 @@ document.getElementById('dodaj-ean').addEventListener('click', () => {
     eanInput.value = '';
 });
 
-// EAN Scanner
+// Skrypt obsługujący skanowanie kodów EAN (kamera)
 const scanner = new Html5Qrcode("reader");
 let isScanning = false;
 
@@ -220,7 +231,7 @@ document.getElementById('start-scan').addEventListener('click', async () => {
     }
 });
 
-// Order submission
+// Obsługa formularza zamówienia – przygotowanie danych przed wysłaniem
 document.getElementById('zamowienieForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -253,7 +264,7 @@ document.getElementById('zamowienieForm').addEventListener('submit', function(e)
     this.submit();
 });
 
-// Initialize
+// Inicjalizacja – aktualizuj przycisk dodawania po załadowaniu strony
 document.addEventListener('DOMContentLoaded', () => {
     updateAvailableProducts();
 });
