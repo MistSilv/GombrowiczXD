@@ -81,13 +81,19 @@
         </div>
 
 
-        <div>
+        <div class="pt-4 border-t border-gray-700 flex flex-col md:flex-row md:items-center gap-3">
             <button
                 type="submit"
                 onclick="return confirm('Czy na pewno chcesz potwierdzić aktualnie wykonywaną operację?')"
-                class="bg-blue-700 text-white px-6 py-3 rounded hover:bg-blue-800 transition w-full sm:w-auto">
+                class="px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
                 Zapisz stratę
             </button>
+            @if($automat)
+                <a href="{{ route('wsady.create', ['automat_id' => $automat->id]) }}" 
+                class="inline-flex max-w-max px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
+                    Powrót
+                </a>
+            @endif
         </div>
     </form>
 

@@ -76,11 +76,7 @@
             <!-- Dodatkowe linki -->
             <div class="pt-4 border-t border-gray-700 flex flex-col md:flex-row md:items-center gap-3">
                 @if($automat)
-                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" 
-                    class="inline-flex max-w-max px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
-                        Wprowadź straty
-                    </a>
-
+                    
                     @auth
                         @if(!auth()->user()->isProdukcja())
                             <a href="{{ route('zamowienia.index', ['automat_id' => $automat->id]) }}" 

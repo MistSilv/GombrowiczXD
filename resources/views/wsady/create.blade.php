@@ -72,14 +72,19 @@
                     Dodaj wsad
                 </button>
             </div>
-
-            @if($automat)
-                <div class="pt-6 border-t border-gray-700">
+            <div class="pt-4 border-t border-gray-700 flex flex-col md:flex-row md:items-center gap-3">
+                @if($automat)
                     <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
-                       📋 Przejdź do bułek i innych
+                    📋 Przejdź do bułek i innych
                     </a>
-                </div>
-            @endif
+
+                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" 
+                    class="inline-flex max-w-max px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
+                        Wprowadź straty
+                    </a>
+                
+                @endif
+            </div>
         </form>
     </div>
 
