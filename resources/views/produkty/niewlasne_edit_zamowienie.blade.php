@@ -94,8 +94,8 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="application/json" id="produkty-data">@json($produkty)</script>
     <script src="{{ asset('js/niewlasne.js') }}"></script>
+    {{-- @vite('resources/js/niewlasne.js') --}}
 </x-layout>

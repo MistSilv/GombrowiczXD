@@ -1,5 +1,3 @@
-import { Html5Qrcode } from "html5-qrcode";
-
 $(document).ready(function () {
     const $globalSearchInput = $('#szukaj-produkt');
     const $globalSuggestions = $('#lista-podpowiedzi');

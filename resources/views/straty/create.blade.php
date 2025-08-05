@@ -96,4 +96,5 @@
     </script>
 
     <script src="{{ asset('js/straty-create.js') }}"></script>
+    {{-- @vite('resources/js/straty-create.js') --}}
 </x-layout>

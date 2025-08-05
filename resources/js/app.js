@@ -1,3 +1,10 @@
+//import plików js
+import './burger.js';
+import './niewlasne.js';
+import './straty-create.js';
+import './wsady-create.js';
+import './zamowienia-create.js';
+
 // Importy niezbędnych zależności
 import './bootstrap';
 import { registerSW } from 'virtual:pwa-register';
