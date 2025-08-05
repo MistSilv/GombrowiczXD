@@ -1,38 +1,51 @@
-import { Html5Qrcode } from "html5-qrcode";
-
-window.isFirmoweWifi = 0;
+window.isFirmoweWifi = 0
 
 function checkNetworkType() {
     fetch('/api/network/check')
         .then(res => res.json())
         .then(data => {
             window.isFirmoweWifi = data.connection_type === 'wifi_firmowe' ? 1 : 0;
-            console.log(window.isFirmoweWifi ? 'Połączono z siecią firmową WiFi' : 'Nie jesteś połączony z siecią firmową WiFi');
+            if (window.isFirmoweWifi) {
+                console.log('Połączono z siecią firmową WiFi');
+            } else {
+                console.log('Nie jesteś połączony z siecią firmową WiFi');
+            }
         })
-        .catch(() => {
-            window.isFirmoweWifi = 0;
-        });
+        .catch(() => window.isFirmoweWifi = 0);
 }
+document.addEventListener('DOMContentLoaded', checkNetworkType);
 
-document.addEventListener('DOMContentLoaded', () => {
-    checkNetworkType();
-    aktualizujDostepneProdukty();
-});
+
 
 window._produkty = JSON.parse(document.getElementById('produkty-data').textContent);
 
+let index = 0;
+//dodaje do tabeli tej na dole dynamicznej
 function aktualizujDostepneProdukty() {
     const uzyteProdukty = new Set();
     document.querySelectorAll('#produkty-lista tbody tr').forEach(tr => {
         const pid = parseInt(tr.getAttribute('data-produkt-id'));
-        if (pid) uzyteProdukty.add(pid);
+        if(pid) uzyteProdukty.add(pid);
     });
 
-    // Tu masz kod na selecty — jeśli nie ma selectów, pomińmy (u Ciebie ich nie ma)
-    // Przycisk dodawania produktu:
+    document.querySelectorAll('#produkty-lista tbody tr').forEach(tr => {
+        const select = tr.querySelector('select');
+        if(!select) return; // w naszej wersji nie ma selectów
+
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">-- wybierz produkt --</option>';
+        window._produkty.forEach(p => {
+            if (!uzyteProdukty.has(p.id) || p.id === parseInt(currentValue)) {
+                const selected = p.id === parseInt(currentValue) ? 'selected' : '';
+                select.innerHTML += `<option value="${p.id}" ${selected}>${p.tw_nazwa}</option>`;
+            }
+        });
+    });
+
     const btnDodaj = document.getElementById('dodaj-produkt');
     if (btnDodaj) {
-        btnDodaj.disabled = uzyteProdukty.size >= window._produkty.length;
+        const iloscDostepnych = window._produkty.length;
+        btnDodaj.disabled = uzyteProdukty.size >= iloscDostepnych;
         btnDodaj.classList.toggle('opacity-50', btnDodaj.disabled);
         btnDodaj.classList.toggle('cursor-not-allowed', btnDodaj.disabled);
     }
@@ -43,12 +56,14 @@ function dodajWiersz(produktId = '', ilosc = '') {
     const tbody = document.querySelector('#produkty-lista tbody');
     const uzyteProdukty = aktualizujDostepneProdukty();
 
+    // jeśli produkt już jest dodany, nie dodaj duplikatu
     if (produktId && uzyteProdukty.has(produktId)) {
         setQuantity(produktId, ilosc);
         return;
     }
 
     const produkt = window._produkty.find(p => p.id === produktId);
+
     const nazwa = produkt ? produkt.tw_nazwa : '';
 
     const tr = document.createElement('tr');
@@ -73,12 +88,14 @@ function dodajWiersz(produktId = '', ilosc = '') {
 
     tbody.appendChild(tr);
 
+    // focus i select inputa ilości
     const inputIlosc = tr.querySelector('input[type="number"]');
-    if (inputIlosc) {
+    if(inputIlosc) {
         inputIlosc.focus();
         inputIlosc.select();
     }
 
+    index++;
     aktualizujDostepneProdukty();
 }
 
@@ -90,6 +107,7 @@ function setQuantity(produktId, ilosc) {
         if (parseInt(row.getAttribute('data-produkt-id')) === produktId) {
             const input = row.querySelector('input[type="number"]');
             if (input) {
+                // Dodajemy ilość do istniejącej wartości
                 const currentValue = parseInt(input.value) || 0;
                 input.value = currentValue + ilosc;
 
@@ -101,23 +119,22 @@ function setQuantity(produktId, ilosc) {
             break;
         }
     }
-
     if (!found) {
         dodajWiersz(produktId, ilosc);
     }
-    aktualizujDostepneProdukty();
 }
 
+
+
 // Usuwanie wiersza
-document.addEventListener('click', e => {
+document.addEventListener('click', function (e) {
     if (e.target.classList.contains('remove-row')) {
         e.target.closest('tr').remove();
         aktualizujDostepneProdukty();
     }
 });
 
-// Kliknięcie na nazwę produktu w liście — dodaje 1 sztukę
-document.addEventListener('click', e => {
+document.addEventListener('click', (e) => {
     if (e.target.classList.contains('product-name')) {
         const nazwa = e.target.textContent.trim();
         const produkt = window._produkty.find(p => p.tw_nazwa === nazwa);
@@ -126,8 +143,7 @@ document.addEventListener('click', e => {
         }
     }
 });
-
-// --- Wyszukiwarka produktów ---
+// --- WYSZUKIWARKA PRODUKTÓW DO DODANIA ---
 const searchInput = document.getElementById('product-search');
 const suggestionsList = document.getElementById('product-suggestions');
 
@@ -161,10 +177,10 @@ searchInput.addEventListener('input', () => {
     const uzyteProdukty = new Set();
     document.querySelectorAll('#produkty-lista tbody tr').forEach(row => {
         const pid = parseInt(row.getAttribute('data-produkt-id'));
-        if (pid) uzyteProdukty.add(pid);
+        if(pid) uzyteProdukty.add(pid);
     });
 
-    const matches = window._produkty.filter(p =>
+    const matches = window._produkty.filter(p => 
         p.tw_nazwa.toLowerCase().includes(val) &&
         !uzyteProdukty.has(p.id)
     ).slice(0, 10);
@@ -172,7 +188,7 @@ searchInput.addEventListener('input', () => {
     showSuggestions(matches);
 });
 
-suggestionsList.addEventListener('click', e => {
+suggestionsList.addEventListener('click', (e) => {
     if (e.target.tagName === 'LI') {
         const produktId = parseInt(e.target.dataset.produktId);
         setQuantity(produktId, 0);
@@ -181,25 +197,161 @@ suggestionsList.addEventListener('click', e => {
     }
 });
 
-document.addEventListener('click', e => {
+document.addEventListener('click', (e) => {
     if (e.target !== searchInput && e.target.parentNode !== suggestionsList) {
         clearSuggestions();
     }
 });
 
-// Livewire integration
-document.addEventListener('livewire:load', () => {
-    Livewire.on('produktClicked', produktId => {
+// Obsługa filtrów deficytów
+window.addEventListener('DOMContentLoaded', () => {
+    aktualizujDostepneProdukty();
+
+});
+
+document.addEventListener('livewire:load', function () {
+    Livewire.on('produktClicked', function (produktId) {
         const produkt = window._produkty.find(p => p.id === produktId);
         if (produkt) {
             setQuantity(produkt.id, 0);
         }
     });
 });
+/*
+function handleEmailSend() {
+    const checkbox = document.getElementById('WyslijMail');
+    const wyslijEmailInput = document.getElementById('wyslijEmail');
 
-// --- Obsługa EAN ---
+    if (checkbox && checkbox.checked) {
+        // Switch włączony => NIE wysyłamy maila
+        wyslijEmailInput.value = '1';
+        return confirm('Czy na pewno chcesz zapisać i wysłać email? Sklep');
+    } else {
+        // Switch wyłączony => wysyłamy maila
+        if (confirm('Czy na pewno chcesz zapisać i wysłać email? Import')) {
+            wyslijEmailInput.value = '0';
+            return true;
+        }
+        return false;
+    }
+}
 
-function handleScannedEan(decodedText) {
+function handleEanSearch() {
+    const eanInput = document.getElementById('product-search-ean');
+    const decodedText = eanInput.value.trim();
+    if (!decodedText) {
+        alert('Wpisz kod EAN/PLU');
+        return;
+    }
+
+    const token = $('meta[name="csrf-token"]').attr('content');
+
+    if (window.isFirmoweWifi === 1) {
+        console.log("Jesteś w sieci firmowej – wysyłam zapytanie do kontrolera backendowego");
+
+        fetch('/api/check-ean-firmowe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ kod_ean: decodedText })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Błąd odpowiedzi z backendu');
+            return res.json();
+        })
+        .then(response => {
+            if (!response.success) {
+                alert(response.message || "Nie znaleziono produktu");
+                return;
+            }
+
+            const dane = response.wyniki;
+
+            if (!Array.isArray(dane) || dane.length === 0) {
+                alert("Brak danych z backendu (firmowe API).");
+                return;
+            }
+
+            dane.forEach(item => {
+                console.log("🧾 Nazwa towaru:", item.nazwa_towaru);
+                console.log("📦 Jednostka miary:", item.jm);
+                console.log("🆔 ID Abaco:", item.idabaco);
+                console.log("📑 Kody PLU:", item.kody_plu.join(', '));
+
+                const qty = prompt(`Podaj ilość dla produktu: ${item.nazwa_towaru}`, "1");
+
+                if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                    const produktId = parseInt(item.idabaco);
+                    const produktNazwa = item.nazwa_towaru;
+
+                    // Dodaj produkt do listy dostępnych, jeśli go tam nie ma
+                    let istnieje = window._produkty.find(p => p.id === produktId);
+                    if (!istnieje) {
+                        window._produkty.push({
+                            id: produktId,
+                            tw_nazwa: produktNazwa
+                        });
+                    }
+
+                    // Dodaj do tabeli lub zaktualizuj ilość
+                    setQuantity(produktId, parseInt(qty));
+                } else {
+                    alert("Nieprawidłowa ilość.");
+                }
+            });
+        })
+        .catch(err => {
+            console.error("❌ Błąd:", err.message);
+            alert("Błąd po stronie backendu (firmowe API).");
+        });
+
+        eanInput.value = '';
+        return;
+    }
+
+    // 🔄 ZACHOWANIE DOMYŚLNE (poza siecią firmową)
+    fetch('/api/check-ean', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({ kod_ean: decodedText })
+    })
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw err });
+            return res.json();
+        })
+        .then(data => {
+            const qty = prompt(`Podaj ilość dla produktu: ${data.produkt.tw_nazwa}`, "1");
+            if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                setQuantity(data.produkt.id, parseInt(qty));
+            } else {
+                alert("Nieprawidłowa ilość.");
+            }
+        })
+        .catch(err => {
+            alert(err.message || 'Błąd przy sprawdzaniu kodu.');
+            $('#scan-result').text('');
+        });
+
+    eanInput.value = '';
+}
+*/
+function handleEanSearch() {
+    //window.isFirmoweWifi =0;
+    const eanInput = document.getElementById('product-search-ean');
+    const decodedText = eanInput.value.trim();
+    
+    if (!decodedText) {
+        alert('Wpisz kod EAN/PLU');
+        return;
+    }
+
     const endpoint = window.isFirmoweWifi === 1 ? '/api/check-ean-firmowe' : '/api/check-ean';
 
     fetch(endpoint, {
@@ -210,20 +362,104 @@ function handleScannedEan(decodedText) {
         },
         body: JSON.stringify({ kod_ean: decodedText })
     })
+
+    
     .then(response => {
-        if (!response.ok) throw new Error('Nie znaleziono produktu');
+        if (!response.ok) throw new Error('Błąd sieci');
         return response.json();
     })
     .then(data => {
-        if (!data.success) throw new Error(data.message || 'Nie znaleziono produktu');
+        if (!data.success) {
+            throw new Error(data.message || 'Nie znaleziono produktu');
+        }
 
         const produkt = data.produkt;
         const qty = prompt(`Podaj ilość dla produktu: ${produkt.tw_nazwa}`, "1");
 
-        if (!qty || isNaN(qty) || parseInt(qty) <= 0) throw new Error('Nieprawidłowa ilość');
+        if (!qty || isNaN(qty) || parseInt(qty) <= 0) {
+            throw new Error('Nieprawidłowa ilość');
+        }
 
+        // Dodaj produkt do globalnej listy jeśli nie istnieje
         let lokalnyProdukt = window._produkty.find(p => p.tw_idabaco === produkt.tw_idabaco);
+        
+        // W funkcji handleEanSearch:
+        if (!lokalnyProdukt) {
+            lokalnyProdukt = {
+                id: Math.max(0, ...window._produkty.map(p => p.id)) + 1,
+                tw_nazwa: produkt.tw_nazwa,
+                tw_idabaco: produkt.tw_idabaco,
+                ean_codes: produkt.ean_codes || [] // Upewnij się, że to pole jest ustawione
+            };
+            window._produkty.push(lokalnyProdukt);
+        }
 
+        setQuantity(lokalnyProdukt.id, parseInt(qty));
+        eanInput.value = '';
+    })
+    .catch(error => {
+        console.error('Błąd:', error);
+        alert(error.message);
+    });
+    
+}
+
+
+document.getElementById('dodaj-ean').addEventListener('click', handleEanSearch);
+
+
+
+// --- EAN Scanner ---
+const scanner = new Html5Qrcode("reader");
+let isScanning = false;
+
+function onScanSuccess(decodedText) {
+    console.log("Zeskanowano:", decodedText);
+
+    scanner.stop().then(() => {
+        isScanning = false;
+        $('#reader').hide();
+        $('#scan-result').text(`Zeskanowano: ${decodedText}`);
+
+        // Użyj tej samej logiki co w handleEanSearch
+        handleScannedEan(decodedText);
+    }).catch(err => {
+        console.error('Błąd zatrzymania skanera:', err);
+    });
+}
+
+// Wspólna funkcja do obsługi zeskanowanego/samodzielnie wprowadzonego kodu
+function handleScannedEan(decodedText) {
+    //window.isFirmoweWifi =0;
+    const fetchUrl = window.isFirmoweWifi === 1 ? '/api/check-ean-firmowe' : '/api/check-ean';
+
+    fetch(fetchUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ kod_ean: decodedText })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Brak Produktu');
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || 'Nie znaleziono produktu');
+        }
+
+        const produkt = data.produkt;
+        const qty = prompt(`Podaj ilość dla produktu: ${produkt.tw_nazwa}`, "1");
+
+        if (!qty || isNaN(qty) || parseInt(qty) <= 0) {
+            throw new Error('Nieprawidłowa ilość');
+        }
+
+        // Dodaj produkt do globalnej listy jeśli nie istnieje
+        let lokalnyProdukt = window._produkty.find(p => p.tw_idabaco === produkt.tw_idabaco);
+        
         if (!lokalnyProdukt) {
             lokalnyProdukt = {
                 id: Math.max(0, ...window._produkty.map(p => p.id)) + 1,
@@ -242,38 +478,7 @@ function handleScannedEan(decodedText) {
     });
 }
 
-document.getElementById('dodaj-ean').addEventListener('click', () => {
-    const eanInput = document.getElementById('product-search-ean');
-    const decodedText = eanInput.value.trim();
-
-    if (!decodedText) {
-        alert('Wpisz kod EAN/PLU');
-        return;
-    }
-
-    handleScannedEan(decodedText);
-    eanInput.value = '';
-});
-
-// --- EAN Scanner ---
-
-const scanner = new Html5Qrcode("reader");
-let isScanning = false;
-
-function onScanSuccess(decodedText) {
-    console.log("Zeskanowano:", decodedText);
-
-    scanner.stop().then(() => {
-        isScanning = false;
-        $('#reader').hide();
-        $('#scan-result').text(`Zeskanowano: ${decodedText}`);
-
-        handleScannedEan(decodedText);
-    }).catch(err => {
-        console.error('Błąd zatrzymania skanera:', err);
-    });
-}
-
+// Pozostała część kodu skanera bez zmian
 $('#start-scan').on('click', () => {
     if (isScanning) return;
 
@@ -296,3 +501,19 @@ $('#start-scan').on('click', () => {
         })
         .catch(err => alert("Błąd pobierania kamer: " + err));
 });
+
+// Zaktualizowana funkcja handleEanSearch (teraz używa tej samej logiki)
+function handleEanSearch() {
+    const eanInput = document.getElementById('product-search-ean');
+    const decodedText = eanInput.value.trim();
+    
+    if (!decodedText) {
+        alert('Wpisz kod EAN/PLU');
+        return;
+    }
+
+    handleScannedEan(decodedText);
+    eanInput.value = '';
+}
+
+document.getElementById('dodaj-ean').addEventListener('click', handleEanSearch);

@@ -16,7 +16,6 @@
     </script>
     <link href="/css/burger.css" rel="stylesheet">
     <script src="/js/burger.js" defer></script>
-    {{-- @vite('resources/js/burger.js') --}}
     <link rel="manifest" href="/manifest.webmanifest">
     @vite(['resources/js/app.js', 'resources/css/app.css'])
     <meta name="csrf-token" content="{{ csrf_token() }}">

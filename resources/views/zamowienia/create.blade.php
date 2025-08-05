@@ -105,5 +105,4 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('js/zamowienia-create.js') }}"></script>
-    {{-- @vite('resources/js/zamowienia-create.js') --}}
 </x-layout>
