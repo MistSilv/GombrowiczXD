@@ -8,7 +8,6 @@ use App\Models\Zamowienie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Mail\ZamowienieMail;
 use App\Exports\ZamowienieExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,63 +15,15 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProduktController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    public function index() {}
+    public function create() {}
+    public function store(Request $request) {}
+    public function show(Produkt $produkt) {}
+    public function edit(Produkt $produkt) {}
+    public function update(Request $request, Produkt $produkt) {}
+    public function destroy(Produkt $produkt) {}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Produkt $produkt)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Produkt $produkt)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Produkt $produkt)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Produkt $produkt)
-    {
-        //
-    }
-
-   private function buildDeficyty(): \Illuminate\Support\Collection
+    private function buildDeficyty(): \Illuminate\Support\Collection
     {
         $produkty = Produkt::where('is_wlasny', false)->get();
 
@@ -109,7 +60,6 @@ class ProduktController extends Controller
             ->values();
     }
 
-
     public function formularzNoweZamowienie()
     {
         $deficyty = $this->buildDeficyty();
@@ -125,7 +75,7 @@ class ProduktController extends Controller
 
         return view('produkty.niewlasne_edit_zamowienie', [
             'produkty' => Produkt::where('is_wlasny', false)
-                            ->select('id', 'tw_idabaco', 'tw_nazwa') // Dodajemy tw_idabaco
+                            ->select('id', 'tw_idabaco', 'tw_nazwa')
                             ->get(),
             'deficyty' => $paginated,
             'zamowienieId' => null,
@@ -149,46 +99,30 @@ class ProduktController extends Controller
         ]);
     }
 
-    //dd(request()->all());
-
     public function zapiszZamowienie(Request $request)
     {
-        Log::info('Start metody zapiszZamowienie');
-
-        // Walidacja danych wejściowych
         $validated = $request->validate([
             'zamowienieId' => 'nullable|integer',
             'produkty_json' => 'required|json',
             'wyslij_email' => 'sometimes|boolean'
         ]);
 
-        Log::debug('Zwalidowane dane:', $validated);
-
-        // Rozpocznij transakcję
         DB::beginTransaction();
 
         try {
-            // 1. Utwórz lub zaktualizuj zamówienie
             if (!empty($validated['zamowienieId'])) {
                 $zamowienieId = $validated['zamowienieId'];
-                Log::info("Używam istniejącego zamówienia ID: $zamowienieId");
             } else {
                 $zamowienieId = DB::table('zamowienia')->insertGetId([
                     'data_zamowienia' => now(),
                     'data_realizacji' => null,
                     'automat_id' => null
                 ]);
-                Log::info("Utworzono nowe zamówienie ID: $zamowienieId");
             }
 
-            // 2. Przetwórz produkty
             $produkty = json_decode($validated['produkty_json'], true);
-            Log::debug('Produkty do przetworzenia:', $produkty);
 
-            foreach ($produkty as $index => $produktData) {
-                Log::debug("Przetwarzanie produktu #$index", $produktData);
-
-                // 2a. Znajdź lub utwórz produkt
+            foreach ($produkty as $produktData) {
                 $produkt = Produkt::firstOrCreate(
                     ['tw_idabaco' => $produktData['tw_idabaco']],
                     [
@@ -196,57 +130,40 @@ class ProduktController extends Controller
                         'is_wlasny' => false
                     ]
                 );
-                Log::debug("Produkt ID: {$produkt->id}, nowy: " . ($produkt->wasRecentlyCreated ? 'tak' : 'nie'));
 
-                // 2b. Dodaj kody EAN dla nowych produktów
                 if ($produkt->wasRecentlyCreated && !empty($produktData['ean_codes'])) {
                     foreach ($produktData['ean_codes'] as $kodEan) {
                         EanCode::firstOrCreate([
                             'produkt_id' => $produkt->id,
                             'kod_ean' => $kodEan
                         ]);
-                        Log::debug("Dodano kod EAN: $kodEan dla produktu ID: {$produkt->id}");
                     }
                 }
 
-                // 2c. Aktualizuj ilość w zamówieniu
-                $updated = DB::table('produkt_zamowienie')->updateOrInsert(
+                DB::table('produkt_zamowienie')->updateOrInsert(
                     [
                         'zamowienie_id' => $zamowienieId,
                         'produkt_id' => $produkt->id
                     ],
                     ['ilosc' => $produktData['ilosc']]
                 );
-                Log::debug("Zaktualizowano ilość: {$produktData['ilosc']} dla produktu ID: {$produkt->id}");
             }
 
-            // 3. Zatwierdź transakcję
             DB::commit();
-            Log::info("Pomyślnie zapisano zamówienie ID: $zamowienieId");
 
-            // 4. Obsługa e-maila (opcjonalnie)
             if (!empty($validated['wyslij_email'])) {
-                Log::info("Wysyłam maila dla zamówienia ID: $zamowienieId");
                 try {
                     $this->wyslijEmailZamowienia($zamowienieId);
-                    Log::info("Mail wysłany pomyślnie dla zamówienia ID: $zamowienieId");
                 } catch (\Exception $ex) {
-                    Log::error("Błąd podczas wysyłania maila: " . $ex->getMessage());
-                    // możesz tu dodać jakąś reakcję, np. komunikat błędu, jeśli chcesz
+                    // Obsłuż błąd wysyłki maila
                 }
             }
 
-            Log::info("Przekierowanie po zapisie zamówienia");
             return redirect()->route('zamowienia.show', $zamowienieId)
                 ->with('success', 'Zamówienie zostało zapisane pomyślnie');
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error('Błąd zapisu zamówienia: ' . $e->getMessage(), [
-                'exception' => $e,
-                'request_data' => $request->all()
-            ]);
 
             return back()
                 ->withInput()
@@ -254,36 +171,20 @@ class ProduktController extends Controller
         }
     }
 
-
-
-    /**
-     * Wyślij email z zamówieniem produktów nie-własnych
-     */
     public function wyslijEmailZamowienia($zamowienieId)
     {
-        Log::info("Próba wysyłki maila dla zamówienia ID: $zamowienieId");
-        
-        // Znajdź zamówienie z produktami i ich kodami EAN
         $zamowienie = Zamowienie::with(['produkty' => function($query) {
             $query->select('produkty.id', 'tw_nazwa')
                   ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
                   ->addSelect('ean_codes.kod_ean as ean');
         }])->findOrFail($zamowienieId);
 
-        Log::debug("Zamówienie załadowane: {$zamowienie->id} z produktami: " . $zamowienie->produkty->count());
-
-
-        // Generuj plik Excel z dodatkową kolumną EAN
         $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
 
-        Log::debug("Plik Excel wygenerowany. Rozmiar: " . strlen($xlsxContent) . " bajtów");
-
-        // Wyślij email
         try {
             Mail::to(config('mail.importowanie'))->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
-            Log::info("Mail wrzucony do kolejki dla zamówienia ID: $zamowienieId na adres: " . config('mail.importowanie'));
         } catch (\Exception $e) {
-            Log::error("Błąd podczas wrzucania maila do kolejki: " . $e->getMessage());
+            // Obsłuż błąd maila
         }
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
@@ -291,12 +192,6 @@ class ProduktController extends Controller
             ->with('email_sent', 'Email z zamówieniem został wysłany.');
     }
 
-
-
-
-    /**
-     * Pobierz plik Excel z zamówieniem (z kodem EAN)
-     */
     public function pobierzZamowienieExcel($zamowienieId)
     {
         $zamowienie = Zamowienie::with(['produkty' => function($query) {
@@ -312,15 +207,16 @@ class ProduktController extends Controller
             "zamowienie_{$zamowienieId}_{$date}.xlsx"
         );
     }
+
     public function createWlasny()
     {
         return view('produkty.create_wlasny');
     }
+
     public function createNiewlasny()
     {
         return view('produkty.create_wlasny');
     }
-
 
     public function storeWlasny(Request $request)
     {
@@ -341,7 +237,7 @@ class ProduktController extends Controller
         $validated = $request->validate([
             'tw_nazwa' => 'required|string|max:255',
             'tw_idabaco' => 'nullable|string|max:255',
-            'ean_codes' => 'nullable|string|max:255', // <- jako string, nie array
+            'ean_codes' => 'nullable|string|max:255',
         ]);
 
         $produkt = Produkt::create([
@@ -359,7 +255,6 @@ class ProduktController extends Controller
 
         return redirect()->route('produkty.create.niewlasny')->with('success', 'Produkt został dodany.');
     }
-
 
     public function search(Request $request)
     {
@@ -386,8 +281,4 @@ class ProduktController extends Controller
 
         return response()->json($results);
     }
-
-
-
-    
 }
