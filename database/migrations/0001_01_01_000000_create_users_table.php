@@ -65,6 +65,7 @@ return new class extends Migration
             $table->string('data_realizacji')->nullable();
             $table->unsignedBigInteger('automat_id')->nullable();
             $table->foreign('automat_id')->references('id')->on('automats')->onDelete('cascade');
+            $table->string('status')->default('pending'); 
         });
 
         Schema::create('produkt_zamowienie', function (Blueprint $table) {
@@ -122,6 +123,16 @@ return new class extends Migration
             $table->string('owner');
             $table->integer('expiration');
         });
+
+        Schema::create('failed_jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('uuid')->unique();
+            $table->text('connection');
+            $table->text('queue');
+            $table->longText('payload');
+            $table->longText('exception');
+            $table->timestamp('failed_at')->useCurrent();
+        });
     }
 
     /**
@@ -144,5 +155,6 @@ return new class extends Migration
         Schema::dropIfExists('jobs');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('cache_locks');
+        Schema::dropIfExists('failed_jobs');
     }
 };
