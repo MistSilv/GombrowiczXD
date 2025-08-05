@@ -4,10 +4,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const $productContainer = document.getElementById('produkty-list');
     const produkty = window._produkty || [];
 
-    let index = 0; // Start from 0, we'll increment before first use
+    let index = 0; // Zaczynamy od 0, zwiększamy przed użyciem
     let debounceTimer;
 
-    // --- Focus helper ---
+    // --- Pomocnicza funkcja do ustawienia fokusu na polu ilości ---
     function focusQuantity(row) {
         const input = row.querySelector('input[type="number"]');
         if (input) {
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- Global search input ---
+    // --- Obsługa globalnego pola wyszukiwania ---
     $globalSearchInput.addEventListener('input', function () {
         clearTimeout(debounceTimer);
         const query = this.value.trim().toLowerCase();
@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // --- Add product row ---
+    // --- Dodawanie wiersza produktu ---
     function addProductRow(productId = null, productName = '', qty = 1) {
-        // Check if product exists
+        // Sprawdzenie, czy produkt już istnieje
         if (productId) {
             const existing = Array.from($productContainer.querySelectorAll('.produkt-row')).find(row => {
                 return row.querySelector('.produkt-id-hidden').value == productId;
@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        index++; // Increment index before creating new row
-        
+        index++; // Zwiększenie indeksu przed utworzeniem nowego wiersza
+
         const row = document.createElement('div');
         row.className = 'produkt-row flex flex-col sm:flex-row gap-2 items-stretch sm:items-center relative mb-2';
         row.innerHTML = `
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         focusQuantity(row);
     }
 
-    // --- Attach autocomplete for row input ---
+    // --- Podłączanie podpowiedzi (autocomplete) do pola w nowym wierszu ---
     function attachRowAutocomplete(input) {
         let timer = null;
         const suggestions = document.createElement('ul');
@@ -171,18 +171,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Remove product
+    // --- Usuwanie produktu ---
     $productContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-produkt')) {
             e.target.closest('.produkt-row').remove();
-            
-            // If no products left, focus on search input
+
+            // Jeśli nie ma już produktów, ustaw fokus na pole wyszukiwania
             if ($productContainer.children.length === 0) {
                 $globalSearchInput.focus();
             }
         }
     });
 
-    // Focus on search input when page loads
+    // --- Ustawienie fokusu na pole wyszukiwania po załadowaniu strony ---
     $globalSearchInput.focus();
 });

@@ -96,22 +96,6 @@ class ZamowienieController extends Controller
             $produktyText .= "• **{$produkt->tw_nazwa}** — `{$produkt->pivot->ilosc}` szt.\n";
         }
 
-        // $webhookUrl = config('services.discord.webhook_url');
-
-        // Http::post($webhookUrl, [
-        //     'embeds' => [[
-        //         'title' => "📦 Nowe zamówienie #{$zamowienie->id}",
-        //         'description' => "**🧊 Automat:** {$zamowienie->automat->nazwa}\n
-        //         **📅 Realizacja:** {$zamowienie->data_realizacji->format('Y-m-d')}\n\n
-        //         🧾 **Produkty:**\n{$produktyText}",
-        //         'color' => hexdec('2C2F33'),
-        //         'footer' => [
-        //             'text' => '🛒 Zamówienia',
-        //         ],
-        //         'timestamp' => now()->toIso8601String(),
-        //     ]]
-        // ]);
-
         $message = "📦 *Nowe zamówienie #{$zamowienie->id}*\n";
         $message .= "Status: 🔴 Oczekujące\n"; 
         $message .= "Automat: {$zamowienie->automat->nazwa}\n";

@@ -128,7 +128,7 @@ $(document).ready(function () {
         attachAutocomplete($(this));
     });
 
-    // ✅ Nowa sekcja – globalna wyszukiwarka produktów
+    // Nowa sekcja – globalna wyszukiwarka produktów
     const $searchInput = $('#szukaj-produkt');
     const $globalSuggestions = $('#lista-podpowiedzi');
 
@@ -167,7 +167,7 @@ $(document).ready(function () {
 
         dodajProduktDoListy(productId, productName);
 
-        // ✅ Focus na pole ilości w nowo dodanym wierszu
+        // Focus na pole ilości w nowo dodanym wierszu
         const lastItem = $('#produkty-lista .produkt-item').last();
         const iloscInput = lastItem.find('input[type="number"]');
         if (iloscInput.length) {

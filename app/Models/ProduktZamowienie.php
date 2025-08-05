@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProduktZamowienie extends Model
 {
-    protected $table = 'produkt_zamowienie'; // tu nazwa tabeli z bazy danych
+    protected $table = 'produkt_zamowienie'; 
 
-    public $timestamps = false; // jeśli tabela nie ma timestampów
+    public $timestamps = false; 
 }

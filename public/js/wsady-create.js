@@ -8,7 +8,7 @@ $(document).ready(function () {
 
     const produkty = window._produkty || [];
 
-    // --- Global search with AJAX ---
+    // --- Globalne wyszukiwanie z użyciem AJAX ---
     $globalSearchInput.on('input', function () {
         clearTimeout(debounceTimer);
         const query = $(this).val().trim();
@@ -45,7 +45,7 @@ $(document).ready(function () {
         }, 300);
     });
 
-    // --- Click on suggestion from global search ---
+    // --- Kliknięcie na podpowiedź z wyszukiwarki globalnej ---
     $globalSuggestions.on('click', 'li', function () {
         const productId = $(this).data('id');
         const productName = $(this).text();
@@ -54,12 +54,12 @@ $(document).ready(function () {
         $globalSearchInput.val('');
         $globalSuggestions.hide().empty();
 
-        // Focus quantity
+        // Ustawienie fokusu na pole ilości
         const lastItem = $('#produkty-lista .produkt-item').last();
         focusQuantityField(lastItem);
     });
 
-    // --- Focus helper ---
+    // --- Pomocnicza funkcja ustawiająca fokus na pole ilości ---
     function focusQuantityField($item) {
         const $iloscInput = $item.find('input[type="number"]');
         if ($iloscInput.length) {
@@ -69,9 +69,9 @@ $(document).ready(function () {
         }
     }
 
-    // // --- Add product row ---
+    // --- Dodawanie nowego wiersza produktu ---
     function addProductRow(productId = null, productName = '', qty = 1) {
-        // If product already exists, increment quantity
+        // Jeśli produkt już istnieje, zwiększ ilość
         if (productId) {
             let found = false;
             $productContainer.find('.produkt-item').each(function () {
@@ -132,19 +132,19 @@ $(document).ready(function () {
         index++;
     }
 
-    // --- Remove product row ---
+    // --- Usuwanie wiersza produktu ---
     $productContainer.on('click', '.remove-item', function () {
         $(this).closest('.produkt-item').remove();
     });
 
-    // --- Hide global suggestions on click outside ---
+    // --- Ukrywanie globalnych podpowiedzi po kliknięciu poza ---
     $(document).on('click', function (e) {
         if (!$(e.target).closest('#lista-podpowiedzi, #szukaj-produkt').length) {
             $globalSuggestions.hide().empty();
         }
     });
 
-    // --- Autocomplete inside rows ---
+    // --- Podpowiedzi (autocomplete) w wierszach ---
     function attachRowAutocomplete($input) {
         let timer = null;
         const $localSuggestions = $('<ul class="absolute z-10 bg-gray-700 text-white max-h-60 overflow-auto border border-gray-600 rounded-lg w-full mt-1 shadow-lg" style="display:none;"></ul>');
@@ -197,17 +197,17 @@ $(document).ready(function () {
         });
     }
 
-    // Attach autocomplete to existing inputs on load
+    // --- Podłącz autocomplete do istniejących pól po załadowaniu ---
     $productContainer.find('input[type="text"]').each(function () {
         attachRowAutocomplete($(this));
     });
 
-    // --- Add product manually ---
+    // --- Dodanie produktu ręcznie ---
     $('#dodaj-produkt').on('click', () => {
         addProductRow();
     });
 
-    // --- EAN Scanner ---
+    // --- Obsługa skanera EAN ---
     const scanner = new Html5Qrcode("reader");
     let isScanning = false;
 
@@ -244,6 +244,7 @@ $(document).ready(function () {
         });
     }
 
+    // --- Rozpoczęcie skanowania ---
     $('#start-scan').on('click', () => {
         if (isScanning) return;
 

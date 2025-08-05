@@ -11,7 +11,7 @@ class Zamowienie extends Model
     
     protected $table = 'zamowienia';
 
-    protected $fillable = ['data_realizacji', 'automat_id']; // pola, które można masowo przypisywać
+    protected $fillable = ['data_realizacji', 'automat_id']; 
 
     public $timestamps = false;
 
@@ -22,11 +22,11 @@ class Zamowienie extends Model
     public function produkty()
     {
         return $this->belongsToMany(Produkt::class, 'produkt_zamowienie')
-                    ->withPivot('ilosc'); // relacja z produktami przez tabelę przestawną
+                    ->withPivot('ilosc'); 
     }
 
     public function automat()
     {
-        return $this->belongsTo(Automat::class, 'automat_id'); // relacja z modelem Automat
+        return $this->belongsTo(Automat::class, 'automat_id'); 
     }
 }
