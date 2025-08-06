@@ -75,8 +75,10 @@
 
             @if($automat)
                 <div class="pt-6 border-t border-gray-700">
-                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
-                       📋 Przejdź do bułek i innych
+                    <p class="mb-2 text-white font-semibold text-xl">🛒 Przejdź do zamawiania bułek</p>
+                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}"
+                    class="inline-flex items-center px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
+                    Bułeczki 🍞
                     </a>
                 </div>
             @endif
