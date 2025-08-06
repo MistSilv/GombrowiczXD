@@ -25,7 +25,7 @@
                     <div>
                         <label for="email" class="block text-sm font-medium leading-5 text-gray-200">Adres email</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="email" name="email" placeholder="user@example.com" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-500 transition duration-150 ease-in-out sm:text-sm sm:leading-5" value="{{ old('email') }}">
+                            <input id="email" name="email" placeholder="user@example.com" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500  transition duration-150 ease-in-out sm:text-sm sm:leading-5" value="{{ old('email') }}">
                         </div>
                         @error('email')
                             <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie emaila -->
@@ -35,7 +35,7 @@
                     <div class="mt-6">
                         <label for="password" class="block text-sm font-medium leading-5 text-gray-200">Hasło</label>
                         <div class="mt-1 rounded-md shadow-sm">
-                            <input id="password" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-500 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+                            <input id="password" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-700 bg-black text-white rounded-md placeholder-gray-500  transition duration-150 ease-in-out sm:text-sm sm:leading-5">
                         </div>
                         @error('password')
                             <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie hasła -->

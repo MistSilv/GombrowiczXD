@@ -19,7 +19,7 @@
                     rows="5"
                     required
                     placeholder="Wpisz treść wiadomości do wysłania na Discord..."
-                    class="w-full px-4 py-3 rounded-xl bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 resize-none shadow-inner">{{ old('tresc') }}</textarea>
+                    class="w-full px-4 py-3 rounded-xl bg-slate-700 text-white border border-slate-600  placeholder-gray-400 resize-none shadow-inner">{{ old('tresc') }}</textarea>
 
                 @error('tresc')
                     <p class="text-red-400 text-sm mt-1">{{ $message }}</p>

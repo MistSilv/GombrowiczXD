@@ -16,7 +16,7 @@
                 name="data_straty"
                 value="{{ old('data_straty', date('Y-m-d')) }}"
                 required
-                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2"
             >
             @error('data_straty')
                 <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
@@ -29,7 +29,7 @@
                 id="opis"
                 name="opis"
                 rows="3"
-                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2"
             >{{ old('opis') }}</textarea>
         </div>
 
@@ -60,7 +60,7 @@
                             max="100"
                             value="{{ $produkt['ilosc'] ?? 1 }}"
                             required
-                            class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                            class="w-full sm:w-20 border border-gray-700 bg-gray-800 text-white rounded px-3 py-2"
                         >
                         <button type="button" class="remove-produkt bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700 transition">
                             X
@@ -74,7 +74,7 @@
                 type="text"
                 id="szukaj-produkt"
                 placeholder="Szukaj produktu..."
-                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                class="w-full border border-gray-700 bg-gray-800 text-white rounded px-3 py-2"
                 autocomplete="off"
             >
             <ul id="lista-podpowiedzi" class="absolute bg-white text-black max-h-40 overflow-auto border border-gray-600 rounded w-full z-50 hidden"></ul>

@@ -13,7 +13,7 @@
         <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3">
             <label class="block text-white font-semibold mb-2 text-sm">Filtruj po nazwie:</label>
             <input id="filterNazwa" type="text" wire:keydown.debounce.300ms="$set('filterNazwa', $event.target.value)"
-                   class="w-full px-4 py-2 rounded-lg bg-white/90 border-0 text-gray-800 focus:ring-2 focus:ring-blue-500"
+                   class="w-full px-4 py-2 rounded-lg bg-white/90 border-0 text-gray-800"
                    placeholder="Wpisz nazwę produktu">
         </div>
 
@@ -21,7 +21,7 @@
         <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3">
             <label class="block text-white font-semibold mb-2 text-sm">Filtruj po kodzie EAN:</label>
             <input id="filterEan" type="text" wire:keydown.debounce.300ms="$set('filterEan', $event.target.value)"
-                   class="w-full px-4 py-2 rounded-lg bg-white/90 border-0 text-gray-800 focus:ring-2 focus:ring-blue-500"
+                   class="w-full px-4 py-2 rounded-lg bg-white/90 border-0 text-gray-800"
                    placeholder="Wpisz kod EAN">
         </div>
 

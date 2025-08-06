@@ -12,7 +12,7 @@
             <div class="mb-4">
                 <label for="email" class="block text-gray-200 mb-1">E-mail</label>
                 <input id="email" type="email" name="email" required autofocus
-                    class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
+                    class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700">
                 @error('email')
                     <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie emaila -->
                 @enderror

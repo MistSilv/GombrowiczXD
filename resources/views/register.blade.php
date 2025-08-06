@@ -27,7 +27,7 @@
         <div class="mb-4">
             <label for="name" class="block text-gray-200 mb-1">Imię i nazwisko</label>
             <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
-                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
+                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 ">
             @error('name')
                 <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie imienia i nazwiska -->
             @enderror
@@ -36,7 +36,7 @@
         <div class="mb-4">
             <label for="email" class="block text-gray-200 mb-1">E-mail</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
+                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 ">
             @error('email')
                 <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie emaila -->
             @enderror
@@ -45,7 +45,7 @@
         <div class="mb-4">
             <label for="password" class="block text-gray-200 mb-1">Hasło</label>
             <input id="password" type="password" name="password" required
-                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
+                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 ">
             @error('password')
                 <span class="text-red-400 text-sm">{{ $message }}</span> <!-- komunikat o błędzie hasła -->
             @enderror
@@ -54,13 +54,13 @@
         <div class="mb-4">
             <label for="password_confirmation" class="block text-gray-200 mb-1">Powtórz hasło</label>
             <input id="password_confirmation" type="password" name="password_confirmation" required
-                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
+                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 ">
         </div>
 
         <div class="mb-6"> <!-- pole wyboru roli użytkownika -->
             <label for="role" class="block text-gray-200 mb-1">Rola</label>
             <select id="role" name="role" required
-                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500">
+                class="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 ">
                 <option value="produkcja" {{ old('role') == 'produkcja' ? 'selected' : '' }}>Produkcja</option>
                 <option value="serwis" {{ old('role') == 'serwis' ? 'selected' : '' }}>Serwis</option>
                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>

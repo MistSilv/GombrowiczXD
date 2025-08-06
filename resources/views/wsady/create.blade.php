@@ -1,4 +1,4 @@
-<x-layout>
+ <x-layout>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <div class="max-w-3xl mx-auto p-6 bg-gray-900 rounded-2xl shadow-lg">
@@ -33,7 +33,7 @@
                     <input
                         type="text"
                         name="produkty[0][tw_nazwa]"
-                        class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                        class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400"
                         placeholder="Wpisz nazwę produktu"
                         required
                         autocomplete="off">
@@ -47,7 +47,7 @@
                             type="number"
                             name="produkty[0][ilosc]"
                             min="1" max="3000"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white"
                             placeholder="Ilość"
                             required
                             value="1">
@@ -72,26 +72,20 @@
                     Dodaj wsad
                 </button>
             </div>
-            <div class="pt-4 border-t border-gray-700 flex flex-col md:flex-row md:items-center gap-3">
-                @if($automat)
-                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
-                    📋 Przejdź do bułek i innych
-                    </a>
 
-                    <a href="{{ route('straty.create', ['automat_id' => $automat->id]) }}" 
-                    class="inline-flex max-w-max px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
-                        Wprowadź straty
+            @if($automat)
+                <div class="pt-6 border-t border-gray-700">
+                    <a href="{{ route('zamowienia.create', ['automat_id' => $automat->id]) }}" class="inline-flex items-center px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
+                       📋 Przejdź do bułek i innych
                     </a>
-                
-                @endif
-            </div>
+                </div>
+            @endif
         </form>
     </div>
 
     <script>
         window._produkty = @json($produkty);
     </script>
-
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('js/wsady-create.js') }}"></script>

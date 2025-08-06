@@ -17,13 +17,13 @@
                     <div class="space-y-2">
                         <label for="tw_nazwa" class="block text-white font-semibold">Nazwa produktu:</label>
                         <input type="text" name="tw_nazwa" id="tw_nazwa" required 
-                               class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                               class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600  transition">
                     </div>
 
                     <div class="space-y-2">
                         <label for="tw_idabaco" class="block text-white font-semibold">ID Abaco (opcjonalnie):</label>
                         <input type="text" name="tw_idabaco" id="tw_idabaco" 
-                               class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                               class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600  transition">
                     </div>
 
                     <input type="hidden" name="is_wlasny" value="1">
@@ -52,20 +52,20 @@
                     <div class="space-y-2">
                         <label for="tw_nazwa_niewlasny" class="block text-white font-semibold">Nazwa produktu:</label>
                         <input type="text" name="tw_nazwa" id="tw_nazwa_niewlasny" required
-                                class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 transition">
                     </div>
 
                     <div class="space-y-2">
                         <label for="tw_idabaco_niewlasny" class="block text-white font-semibold">ID Abaco (opcjonalnie):</label>
                         <input type="text" name="tw_idabaco" id="tw_idabaco_niewlasny"
-                                class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 transition">
                     </div>
 
                     <div class="space-y-2">
                         <label for="ean_codes" class="block text-white font-semibold">EAN:</label>
                         <input type="text" name="ean_codes" id="ean_codes" maxlength="13" required
                                placeholder="Wprowadź EAN (maksymalnie 13 znaków)"
-                                class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 transition">
                     </div>
 
                     <input type="hidden" name="is_wlasny" value="0">
