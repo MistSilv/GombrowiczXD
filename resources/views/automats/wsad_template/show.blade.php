@@ -45,7 +45,7 @@
                                         <form method="POST" action="{{ route('wsad-template.activate', $template->id) }}" class="flex-shrink-0">
                                             @csrf
                                             <button type="submit" class="bg-green-800 hover:bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs sm:text-sm whitespace-nowrap">
-                                                ✅ Aktywny
+                                                ✅ Aktywuj
                                             </button>
                                         </form>
                                     @else
