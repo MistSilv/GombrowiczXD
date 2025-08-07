@@ -16,5 +16,11 @@ class Automat extends Model
     {
         return $this->hasMany(Zamowienie::class,'vending_machine_id'); 
     }
+
+    public function wsadTemplates()
+    {
+        return $this->hasMany(WsadTemplate::class);
+    }
+
 }
 

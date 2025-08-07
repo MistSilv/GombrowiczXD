@@ -19,6 +19,23 @@
             <div id="scan-result" class="mt-3 text-green-400 font-medium"></div>
         </div>
 
+                {{-- Dropdown wyboru szablonu --}}
+        @if(isset($aktywneSzablony) && $aktywneSzablony->count())
+            <form method="GET" action="{{ route('wsady.create') }}" class="mb-6">
+                @if($automat)
+                    <input type="hidden" name="automat_id" value="{{ $automat->id }}">
+                @endif
+                <label for="wsad_template_id" class="block mb-2 text-white font-semibold">Wybierz szablon wsadu:</label>
+                <select name="wsad_template_id" id="wsad_template_id" class="w-full max-w-xs p-2 rounded bg-gray-700 text-white">
+                    <option value="">-- wybierz szablon --</option>
+                    @foreach($aktywneSzablony as $template)
+                        <option value="{{ $template->id }}" @if(request('wsad_template_id') == $template->id) selected @endif>{{ $template->nazwa }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">Załaduj szablon</button>
+            </form>
+        @endif
+
        <form action="{{ route('wsady.store') }}" method="POST" class="space-y-6">
         @csrf
 
@@ -84,6 +101,17 @@
             @endif
         </form>
     </div>
+
+    <script>
+        window._initialProducts = @json($wsadProdukty->map(function($p) {
+            return [
+                'produkt_id' => is_object($p) ? $p->id : $p['produkt_id'],
+                'tw_nazwa' => is_object($p) ? $p->tw_nazwa : $p['tw_nazwa'],
+                'ilosc' => is_object($p) ? ($p->pivot->ilosc ?? 1) : $p['ilosc']
+            ];
+        }));
+    </script>
+
 
     <script>
         window._produkty = @json($produkty);

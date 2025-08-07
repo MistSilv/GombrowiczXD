@@ -11,7 +11,9 @@ use App\Http\Controllers\{
     Auth\ResetPasswordController,
     LoginController,
     WsadController,
-    ProduktController
+    ProduktController,
+    WsadTemplateController,
+
 };
 use App\Models\Wsad;
 
@@ -79,4 +81,21 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/function-page', function () { return view('FunctionPage'); })->name('function.page');
 
+    Route::get('/wsad-template/create/{automat}', [WsadTemplateController::class, 'create'])->name('wsad-template.create');
+    Route::get('/automats/wsad-template', [WsadTemplateController::class, 'index'])->name('wsad-template.index');
+    Route::get('/automats/wsad-template/show/{automat}', [WsadTemplateController::class, 'show'])->name('wsad-template.show');
+    Route::post('/wsad-template/{template}/update-ilosc', [WsadTemplateController::class, 'updateIlosc'])->name('wsad-template.update-ilosc');
+
+
+    Route::post('/wsad-template/{template}/full-update', [WsadTemplateController::class, 'fullUpdate'])->name('wsad-template.full-update');
+
+    // Zmiana nazwy szablonu
+    Route::patch('/wsad-template/{template}', [WsadTemplateController::class, 'update'])->name('wsad-template.update');
+    // Usunięcie szablonu
+    Route::delete('/wsad-template/{template}', [WsadTemplateController::class, 'destroy'])->name('wsad-template.destroy');
+    // Ustawienie jako aktywny
+    Route::post('/wsad-template/{template}/activate', [WsadTemplateController::class, 'activate'])->name('wsad-template.activate');
+    Route::post('/wsad-template/{template}/deactivate', [WsadTemplateController::class, 'deactivate'])->name('wsad-template.deactivate');
+    Route::delete('/wsad-template/{template}/remove-product/{produkt}', [WsadTemplateController::class, 'removeProduct'])->name('wsad-template.remove-product');
+    Route::post('/wsad-template', [WsadTemplateController::class, 'store'])->name('wsad-template.store');
 });

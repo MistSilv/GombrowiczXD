@@ -1,3 +1,5 @@
+let index = 0;
+
 $(document).ready(function () {
     const $globalSearchInput = $('#szukaj-produkt');
     const $globalSuggestions = $('#lista-podpowiedzi');
@@ -7,6 +9,13 @@ $(document).ready(function () {
     let index = $productContainer.children().length || 1;
 
     const produkty = window._produkty || [];
+
+    if (window._initialProducts && window._initialProducts.length) {
+    window._initialProducts.forEach(prod => {
+        addProductRow(prod.produkt_id, prod.tw_nazwa, prod.ilosc);
+    });
+}
+
 
     // --- Globalne wyszukiwanie z użyciem AJAX ---
     $globalSearchInput.on('input', function () {
@@ -268,3 +277,5 @@ $(document).ready(function () {
             .catch(err => alert("Błąd pobierania kamer: " + err));
     });
 });
+
+

@@ -6,6 +6,7 @@ use App\Models\Wsad;
 use App\Models\Produkt;
 use App\Models\ProduktWsad;
 use App\Models\Automat;
+use App\Models\WsadTemplate; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -48,6 +49,27 @@ class WsadController extends Controller
     }
 
 
+    // public function create(Request $request)
+    // {
+    //     $automat = null;
+    //     if ($request->has('automat_id')) {
+    //         $automat = Automat::find($request->get('automat_id'));
+    //     }
+
+    //     $produkty = Produkt::orderBy('tw_nazwa')->get();
+
+    //     // Zawsze ustawiamy kolekcję, nawet pustą
+    //     $wsadProdukty = collect();
+    //     if ($automat) {
+    //         $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest('data_wsadu')->first();
+    //         if ($ostatniWsad) {
+    //             $wsadProdukty = $ostatniWsad->produkty()->withPivot('ilosc')->get();
+    //         }
+    //     }
+
+    //     return view('wsady.create', compact('automat', 'produkty', 'wsadProdukty'));
+    // }
+
     public function create(Request $request)
     {
         $automat = null;
@@ -57,16 +79,34 @@ class WsadController extends Controller
 
         $produkty = Produkt::orderBy('tw_nazwa')->get();
 
-        // Zawsze ustawiamy kolekcję, nawet pustą
+        // Pobierz aktywne szablony dla automatu (jeśli automat istnieje)
+        $aktywneSzablony = $automat ? WsadTemplate::where('automat_id', $automat->id)->where('is_active', true)->get() : collect();
+
+        // Produkty do formularza (z szablonu, jeśli wybrano)
         $wsadProdukty = collect();
-        if ($automat) {
+
+        if ($request->filled('wsad_template_id')) {
+            $template = WsadTemplate::with('produkty.produkt')->find($request->wsad_template_id);
+            if ($template) {
+                foreach ($template->produkty as $tp) {
+                    if ($tp->produkt) {
+                        $wsadProdukty->push([
+                            'produkt_id' => $tp->produkt->id,
+                            'tw_nazwa' => $tp->produkt->tw_nazwa,
+                            'ilosc' => $tp->ilosc,
+                        ]);
+                    }
+                }
+            }
+        } else if ($automat) {
+            // Alternatywnie, domyślnie pokazuj produkty z ostatniego wsadu
             $ostatniWsad = Wsad::where('automat_id', $automat->id)->latest('data_wsadu')->first();
             if ($ostatniWsad) {
                 $wsadProdukty = $ostatniWsad->produkty()->withPivot('ilosc')->get();
             }
         }
 
-        return view('wsady.create', compact('automat', 'produkty', 'wsadProdukty'));
+        return view('wsady.create', compact('automat', 'produkty', 'aktywneSzablony', 'wsadProdukty'));
     }
 
     public function store(Request $request)
@@ -155,4 +195,6 @@ class WsadController extends Controller
 
         return view('wsady.archiwum', compact('wsady'));
     }
+
+    
 }

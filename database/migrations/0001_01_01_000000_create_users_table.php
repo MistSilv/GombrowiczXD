@@ -133,6 +133,21 @@ return new class extends Migration
             $table->longText('exception');
             $table->timestamp('failed_at')->useCurrent();
         });
+
+        Schema::create('wsad_template', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('automat_id')->constrained('automats')->onDelete('cascade');
+            $table->boolean('is_active')->default(true); // true=aktywny, false=nieaktywny
+            $table->string('nazwa')->nullable(); // np. "Domyślny A"
+        });
+
+        Schema::create('wsad_template_produkt', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('wsad_template_id')->constrained('wsad_template')->onDelete('cascade');
+            $table->foreignId('produkt_id')->constrained('produkty')->onDelete('cascade');
+            $table->integer('ilosc');
+        });
+
     }
 
     /**
@@ -156,5 +171,6 @@ return new class extends Migration
         Schema::dropIfExists('cache');
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('failed_jobs');
+        schema::dropIfExists('wsad_template');
     }
 };
