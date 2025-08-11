@@ -14,6 +14,12 @@ $(document).ready(function () {
     window._initialProducts.forEach(prod => {
         addProductRow(prod.produkt_id, prod.tw_nazwa, prod.ilosc);
     });
+
+     if (window.location.search.includes('wsad_template_id')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('wsad_template_id');
+        window.history.replaceState({}, '', url);
+    }
 }
 
 
@@ -276,6 +282,7 @@ $(document).ready(function () {
             })
             .catch(err => alert("Błąd pobierania kamer: " + err));
     });
+
 });
 
 

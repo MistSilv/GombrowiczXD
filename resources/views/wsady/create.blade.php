@@ -103,17 +103,6 @@
     </div>
 
     <script>
-        window._initialProducts = @json($wsadProdukty->map(function($p) {
-            return [
-                'produkt_id' => is_object($p) ? $p->id : $p['produkt_id'],
-                'tw_nazwa' => is_object($p) ? $p->tw_nazwa : $p['tw_nazwa'],
-                'ilosc' => is_object($p) ? ($p->pivot->ilosc ?? 1) : $p['ilosc']
-            ];
-        }));
-    </script>
-
-
-    <script>
         window._produkty = @json($produkty);
     </script>
     <script src="https://unpkg.com/html5-qrcode"></script>
