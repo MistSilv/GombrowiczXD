@@ -10,10 +10,6 @@ $(document).ready(function () {
 
     const produkty = window._produkty || [];
 
-    if (window._initialProducts && window._initialProducts.length) {
-    window._initialProducts.forEach(prod => {
-        addProductRow(prod.produkt_id, prod.tw_nazwa, prod.ilosc);
-    });
 }
 
 
