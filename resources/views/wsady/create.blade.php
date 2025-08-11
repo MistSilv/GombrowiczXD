@@ -119,4 +119,18 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('js/wsady-create.js') }}"></script>
+
+<script>
+    window._initialProducts = @json(
+        request('wsad_template_id')
+            ? $wsadProdukty->map(function($p) {
+                return [
+                    'produkt_id' => is_object($p) ? $p->id : $p['produkt_id'],
+                    'tw_nazwa' => is_object($p) ? $p->tw_nazwa : $p['tw_nazwa'],
+                    'ilosc' => is_object($p) ? ($p->pivot->ilosc ?? 1) : $p['ilosc']
+                ];
+            })
+            : []
+    );
+</script>
 </x-layout>
