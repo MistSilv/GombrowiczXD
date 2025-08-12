@@ -13,6 +13,7 @@ use App\Http\Controllers\{
     WsadController,
     ProduktController,
     WsadTemplateController,
+    ZamowienieTemplateController,
 
 };
 use App\Models\Wsad;
@@ -98,4 +99,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/wsad-template/{template}/deactivate', [WsadTemplateController::class, 'deactivate'])->name('wsad-template.deactivate');
     Route::delete('/wsad-template/{template}/remove-product/{produkt}', [WsadTemplateController::class, 'removeProduct'])->name('wsad-template.remove-product');
     Route::post('/wsad-template', [WsadTemplateController::class, 'store'])->name('wsad-template.store');
+
+
+    Route::prefix('produkty/templates')->name('produkty.templates.')->group(function () {
+        Route::get('/', [ZamowienieTemplateController::class, 'index'])->name('index');
+        Route::get('/create', [ZamowienieTemplateController::class, 'create'])->name('create');
+        Route::post('/', [ZamowienieTemplateController::class, 'store'])->name('store');
+        Route::get('/{id}', [ZamowienieTemplateController::class, 'show'])->name('show');
+    });
+
+
+
 });

@@ -103,6 +103,7 @@ return new class extends Migration
             $table->integer('ilosc');
             $table->timestamps();
         });
+
         Schema::create('jobs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('queue')->index();
@@ -148,6 +149,20 @@ return new class extends Migration
             $table->integer('ilosc');
         });
 
+        Schema::create('zamowienie_template', function (Blueprint $table) {
+            $table->id();
+            $table->boolean('is_active')->default(true); // true=aktywny, false=nieaktywny
+            $table->string('nazwa')->nullable(); // np. "Szablon ogólny A"
+        });
+
+        Schema::create('zamowienie_template_produkt', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('zamowienie_template_id')->constrained('zamowienie_template')->onDelete('cascade');
+            $table->foreignId('produkt_id')->constrained('produkty')->onDelete('cascade');
+            $table->integer('ilosc');
+        });
+
+
     }
 
     /**
@@ -172,5 +187,8 @@ return new class extends Migration
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('failed_jobs');
         schema::dropIfExists('wsad_template');
+        Schema::dropIfExists('wsad_template_produkt');
+        Schema::dropIfExists('zamowienie_template');
+        Schema::dropIfExists('zamowienie_template_produkt');
     }
 };

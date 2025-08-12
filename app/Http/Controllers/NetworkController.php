@@ -37,7 +37,7 @@ class NetworkController extends Controller
             }
         }
 
-        Log::info("Sprawdzenie połączenia: IP {$ip}, typ: {$connectionType}, dostęp do zasobu: {$internalResourceAccess}");
+        //Log::info("Sprawdzenie połączenia: IP {$ip}, typ: {$connectionType}, dostęp do zasobu: {$internalResourceAccess}");
 
         return response()->json([
             'connection_type' => $connectionType,
@@ -51,7 +51,7 @@ class NetworkController extends Controller
     public function getClientIp(Request $request)
     {
         $ip = $request->ip();
-        Log::info("Aktualne IP klienta: {$ip}");
+        //Log::info("Aktualne IP klienta: {$ip}");
         return response()->json([
             'client_ip' => $ip,
         ]);

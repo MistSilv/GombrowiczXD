@@ -12,6 +12,7 @@ use App\Mail\ZamowienieMail;
 use App\Exports\ZamowienieExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class ProduktController extends Controller
 {
@@ -101,6 +102,8 @@ class ProduktController extends Controller
 
     public function zapiszZamowienie(Request $request)
     {
+        Log::info('Start store Zamowienie', ['request_data' => $request->all()]);
+        
         $validated = $request->validate([
             'zamowienieId' => 'nullable|integer',
             'produkty_json' => 'required|json',
