@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
         //$this->call(EmulatorOperacjiSeeder::class);
 
         //$this->call(UpdateProduktyEanSeeder::class);
-        $this->call(UpdateProduktyEanByNameSeeder::class);
+        //$this->call(UpdateProduktyEanByNameSeeder::class);
+        $this->call(ProduktyEanSeeder::class);
 
     }
 }
