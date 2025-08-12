@@ -268,3 +268,30 @@ document.getElementById('zamowienieForm').addEventListener('submit', function(e)
 document.addEventListener('DOMContentLoaded', () => {
     updateAvailableProducts();
 });
+
+document.getElementById('zaladujSzablon').addEventListener('click', function() {
+    const select = document.getElementById('zamowienie_template_id');
+    const templateId = select.value;
+    if (!templateId) return;
+
+    // Usuń wszystkie produkty z formularza
+    const tbody = document.querySelector('#produkty-lista tbody');
+    tbody.innerHTML = '';
+
+    fetch('/api/produkty/template/' + templateId)
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(prod => {
+                let product = window._produkty.find(p => p.id === prod.id);
+                if (!product) {
+                    window._produkty.push({
+                        id: prod.id,
+                        tw_nazwa: prod.tw_nazwa,
+                        tw_idabaco: prod.tw_idabaco,
+                        ean_codes: []
+                    });
+                }
+                addProductRow(prod.id, prod.ilosc);
+            });
+        });
+});

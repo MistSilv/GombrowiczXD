@@ -3,8 +3,23 @@
         <!-- Sekcja deficytów -->
             @livewire('deficyty-tabela')
 
+            {{-- Wybór szablonu zamówienia --}}
+
+
             <!-- Formularz zamówień -->
         <div class="bg-gray-900 rounded-lg shadow-md p-3 sm:p-4 mb-6 text-sm">
+            @if(isset($aktywneSzablony) && $aktywneSzablony->count())
+                <div class="mb-6">
+                    <label for="zamowienie_template_id" class="block mb-2 text-white font-semibold">Wybierz szablon zamówienia:</label>
+                    <select name="zamowienie_template_id" id="zamowienie_template_id" class="w-full max-w-xs p-2 rounded bg-gray-700 text-white">
+                        <option value="">-- wybierz szablon --</option>
+                        @foreach($aktywneSzablony as $template)
+                            <option value="{{ $template->id }}">{{ $template->nazwa }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" id="zaladujSzablon" class="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">Załaduj szablon</button>
+                </div>
+            @endif
             <form action="{{ route('produkty.zamowienie.zapisz') }}" method="POST" class="space-y-4" id="zamowienieForm">
                 @csrf
                 <input type="hidden" name="zamowienieId" value="{{ $zamowienieId ?? '' }}">
@@ -94,6 +109,16 @@
             </form>
         </div>
     </div>
+    
+    @if(isset($templateProdukty) && $templateProdukty->count())
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @foreach($templateProdukty as $prod)
+                addProductRow({{ $prod['id'] }}, {{ $prod['ilosc'] }});
+            @endforeach
+        });
+    </script>
+@endif
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

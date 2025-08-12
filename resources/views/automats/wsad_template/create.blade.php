@@ -80,9 +80,9 @@
                     💾 Zapisz szablon
                 </button>
                 <a href="{{ route('wsad-template.show', ['automat' => $automat->id]) }}"
-                class="px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
-                Powrót
-            </a>
+                    class="px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
+                    Powrót
+                </a>
             </div>
         </form>
     </div>

@@ -6,6 +6,15 @@
 
         <form action="{{ route('produkty.templates.store') }}" method="POST" class="space-y-6" id="zamowienieForm">
             @csrf
+            <div class="flex items-center space-x-3">
+                <label for="is_wlasny" class="text-white font-semibold">Zamówienie na produkty własne</label>
+                <button type="button" id="toggleIsWlasny" aria-pressed="false" 
+                    class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    <span class="sr-only">Toggle zamówienie własne</span>
+                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" id="toggleKnob"></span>
+                </button>
+                <input type="hidden" name="is_wlasny" id="is_wlasny" value="0">
+            </div>
 
             <!-- Pole nazwa szablonu -->
             <div>
@@ -91,10 +100,10 @@
                     class="px-4 py-2 bg-blue-800 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
                     💾 Zapisz szablon
                 </button>
-                {{-- <a href="{{ route('templates.index') }}"
+                <a href="{{ route('produkty.templates.index') }}"
                    class="px-4 py-2 bg-yellow-800 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-colors">
                    Powrót
-                </a> --}}
+                </a>
             </div>
         </form>
     </div>
@@ -102,5 +111,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="application/json" id="produkty-data">@json($produkty)</script>
-    <script src="{{ asset('js/niewlasne.js') }}"></script>
+>
+    <script src="{{ asset('js/zamowienia-template.js') }}"></script>
 </x-layout>

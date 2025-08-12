@@ -9,7 +9,7 @@ class ZamowienieTemplate extends Model
     protected $table = 'zamowienie_template';  // nazwa tabeli, którą utworzysz w migracji
     public $timestamps = false;
 
-    protected $fillable = ['nazwa']; // tylko nazwa, bo to dla zamówień niewłasnych (bez automat_id)
+    protected $fillable = ['nazwa', 'is_wlasny']; // tylko nazwa, bo to dla zamówień niewłasnych (bez automat_id)
     
 
     public function produkty()

@@ -101,7 +101,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/wsad-template', [WsadTemplateController::class, 'store'])->name('wsad-template.store');
 
 
-   
+Route::get('/produkty/niewlasne/zamowienie/create', [ProduktController::class, 'createFromTemplate'])->name('produkty.zamowienie.create');
     Route::prefix('produkty/templates')->name('produkty.templates.')->group(function () {
         Route::get('/', [ZamowienieTemplateController::class, 'index'])->name('index');
         Route::get('/create', [ZamowienieTemplateController::class, 'create'])->name('create');

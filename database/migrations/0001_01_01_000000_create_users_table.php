@@ -153,6 +153,7 @@ return new class extends Migration
             $table->id();
             $table->boolean('is_active')->default(true); // true=aktywny, false=nieaktywny
             $table->string('nazwa')->nullable(); // np. "Szablon ogólny A"
+            $table->boolean('is_wlasny')->default(false); // true=szablon własny, false=obcy
         });
 
         Schema::create('zamowienie_template_produkt', function (Blueprint $table) {

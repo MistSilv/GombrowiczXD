@@ -20,6 +20,9 @@ Route::post('/telegram-callback', [TelegramController::class, 'handleCallback'])
 Route::get('/network/check', [NetworkController::class, 'check']);
 Route::get('/network/ip', [NetworkController::class, 'getClientIp']);
 
+
+Route::get('/produkty/template/{id}', [ProduktController::class, 'getTemplateProdukty']);
+
 // Route::post('/report-network', function (Request $request) {
 //     Log::info('Dostęp do sieci lokalnej: ' . ($request->boolean('hasLocalAccess') ? 'TAK' : 'NIE'));
 

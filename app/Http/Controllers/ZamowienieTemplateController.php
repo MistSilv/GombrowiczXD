@@ -29,13 +29,15 @@ class ZamowienieTemplateController extends Controller
 
     // Zapisz nowy szablon wraz z produktami
 
-    public function store(Request $request)
+     public function store(Request $request)
     {
         Log::info('Start store ZamowienieTemplate', ['request_data' => $request->all()]);
 
         $validated = $request->validate([
             'nazwa' => 'required|string|max:255',
-            'produkty_json' => 'required|json'
+            'produkty_json' => 'required|json',
+            'is_wlasny' => 'required|boolean',
+            'ilosci' => 'required|array',
         ]);
 
         DB::beginTransaction();
@@ -44,48 +46,62 @@ class ZamowienieTemplateController extends Controller
             // Tworzymy szablon
             $templateId = DB::table('zamowienie_template')->insertGetId([
                 'nazwa' => $validated['nazwa'],
-
+                'is_wlasny' => $validated['is_wlasny'],
             ]);
 
             $produkty = json_decode($validated['produkty_json'], true);
+            $ilosci = $validated['ilosci'];
+            $isWlasny = $validated['is_wlasny'];
 
-            foreach ($produkty as $produktData) {
-                Log::info('Przetwarzam produkt', $produktData);
-
-                // Produkt — jeśli nie istnieje, tworzymy
-                $produkt = Produkt::firstOrCreate(
-                    ['tw_idabaco' => $produktData['tw_idabaco']],
-                    [
-                        'tw_nazwa' => $produktData['tw_nazwa'] ?? 'Brak nazwy',
-                        'is_wlasny' => false
-                    ]
-                );
-
-                // Dodaj EAN-y tylko przy tworzeniu nowego
-                if ($produkt->wasRecentlyCreated && !empty($produktData['ean_codes'])) {
-                    foreach ($produktData['ean_codes'] as $kodEan) {
-                        EanCode::firstOrCreate([
-                            'produkt_id' => $produkt->id,
-                            'kod_ean' => $kodEan
-                        ]);
-                    }
+            if ($isWlasny) {
+                Log::info('Try wlasny');
+                // Jeśli własne produkty — iterujemy po ilosci (klucz to id produktu)
+                foreach ($ilosci as $produktId => $ilosc) {
+                    DB::table('zamowienie_template_produkt')->updateOrInsert(
+                        [
+                            'zamowienie_template_id' => $templateId,
+                            'produkt_id' => $produktId,
+                        ],
+                        ['ilosc' => $ilosc]
+                    );
                 }
+            } else {
+                Log::info('Try nie wlasny');
+                // Produkty importowane - szukamy lub tworzymy po tw_idabaco
+                foreach ($produkty as $produktData) {
+                    $produkt = Produkt::firstOrCreate(
+                        ['tw_idabaco' => $produktData['tw_idabaco']],
+                        [
+                            'tw_nazwa' => $produktData['tw_nazwa'] ?? 'Brak nazwy',
+                            'is_wlasny' => false,
+                        ]
+                    );
 
-                // Zapis do pivot table szablon–produkt
-                DB::table('zamowienie_template_produkt')->updateOrInsert(
-                    [
-                        'zamowienie_template_id' => $templateId, // ✅ poprawna kolumna
-                        'produkt_id' => $produkt->id
-                    ],
-                    ['ilosc' => $produktData['ilosc']]
-                );
+                    if ($produkt->wasRecentlyCreated && !empty($produktData['ean_codes'])) {
+                        foreach ($produktData['ean_codes'] as $kodEan) {
+                            EanCode::firstOrCreate([
+                                'produkt_id' => $produkt->id,
+                                'kod_ean' => $kodEan,
+                            ]);
+                        }
+                    }
 
+                    $ilosc = $ilosci[$produkt->id] ?? ($produktData['ilosc'] ?? 0);
+
+                    DB::table('zamowienie_template_produkt')->updateOrInsert(
+                        [
+                            'zamowienie_template_id' => $templateId,
+                            'produkt_id' => $produkt->id,
+                        ],
+                        ['ilosc' => $ilosc]
+                    );
+                }
             }
 
             DB::commit();
 
             return redirect()
-                ->route('templates.show', $templateId)
+                ->route('produkty.templates.create', $templateId)
                 ->with('success', 'Szablon zamówienia zapisany pomyślnie');
 
         } catch (\Exception $e) {

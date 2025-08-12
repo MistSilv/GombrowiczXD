@@ -74,17 +74,25 @@ class ProduktController extends Controller
             'query' => request()->query(),
         ]);
 
+        $aktywneSzablony = \App\Models\ZamowienieTemplate::where('is_active', 1)->where('is_wlasny', 0)->get();
+
+
         return view('produkty.niewlasne_edit_zamowienie', [
             'produkty' => Produkt::where('is_wlasny', false)
                             ->select('id', 'tw_idabaco', 'tw_nazwa')
                             ->get(),
             'deficyty' => $paginated,
             'zamowienieId' => null,
+            'aktywneSzablony' => $aktywneSzablony,
+            
         ]);
     }
 
     public function edytujZamowienie($zamowienieId)
     {
+         if (!is_numeric($zamowienieId)) {
+            abort(404, 'Nieprawidłowy identyfikator zamówienia.');
+        }
         $produkty = DB::table('produkty')
             ->leftJoin('produkt_zamowienie', function($join) use ($zamowienieId) {
                 $join->on('produkty.id', '=', 'produkt_zamowienie.produkt_id')
@@ -284,4 +292,60 @@ class ProduktController extends Controller
 
         return response()->json($results);
     }
+
+    public function createFromTemplate(Request $request)
+    {
+        $templateId = $request->get('zamowienie_template_id');
+        $aktywneSzablony = \App\Models\ZamowienieTemplate::where('is_active', 1)->where('is_wlasny', 0)->get();
+
+        $produkty = Produkt::where('is_wlasny', false)
+            ->select('id', 'tw_idabaco', 'tw_nazwa')
+            ->get();
+
+        $templateProdukty = collect();
+        if ($templateId) {
+            $template = \App\Models\ZamowienieTemplate::with('produkty.produkt')->find($templateId);
+            if ($template) {
+                foreach ($template->produkty as $tp) {
+                    if ($tp->produkt) {
+                        $templateProdukty->push([
+                            'id' => $tp->produkt->id,
+                            'tw_idabaco' => $tp->produkt->tw_idabaco,
+                            'tw_nazwa' => $tp->produkt->tw_nazwa,
+                            'ilosc' => $tp->ilosc,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return view('produkty.niewlasne_edit_zamowienie', [
+            'produkty' => $produkty,
+            'deficyty' => $this->buildDeficyty(),
+            'zamowienieId' => null,
+            'aktywneSzablony' => $aktywneSzablony,
+            'templateProdukty' => $templateProdukty,
+        ]);
+    }
+
+    public function getTemplateProdukty($id)
+    {
+        $template = \App\Models\ZamowienieTemplate::with('produkty.produkt')->find($id);
+        $produkty = [];
+        if ($template) {
+            foreach ($template->produkty as $tp) {
+                if ($tp->produkt) {
+                    $produkty[] = [
+                        'id' => $tp->produkt->id,
+                        'tw_idabaco' => $tp->produkt->tw_idabaco,
+                        'tw_nazwa' => $tp->produkt->tw_nazwa,
+                        'ilosc' => $tp->ilosc,
+                    ];
+                }
+            }
+        }
+        return response()->json($produkty);
+    }
 }
+
+
