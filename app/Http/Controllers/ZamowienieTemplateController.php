@@ -98,10 +98,48 @@ class ZamowienieTemplateController extends Controller
         }
     }
 
-    // Pokaż pojedynczy szablon
+ 
     public function show($id)
     {
         $template = ZamowienieTemplate::with('produkty.produkt')->findOrFail($id);
-        return view('produkty.templates.create');
+        return view('produkty.templates.create', [
+            'template' => $template,
+            'produkty' => $template->produkty 
+        ]);
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        $template = ZamowienieTemplate::findOrFail($id);
+
+        // Sprawdź czy przesłano ilości
+        $ilosci = $request->input('ilosci', []);
+
+        foreach ($ilosci as $pivotId => $ilosc) {
+            // Zaktualizuj ilość w tabeli pivot
+            DB::table('zamowienie_template_produkt')
+                ->where('id', $pivotId)
+                ->where('zamowienie_template_id', $template->id)
+                ->update(['ilosc' => $ilosc]);
+        }
+
+        return redirect()->route('produkty.templates.index')
+            ->with('success', 'Ilości zostały zaktualizowane.');
+    }
+
+ 
+    public function destroy($id)
+    {
+        $template = ZamowienieTemplate::findOrFail($id);
+
+        // Usuwa powiązane produkty z pivotu ręcznie
+        DB::table('zamowienie_template_produkt')->where('zamowienie_template_id', $template->id)->delete();
+
+        // Usuwa szablon
+        $template->delete();
+
+        return redirect()->route('produkty.templates.index')
+            ->with('success', 'Szablon zamówienia został usunięty.');
     }
 }

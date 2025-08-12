@@ -25,9 +25,9 @@
                 📓 Szablony wsadu
             </a>
 
-            <a href="{{ route('produkty.templates.create') }}"
+            <a href="{{ route('produkty.templates.index') }}"
                 class="block w-full px-5 py-3 bg-sky-900 hover:bg-sky-600 text-white font-bold rounded-xl text-center transition shadow-md">
-                📓 Szablon zamówienia - nowy
+                📓 Szablon zamówienia 
             </a>
 
             <a href="{{ route('capybara.show') }}"

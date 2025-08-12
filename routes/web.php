@@ -101,13 +101,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/wsad-template', [WsadTemplateController::class, 'store'])->name('wsad-template.store');
 
 
+   
     Route::prefix('produkty/templates')->name('produkty.templates.')->group(function () {
         Route::get('/', [ZamowienieTemplateController::class, 'index'])->name('index');
         Route::get('/create', [ZamowienieTemplateController::class, 'create'])->name('create');
         Route::post('/', [ZamowienieTemplateController::class, 'store'])->name('store');
         Route::get('/{id}', [ZamowienieTemplateController::class, 'show'])->name('show');
+        Route::patch('/{id}', [ZamowienieTemplateController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ZamowienieTemplateController::class, 'destroy'])->name('destroy'); 
     });
-
 
 
 });
