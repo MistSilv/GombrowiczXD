@@ -1,10 +1,11 @@
 <x-layout>
     <div class="max-w-4xl mx-auto p-4 bg-gray-900 rounded-2xl shadow-lg">
+
+        <h1 class="text-2xl font-bold mb-6 text-white text-center">Szablony zamówień</h1>
         <a href="{{ route('produkty.templates.create') }}"
         class="mb-6 px-4 py-2 bg-green-800 hover:bg-green-600 text-white font-semibold rounded-lg text-base text-left transition shadow inline-block align-middle">
             ➕ Dodaj szablon zamówienia
         </a>
-        <h1 class="text-2xl font-bold mb-6 text-white text-center">Szablony zamówień</h1>
         <div class="overflow-x-auto">
             <table class="min-w-full text-white bg-gray-800 rounded-lg overflow-hidden shadow">
                 <thead>
