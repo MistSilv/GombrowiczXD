@@ -346,6 +346,24 @@ class ProduktController extends Controller
         }
         return response()->json($produkty);
     }
+
+    public function getWlasnyTemplateProdukty($id)
+    {
+        $template = \App\Models\ZamowienieTemplate::with('produkty.produkt')->find($id);
+        $produkty = [];
+        if ($template) {
+            foreach ($template->produkty as $tp) {
+                if ($tp->produkt && $tp->produkt->is_wlasny) {
+                    $produkty[] = [
+                        'id' => $tp->produkt->id,
+                        'tw_nazwa' => $tp->produkt->tw_nazwa,
+                        'ilosc' => $tp->ilosc,
+                    ];
+                }
+            }
+        }
+        return response()->json($produkty);
+    }
 }
 
 

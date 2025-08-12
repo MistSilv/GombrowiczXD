@@ -13,6 +13,20 @@
                 <input type="hidden" name="automat_id" value="{{ $automat->id }}">
             @endif
 
+
+            {{-- Wybór szablonu zamówienia własnego --}}
+            @if(isset($wlasneSzablony) && $wlasneSzablony->count())
+                <div class="mb-6">
+                    <label for="wlasny_template_id" class="block mb-2 text-white font-semibold">Wybierz szablon produktów własnych:</label>
+                    <select name="wlasny_template_id" id="wlasny_template_id" class="w-full max-w-xs p-2 rounded bg-gray-700 text-white">
+                        <option value="">-- wybierz szablon --</option>
+                        @foreach($wlasneSzablony as $template)
+                            <option value="{{ $template->id }}">{{ $template->nazwa }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" id="zaladujWlasnySzablon" class="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">Załaduj szablon</button>
+                </div>
+            @endif
             <!-- Lista produktów -->
             <div class="space-y-4" id="produkty-lista">
                 <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end produkt-item">

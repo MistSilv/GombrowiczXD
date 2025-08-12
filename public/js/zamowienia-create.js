@@ -185,3 +185,38 @@ $(document).ready(function () {
         }
     });
 });
+
+document.getElementById('zaladujWlasnySzablon').addEventListener('click', function() {
+    const select = document.getElementById('wlasny_template_id');
+    const templateId = select.value;
+    if (!templateId) return;
+
+    // Usuń wszystkie produkty z formularza
+    const lista = document.getElementById('produkty-lista');
+    lista.innerHTML = '';
+
+    fetch('/api/produkty/wlasny-template/' + templateId)
+        .then(res => res.json())
+        .then(data => {
+            data.forEach((prod, idx) => {
+                // Dodaj produkt do formularza (przykład dla dynamicznego generowania pól)
+                const item = document.createElement('div');
+                item.className = 'flex flex-col sm:flex-row gap-3 items-start sm:items-end produkt-item';
+                item.innerHTML = `
+                    <div class="w-full sm:w-auto flex-grow">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nazwa produktu</label>
+                        <input type="text" name="produkty[${idx}][tw_nazwa]" class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400" value="${prod.tw_nazwa}" required autocomplete="off">
+                        <input type="hidden" name="produkty[${idx}][produkt_id]" value="${prod.id}" class="produkt-id-hidden">
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <div class="w-24">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Ilość</label>
+                            <input type="number" name="produkty[${idx}][ilosc]" min="1" max="3000" class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white" value="${prod.ilosc}" required>
+                        </div>
+                        <button type="button" class="h-[42px] px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors remove-item flex items-center justify-center">Usuń</button>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+        });
+});

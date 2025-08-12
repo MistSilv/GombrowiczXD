@@ -48,7 +48,7 @@ class ZamowienieController extends Controller
      */
 
 
-   public function create(Request $request)
+    public function create(Request $request)
     {
         // Pobierz tylko produkty własne dla standardowego zamówienia
         $produkty = Produkt::where('is_wlasny', true)->orderBy('tw_nazwa')->get();
@@ -56,8 +56,12 @@ class ZamowienieController extends Controller
         $automatId = $request->get('automat_id');
         $automat = $automatId ? Automat::findOrFail($automatId) : null; 
 
-        return view('zamowienia.create', compact('produkty', 'automat'));
+        // Pobierz szablony własne
+        $wlasneSzablony = \App\Models\ZamowienieTemplate::where('is_active', 1)->where('is_wlasny', 1)->get();
+
+        return view('zamowienia.create', compact('produkty', 'automat', 'wlasneSzablony'));
     }
+
 
     public function createProdukcja(Request $request)
     {
