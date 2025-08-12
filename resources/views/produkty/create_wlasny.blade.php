@@ -56,8 +56,8 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label for="tw_idabaco_niewlasny" class="block text-white font-semibold">ID Abaco (opcjonalnie):</label>
-                        <input type="text" name="tw_idabaco" id="tw_idabaco_niewlasny"
+                        <label for="tw_idabaco_niewlasny" class="block text-white font-semibold">ID Abaco:</label>
+                        <input type="text" name="tw_idabaco" id="tw_idabaco_niewlasny" required
                                 class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 transition">
                     </div>
 
