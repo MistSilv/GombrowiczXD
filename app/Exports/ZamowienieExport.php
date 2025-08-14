@@ -45,7 +45,7 @@ class ZamowienieExport implements FromCollection, WithHeadings, WithEvents, With
     public function columnFormats(): array
     {
         return [
-            'B' => NumberFormat::FORMAT_TEXT, // EAN
+            'B' => NumberFormat::FORMAT_NUMBER, // EAN
         ];
     }
 
