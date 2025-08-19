@@ -111,5 +111,8 @@ Route::get('/produkty/niewlasne/zamowienie/create', [ProduktController::class, '
         Route::delete('/{id}', [ZamowienieTemplateController::class, 'destroy'])->name('destroy'); 
     });
 
+    Route::get('/zamowienia/{zamowienie}/print', [ZamowienieController::class, 'print'])
+    ->name('zamowienia.print');
+
 
 });

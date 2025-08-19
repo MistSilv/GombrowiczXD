@@ -59,6 +59,7 @@
                                     <a href="{{ route('zamowienia.show', $zamowienie) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded">👁️</a>
                                     <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'csv']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded ">📄</a>
                                     <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'xlsx']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded ">📊</a>
+                                    <a href="{{ route('zamowienia.print', $zamowienie) }}" target="_blank"class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded">🖨️</a>
                                 </td>
                     </tr>
                     @empty

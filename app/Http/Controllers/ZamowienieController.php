@@ -27,17 +27,20 @@ class ZamowienieController extends Controller
      */
     public function index(Request $request)
     {
-        $dzisiaj = Carbon::today()->toDateString();
-        $query = Zamowienie::where(function($q) use ($dzisiaj) {
-            $q->whereNull('data_realizacji')
-            ->orWhere('data_realizacji', '>=', $dzisiaj);
-        }); // Filtruj zamówienia, które nie mają daty realizacji lub mają datę realizacji dzisiejszą lub późniejszą
+        // Bieżący miesiąc i rok
+        $currentMonth = Carbon::now()->month;
+        $currentYear  = Carbon::now()->year;
+
+        $query = Zamowienie::whereMonth('data_zamowienia', $currentMonth)
+            ->whereYear('data_zamowienia', $currentYear);
 
         if ($request->has('automat_id')) {
             $query->where('automat_id', $request->automat_id);
-        } // Sprawdź, czy automat_id jest w żądaniu i dodaj warunek
+        }
 
-        $zamowienia = $query->orderByDesc('data_zamowienia')->paginate(20)->withQueryString();
+        $zamowienia = $query->orderByDesc('data_zamowienia')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('zamowienia.index', compact('zamowienia'));
     }
@@ -136,23 +139,19 @@ class ZamowienieController extends Controller
     {
         $query = Zamowienie::query();
 
-        $minRaw = $request->min_date;
-        $maxRaw = $request->max_date;
-
         if ($request->filled('min_date') && $request->filled('max_date')) {
-            $minDate = $minRaw . ' 00:00:00';
-            $maxDate = $maxRaw . ' 23:59:59';
+            $minDate = $request->min_date . ' 00:00:00';
+            $maxDate = $request->max_date . ' 23:59:59';
             $query->whereBetween('data_zamowienia', [$minDate, $maxDate]);
-        } else {
-            if ($request->filled('min_date')) {
-                $query->where('data_zamowienia', '>=', $minRaw . ' 00:00:00');
-            }
-            if ($request->filled('max_date')) {
-                $query->where('data_zamowienia', '<=', $maxRaw . ' 23:59:59');
-            }
+        } elseif ($request->filled('min_date')) {
+            $query->where('data_zamowienia', '>=', $request->min_date . ' 00:00:00');
+        } elseif ($request->filled('max_date')) {
+            $query->where('data_zamowienia', '<=', $request->max_date . ' 23:59:59');
         }
 
-        $zamowienia = $query->orderByDesc('data_zamowienia')->paginate(20)->withQueryString();
+        $zamowienia = $query->orderByDesc('data_zamowienia')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('zamowienia.archiwum', compact('zamowienia'));
     }
@@ -216,6 +215,14 @@ class ZamowienieController extends Controller
 
         return Excel::download(new ZamowienieExport($zamowienie), "zamowienie_{$id}.csv", \Maatwebsite\Excel\Excel::CSV);
     }
+
+
+    public function print(Zamowienie $zamowienie)
+{
+    $zamowienie->load('produkty', 'automat');
+
+    return view('zamowienia.print', compact('zamowienie'));
+}
 
 
 }
