@@ -46,7 +46,7 @@
                         <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">ID</th>
                         <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Data zamówienia</th>
                         <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Data realizacji</th>
-                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Akcje</th>
+                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">⚙️</th>
                     </tr>
                 </thead>
                 <tbody class="bg-gray-900 divide-y divide-gray-700">
@@ -59,7 +59,7 @@
                                     <a href="{{ route('zamowienia.show', $zamowienie) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded">👁️</a>
                                     <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'csv']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded ">📄</a>
                                     <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'xlsx']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded ">📊</a>
-                                    <a href="{{ route('zamowienia.print', $zamowienie) }}" target="_blank"class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded">🖨️</a>
+                                    <a href="{{ route('zamowienia.print', $zamowienie) }}" target="_blank" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded">🖨️</a>
                                 </td>
                     </tr>
                     @empty
