@@ -24,8 +24,3 @@ Route::get('/network/ip', [NetworkController::class, 'getClientIp']);
 Route::get('/produkty/template/{id}', [ProduktController::class, 'getTemplateProdukty']);
 
 Route::get('/produkty/wlasny-template/{id}', [ProduktController::class, 'getWlasnyTemplateProdukty']);
-// Route::post('/report-network', function (Request $request) {
-//     Log::info('Dostęp do sieci lokalnej: ' . ($request->boolean('hasLocalAccess') ? 'TAK' : 'NIE'));
-
-//     return response()->json(['status' => 'ok']);
-// });

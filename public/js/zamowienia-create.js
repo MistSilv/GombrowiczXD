@@ -178,7 +178,6 @@ $(document).ready(function () {
         $globalSuggestions.hide().empty();
     });
 
-
     $(document).on('click', function (e) {
         if (!$(e.target).closest($globalSuggestions).length && e.target !== $searchInput[0]) {
             $globalSuggestions.hide().empty();

@@ -62,6 +62,7 @@
                     <tr class="hover:bg-gray-700 text-white text-center">
                         <td class="py-2 px-4 text-sm">{{ $zamowienie->id }}</td>
                         <td class="py-2 px-4 text-sm">{{ $zamowienie->data_zamowienia }}</td>
+<<<<<<< HEAD
                         <td class="py-2 px-4 text-sm"">{{ $zamowienie->data_realizacji ?? '—' }}</td>
                         <td class="py-2 px-4">
                             <a href="{{ route('zamowienia.show', $zamowienie) }}" 
@@ -72,6 +73,11 @@
                             target="_blank"
                             class="inline-block hover:bg-blue-700 text-white text-xl rounded" 
                             aria-label="Drukuj">🖨️</a>
+=======
+                        <td class="py-2 px-4 text-sm">{{ $zamowienie->data_realizacji ?? '—' }}</td>
+                        <td class="py-2 px-4">
+                            <a href="{{ route('zamowienia.show', $zamowienie) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded aria-label="Szczegóły"">👁️</a>
+>>>>>>> 3ac572bf2a609f9505b8dd6f47908aac831f9a8e
                         </td>
 
                     </tr>
