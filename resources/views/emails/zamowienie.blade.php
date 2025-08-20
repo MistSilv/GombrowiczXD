@@ -2,7 +2,7 @@
 @if($dataRealizacji)
     <h4>Data realizacji zamówienia: {{ $dataRealizacji }}</h4>
 @endif
-<h3>Automat: {{ $zamowienie->automat->nazwa ?? 'Brak danych' }}</h3>
+<h3>Automat: {{ $zamowienie->automat->nazwa ?? 'zamówienie ogólne' }}</h3>
 
 <table width="100%" style="border-collapse: collapse;">
     <thead>
