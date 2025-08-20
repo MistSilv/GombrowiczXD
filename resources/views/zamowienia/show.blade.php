@@ -8,12 +8,12 @@
         <div class="bg-gray-900/70 rounded-xl shadow-lg p-5 sm:p-6 mb-6 space-y-3 border border-gray-700">
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-400 font-semibold">Data zamówienia:</span>
-                <span class="text-base font-medium">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('Y-m-d H:i') }}</span>
+                <span class="text-base font-medium">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('d-m-Y H:i') }}</span>
             </div>
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-400 font-semibold">Data realizacji:</span>
                 <span class="text-base font-medium">
-                    {{ $zamowienie->data_realizacji ?? '—' }}
+                    {{ $zamowienie->data_realizacji_formatted ?? 'brak' }}
                 </span>
             </div>
             <div class="flex justify-between items-center">

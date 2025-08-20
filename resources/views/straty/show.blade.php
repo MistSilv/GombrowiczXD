@@ -6,19 +6,17 @@
 
         <!-- Informacje o stracie -->
         <div class="bg-gray-900/70 rounded-xl shadow-lg p-5 sm:p-6 mb-6 space-y-3 border border-gray-700">
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                 <span class="text-sm text-gray-400 font-semibold">Data straty:</span>
-                <span class="text-base font-medium">{{ $strata->data_straty }}</span>
+                <span class="text-base font-medium">{{ \Carbon\Carbon::parse($strata->data_straty)->format('d.m.Y') }}</span>
             </div>
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                 <span class="text-sm text-gray-400 font-semibold">Automat:</span>
                 <span class="text-base font-medium">{{ $strata->automat->nazwa }} – {{ $strata->automat->lokalizacja }}</span>
             </div>
-            <div class="flex justify-between items-start">
-                <span class="text-sm text-gray-400 font-semibold">Opis:</span>
-                <span class="text-base font-medium max-w-xs text-right">
-                    {{ $strata->opis ?? '—' }}
-                </span>
+            <div class="flex flex-col sm:flex-row sm:justify-start sm:items-start">
+                <span class="text-sm text-gray-400 font-semibold mr-2">Opis:</span>
+                <span class="text-base font-medium">{{ $strata->opis ?? '—' }}</span>
             </div>
         </div>
 
@@ -41,6 +39,7 @@
                 </ul>
             @endif
         </div>
+
         <div class="mt-6 text-center">
             {{ $produkty->links('pagination::simple-tailwind') }}
         </div>

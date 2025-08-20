@@ -115,7 +115,8 @@ class ProduktController extends Controller
         $validated = $request->validate([
             'zamowienieId' => 'nullable|integer',
             'produkty_json' => 'required|json',
-            'wyslij_email' => 'sometimes|boolean'
+            'wyslij_email' => 'sometimes|boolean',
+            'data_realizacji' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -123,15 +124,19 @@ class ProduktController extends Controller
         try {
             if (!empty($validated['zamowienieId'])) {
                 $zamowienieId = $validated['zamowienieId'];
+                DB::table('zamowienia')->where('id', $zamowienieId)->update([
+                    'data_realizacji' => $validated['data_realizacji'] ?? null,
+                ]);
             } else {
                 $zamowienieId = DB::table('zamowienia')->insertGetId([
                     'data_zamowienia' => now(),
-                    'data_realizacji' => null,
+                    'data_realizacji' => $validated['data_realizacji'] ?? null,
                     'automat_id' => null
                 ]);
             }
 
             $produkty = json_decode($validated['produkty_json'], true);
+
 
             foreach ($produkty as $produktData) {
                 $produkt = Produkt::firstOrCreate(
@@ -184,24 +189,22 @@ class ProduktController extends Controller
 
     public function wyslijEmailZamowienia($zamowienieId)
     {
-        $zamowienie = Zamowienie::with(['produkty' => function($query) {
-            $query->select('produkty.id', 'tw_nazwa')
-                  ->leftJoin('ean_codes', 'produkty.id', '=', 'ean_codes.produkt_id')
-                  ->addSelect('ean_codes.kod_ean as ean');
-        }])->findOrFail($zamowienieId);
+        $zamowienie = Zamowienie::with(['produkty', 'automat'])->findOrFail($zamowienieId);
 
         $xlsxContent = Excel::raw(new ZamowienieExport($zamowienie), \Maatwebsite\Excel\Excel::XLSX);
 
         try {
-            Mail::to(config('mail.importowanie'))->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
+            Mail::to(config('mail.importowanie'))
+                ->queue(new ZamowienieMail(base64_encode($xlsxContent), $zamowienie));
         } catch (\Exception $e) {
-            // Obsłuż błąd maila
+            Log::error('Błąd wysyłki maila', ['error' => $e->getMessage()]);
         }
 
         return redirect()->route('zamowienia.show', ['zamowienie' => $zamowienieId])
             ->with('success', 'Ilości zostały zapisane.')
             ->with('email_sent', 'Email z zamówieniem został wysłany.');
     }
+
 
     public function pobierzZamowienieExcel($zamowienieId)
     {

@@ -15,12 +15,12 @@
     <div class="flex justify-between items-start mb-8 border-b pb-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Zamówienie #{{ $zamowienie->id }}</h1>
-            <p class="text-sm text-gray-500">Wydrukowano: {{ now()->format('Y-m-d H:i') }}</p>
+            <p class="text-sm text-gray-500">Wydrukowano: {{ now()->format('d-m-Y H:i') }}</p>
         </div>
         <div class="text-right text-sm text-gray-600">
             <p>
                 <span class="font-semibold">Automat:</span> 
-                {{ $zamowienie->automat?->nazwa ?? '—' }}
+                {{ $zamowienie->automat?->nazwa ?? 'zamówienie ogólne' }}
             </p>
             <p>
                 <span class="font-semibold">Data zamówienia:</span> 
@@ -28,7 +28,7 @@
             </p>
             <p>
                 <span class="font-semibold">Data realizacji:</span> 
-                {{ $zamowienie->data_realizacji ?? '—' }}
+                {{ $zamowienie->data_realizacji_formatted ?? 'brak' }}
             </p>
         </div>
     </div>

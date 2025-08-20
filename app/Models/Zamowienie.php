@@ -29,4 +29,18 @@ class Zamowienie extends Model
     {
         return $this->belongsTo(Automat::class, 'automat_id'); 
     }
+
+    public function getDataRealizacjiFormattedAttribute()
+    {
+        if ($this->data_realizacji === 'dzisiaj') {
+            return now()->format('d-m-Y');
+        } elseif ($this->data_realizacji === 'jutro') {
+            return now()->addDay()->format('d-m-Y');
+        } elseif ($this->data_realizacji) {
+            return \Carbon\Carbon::parse($this->data_realizacji)->format('d-m-Y');
+        }
+
+        return null;
+    }
+
 }

@@ -15,7 +15,7 @@
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-400 font-semibold">Data wsadu:</span>
                 <span class="text-base font-medium">
-                    {{ $wsad->data_wsadu ? $wsad->data_wsadu->format('Y-m-d H:i') : 'Brak danych' }}
+                    {{ $wsad->data_wsadu ? $wsad->data_wsadu->format('d-m-Y H:i') : 'Brak danych' }}
                 </span>
             </div>
         </div>

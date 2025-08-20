@@ -57,6 +57,20 @@
                         <ul id="product-suggestions" class="absolute z-50 mt-1 w-full bg-white shadow rounded-md max-h-48 overflow-y-auto hidden border border-gray-200"></ul>
                     </div>
 
+                     <div>
+                        <label for="data_realizacji" class="text-white font-semibold mb-1 mt-2 block">
+                            <i class="fas fa-calendar-alt mr-1"></i>Data realizacji
+                        </label>
+                        <input 
+                            type="date" 
+                            name="data_realizacji" 
+                            id="data_realizacji" 
+                             value="{{ old('data_realizacji', $zamowienie->data_realizacji ?? '') }}"
+                            required
+                            class="w-full max-w-xs px-3 py-2 rounded-md shadow-sm border text-white bg-gray-700"
+                                >
+                    </div>
+
                     <!-- EAN -->
                     <div>
                         <label for="product-search-ean" class="text-white font-semibold mb-1 mt-2 block">

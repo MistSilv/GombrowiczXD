@@ -1,4 +1,7 @@
-<h1>Zamówienie #{{ $zamowienie->id }}</h1>
+<h1>Numer zamówienia:{{ $zamowienie->id }}</h1>
+@if($dataRealizacji)
+    <h4>Data realizacji zamówienia: {{ $dataRealizacji }}</h4>
+@endif
 <h3>Automat: {{ $zamowienie->automat->nazwa ?? 'Brak danych' }}</h3>
 
 <table width="100%" style="border-collapse: collapse;">

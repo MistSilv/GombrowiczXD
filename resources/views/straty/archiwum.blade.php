@@ -51,15 +51,13 @@
                     <tr>
                         <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">ID</th>
                         <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Data straty</th>
-                        <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Opis</th>
                         <th class="px-4 py-2 text-center text-sm font-medium text-white uppercase">Akcje</th>
                     </tr>
                     <tbody class="bg-gray-900 divide-y divide-gray-700">
                         @forelse($straty as $strata)
                         <tr class="hover:bg-gray-700 text-white text-center">
                             <td class="py-2 px-4 text-sm">{{ $strata->id }}</td>
-                                <td class="py-2 px-4 text-sm">{{ $strata->data_straty }}</td>
-                                <td class="py-2 px-4 text-sm">{{ $strata->opis ?? '—' }}</td>
+                                <td class="py-2 px-4 text-sm">{{ \Carbon\Carbon::parse($strata->data_straty)->format('d-m-Y') }}</td>
                                 <td class="py-2 px-4">
                                     <a href="{{ route('straty.show', $strata) }}"
                                     class="inline-block bg-inherit hover:bg-blue-700 text-white trxt-xl px-3 py-1 rounded aria-label="Szczegóły straty">

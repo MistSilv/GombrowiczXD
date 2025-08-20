@@ -35,7 +35,7 @@
                         <input
                             type="text"
                             name="produkty[0][tw_nazwa]"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 "
+                            class="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 autocomplete-input"
                             placeholder="Wpisz nazwę produktu"
                             required
                             autocomplete="off">

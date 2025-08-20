@@ -53,8 +53,9 @@
                     @forelse ( $zamowienia as $zamowienie )
                     <tr class="hover:bg-gray-700 text-white text-center">
                         <td class="py-2 px-4 text-smą">{{ $zamowienie->id }}</td>
-                                <td class="py-2 px-4 text-sm">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('Y.m.d H:i') }}</td>
-                                <td class="py-2 px-4 text-sm">{{ $zamowienie->data_realizacji ?? '—' }}</td>
+                                <td class="py-2 px-4 text-sm">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('m-d-Y H:i') }}</td>
+                                <td class="py-2 px-4 text-sm">{{ $zamowienie->data_realizacji_formatted ?? 'brak' }}</td>
+
                                 <td class="py-2 px-4">
                                     <a href="{{ route('zamowienia.show', $zamowienie) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded">👁️</a>
                                     <a href="{{ route('export.zamowienie', ['zamowienie_id' => $zamowienie->id, 'format' => 'csv']) }}" class="inline-block bg-inherit hover:bg-blue-700 text-white text-xl rounded ">📄</a>
