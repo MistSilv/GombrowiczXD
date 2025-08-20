@@ -30,17 +30,21 @@ class Zamowienie extends Model
         return $this->belongsTo(Automat::class, 'automat_id'); 
     }
 
-    public function getDataRealizacjiFormattedAttribute()
+   public function getDataRealizacjiFormattedAttribute()
     {
+        // Sprawdź, czy istnieje data zamówienia
+        $dataZamowienia = $this->data_zamowienia ? \Carbon\Carbon::parse($this->data_zamowienia) : now();
+
         if ($this->data_realizacji === 'dzisiaj') {
-            return now()->format('d-m-Y');
+            return $dataZamowienia->format('d-m-Y');
         } elseif ($this->data_realizacji === 'jutro') {
-            return now()->addDay()->format('d-m-Y');
+            return $dataZamowienia->copy()->addDay()->format('d-m-Y');
         } elseif ($this->data_realizacji) {
             return \Carbon\Carbon::parse($this->data_realizacji)->format('d-m-Y');
         }
 
         return null;
     }
+
 
 }

@@ -53,7 +53,7 @@
                     @forelse ( $zamowienia as $zamowienie )
                     <tr class="hover:bg-gray-700 text-white text-center">
                         <td class="py-2 px-4 text-smą">{{ $zamowienie->id }}</td>
-                                <td class="py-2 px-4 text-sm">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('m-d-Y H:i') }}</td>
+                                <td class="py-2 px-4 text-sm">{{ \Carbon\Carbon::parse($zamowienie->data_zamowienia)->format('d-m-Y H:i') }}</td>
                                 <td class="py-2 px-4 text-sm">{{ $zamowienie->data_realizacji_formatted ?? 'brak' }}</td>
 
                                 <td class="py-2 px-4">
