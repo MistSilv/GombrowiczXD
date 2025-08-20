@@ -32,7 +32,6 @@ class Zamowienie extends Model
 
    public function getDataRealizacjiFormattedAttribute()
     {
-        // Sprawdź, czy istnieje data zamówienia
         $dataZamowienia = $this->data_zamowienia ? \Carbon\Carbon::parse($this->data_zamowienia) : now();
 
         if ($this->data_realizacji === 'dzisiaj') {
