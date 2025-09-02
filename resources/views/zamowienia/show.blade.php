@@ -4,7 +4,6 @@
             Szczegóły zamówienia #{{ $zamowienie->id }}
         </h1>
 
-        <!-- Informacje o zamówieniu -->
         <div class="bg-gray-900/70 rounded-xl shadow-lg p-5 sm:p-6 mb-6 space-y-3 border border-gray-700">
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-400 font-semibold">Data zamówienia:</span>
@@ -28,7 +27,6 @@
             </div>
         </div>
 
-        <!-- Lista produktów -->
         <div class="bg-gray-900/70 rounded-xl shadow-lg p-5 sm:p-6 border border-gray-700">
             <h2 class="text-xl sm:text-2xl font-semibold text-purple-200 mb-4">
                 Produkty w zamówieniu
@@ -40,13 +38,25 @@
                 <ul class="space-y-3">
                     @foreach($produkty as $produkt)
                         <li class="bg-gray-800/50 border border-gray-700 rounded-md px-4 py-2 flex justify-between items-center">
-                            <span class="text-white">{{ $produkt->tw_nazwa }}</span>
+                            <div>
+                                <span class="text-white">{{ $produkt->tw_nazwa }}</span>
+                                @if($produkt->eanCodes->isNotEmpty())
+                                    <div class="text-gray-400 text-sm mt-1">
+                                        @foreach($produkt->eanCodes as $ean)
+                                            <span class="inline-block mr-2">EAN: {{ $ean->kod_ean }}</span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-gray-500 text-sm mt-1 italic">Brak kodu EAN</div>
+                                @endif
+                            </div>
                             <span class="font-semibold text-purple-400">{{ $produkt->pivot->ilosc }} szt.</span>
                         </li>
                     @endforeach
                 </ul>
             @endif
         </div>
+
         <div class="mt-6 text-center">
             {{ $produkty->links('pagination::simple-tailwind') }}
         </div>
